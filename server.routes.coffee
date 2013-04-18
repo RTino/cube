@@ -5,13 +5,14 @@
 # @author: Emanuel Lauria <emanuel.lauria@zalando.de>
 ####
 
-module.exports = (app, express) ->
+module.exports = (app, express, passport) ->
 
     #### Requirements
 
-    async   = require "async"
-    fs      = require "fs"
-    _       = require "underscore"
+    _           = require "underscore"
+    fs          = require "fs"
+    async       = require "async"
+
 
     # Server and default extension settings
     settings = require "#{__dirname}/server.settings.coffee"
@@ -46,11 +47,28 @@ module.exports = (app, express) ->
 
     #### Routes
 
+    ensureAuth = (req, res, next) ->
+        return next() if req.isAuthenticated()
+        console.log 'User not authenticated, redirecting to login form'
+        res.redirect '/login'
+
+
     # Root route
-    app.get '/',        (a...) => root a...
+    app.get '/', ensureAuth, (a...) -> root a...
+
+    app.get '/login', (req, res) ->
+        res.render 'login'
 
     # Entity route
-    app.get '/:resource', (a...) => resource a...
+    app.get '/:resource', ensureAuth, (a...) => resource a...
+
+    # Authentication
+    app.post '/login', passport.authenticate('basic', {
+            session: true
+            failureRedirect: '/login'
+        }), (req, res) ->
+            res.redirect '/'
+
 
     #### Functionality
 
@@ -58,21 +76,15 @@ module.exports = (app, express) ->
     # is coming from an old/deprectaed URL.
     root =  (req, res) ->
 
-        # Redirect to default host if coming from old host
-        return redirectToDefaultHost(req, res) if isOldHost(req)
-
         # Req is fine, get available entities and render index page.
         getEntities (es) =>
 
-            res.render 'index', entities: es
+            res.render 'index', entities: es, user: req.user
 
 
     # Serves an entity rendering the app with the appropriate collection. It
     # also redirects to a default entity in case of misunderstandings.
     resource = (req, res) ->
-
-        #TODO This is not generic
-        return redirectToDefaultHost req, res if isOldHost req
 
         # Entity request from the client
         r = req.params.resource
@@ -91,6 +103,12 @@ module.exports = (app, express) ->
         # Response 'ok' for status (NAGIOS)
         return res.send('ok') if r is 'status'
 
+        return res.render 'login' if r is 'login'
+
+        if r is 'logout'
+            req.logout()
+            return res.redirect '/login'
+
         # Return list of entities
         if r is 'entities' then return getEntities (e) ->
 
@@ -98,7 +116,6 @@ module.exports = (app, express) ->
 
         # Redirect to default app in any other case
         return redirectToDefault req, res
-
 
 
     # Default redirection to the default entity app
@@ -205,12 +222,6 @@ module.exports = (app, express) ->
             if orderedNames.indexOf(e.entity) is -1 then ordered.push e
 
         return ordered
-
-
-    # Check if client accesses the old team.zalando.net
-    isOldHost = (req) ->
-
-        req.header('host') is 'team.zalando.net'
 
 
     # Return bool if e is in the entities array from the settings

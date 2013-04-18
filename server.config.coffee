@@ -1,7 +1,8 @@
 #### Cube's nodejs configuration
+#
 # Basic configuration options for the nodejs server.
 
-module.exports = (app, express) ->
+module.exports = (app, express, passport) ->
 
     app.configure ->
 
@@ -17,6 +18,15 @@ module.exports = (app, express) ->
         app.use express.static "./public", maxAge: 0
         app.use(express.bodyParser({uploadDir:"./"}))
         app.use ConnectAssets
+
+        # Express session
+        app.use express.cookieParser()
+        app.use express.session secret: 'keyboard cat'
+
+        # Passport authentication middleware
+        app.use passport.initialize()
+        app.use passport.session()
+
 
     # Development environment settings
     app.configure "development", ->

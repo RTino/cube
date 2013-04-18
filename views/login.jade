@@ -1,0 +1,48 @@
+!!! 5
+html
+  head
+    title Cube
+    != css('index')
+  body
+    #header.outer
+      header.inner
+        #mainTitle
+          h1#title 
+            a(href="http://zalando.github.com/cube", target="_blank") Cube
+          span#subtitle Zalando's management tool
+    section#content
+      #expanded
+        #form
+          label Please provide your credentials
+          form(action="/login", method="post")#login
+              input(type="text", name="username", value="username")#uname
+              input(type="password", name="password", value="password")#pword
+              a#submit.btn Log In
+
+script(src="/js/jquery-1.9.1.min.js")
+
+script(type="text/javascript)
+  $(function() {
+
+    $('#submit').click(function() {
+      $('form').submit();
+    });
+
+    $('input#pword').keypress(function(e) {
+      if (e.which === 13) {
+        e.preventDefault();
+        $('form').submit();
+      }
+    });
+
+    $('input')
+      .focus(function() {
+        $(this).val('');
+      })
+      .blur(function() {
+        var el = $(this);
+        if (el.val() === '') {
+          el.val(el.attr('name'));
+        }
+      });
+  });

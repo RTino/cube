@@ -10,31 +10,37 @@
 require "coffee-script"
 
 # Main server configuration file. Please edit to your needs!
-settings = require "./server.settings.coffee"
+settings        = require "./server.settings.coffee"
 
 # We all know express, don't we?
-express  = require "express"
+express         = require "express"
+
+passport        = require "passport"
 
 # Create express app
 app = module.exports.app = express()
 
 # The nodejs process will be called:
-process.title = "cube"
+process.title   = "cube"
 
 # Jade templates usually live in views/
-app.viewsDir  = settings.Paths.viewsDir
+app.viewsDir    = settings.Paths.viewsDir
 
 # Public static files usually live in public/
-app.publicDir = settings.Paths.publicDir
+app.publicDir   = settings.Paths.publicDir
 
 # We are actually not using this
-app.coffeeDir = settings.Paths.coffeeDir
+app.coffeeDir   = settings.Paths.coffeeDir
+
+# Passport authentication middleware initialization
+require("./server/passport.coffee")(passport)
 
 # Config file has express settings
-require("./server.config.coffee")(app, express)
+require("./server.config.coffee")(app, express, passport)
 
 # Main routes file for express
-require("./server.routes.coffee")(app, express)
+require("./server.routes.coffee")(app, express, passport)
+
 
 # Listen usually on port 3000
 app.listen settings.Web.defaultPort

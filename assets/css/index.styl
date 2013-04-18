@@ -48,6 +48,7 @@ h2
 
 header.inner
   position      relative
+  height    150pm
   margin        0 auto
   margin-left   80px
 
@@ -56,12 +57,44 @@ header.inner
   padding-right 50px
 
 section#content
-  padding-top   40px
-  position      relative
-  margin        0 auto
+  position      absolute
+  top           145px
+  bottom        0
+  left          0
+  right         0
+  min-height    380px
   .wrapper
-      max-width 640px
-      margin    0 auto
+    max-width   640px
+    margin      0 auto
+    padding-top 40px
+  #expanded
+    position    relative
+    overflow    hidden
+    height      100%
+    width       100%
+  #form
+      border    1px solid dodgerblue
+      width     250px
+      height    150px
+      padding   20px
+      position  absolute
+      top       50%
+      left      50%
+      margin    -181px 0 0 -145px
+      label
+        float           left
+        margin-bottom   15px
+        font-size   16px
+        font-weight bold
+      input
+        width   245px
+        height  20px
+        margin-bottom   5px
+      form
+        display block
+      #submit
+        margin-top  10px
+        float       right
   h2
       margin-left 190px
       margin-top  0
@@ -106,10 +139,9 @@ a
     &.btn
       border              0
       position            relative
-      display             block
       cursor              pointer
       color               #fff
-      background-color    btnColor
+      background-color    dodgerblue
       font-weight         bold
       padding             7px 10px
       text-decoration     none
@@ -144,3 +176,16 @@ input#import
     -moz-transform  translate(-300px, 0pt) scale(15)
     display         none
     cursor          pointer
+
+input
+  outline       none
+  padding       2px
+  background    #FFF
+  color         #000
+  -webkit-box-shadow  none
+  -moz-box-shadow     none
+  -ms-box-shadow      none
+  -o-box-shadow       none
+  box-shadow          none
+  border              1px solid #999
+

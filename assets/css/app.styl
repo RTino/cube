@@ -187,7 +187,7 @@ body
   #extensions
     overflow        hidden
     float           left
-  span
+  span, a.control
     width           30px
     height          30px
     cursor          pointer
@@ -203,8 +203,13 @@ body
     &#print
       background    url('/assets/print.png') no-repeat 0 0
     &#json
-      margin-right  10px
       background    url('/assets/json.png') no-repeat 1px 1px
+  a#logout
+      margin-right  10px
+      background    url('/assets/logout.png') no-repeat 6px 7px
+      &:hover
+        background-position     6px -31px
+
 
 #index
   position        absolute
@@ -1223,11 +1228,11 @@ input
   padding       5px
   background    #FFF
   color         #000
-  -webkit-box-shadow  rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset
-  -moz-box-shadow     rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset
-  -ms-box-shadow      rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset
-  -o-box-shadow       rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset
-  box-shadow          rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset
+  -webkit-box-shadow  none
+  -moz-box-shadow     none
+  -ms-box-shadow      none
+  -o-box-shadow       none
+  box-shadow          none
   border              1px solid #999
 
 .validationFailed
