@@ -1,4 +1,5 @@
 #### Schema class
+#
 # Provides a set of methods to get objects from the Schema that have certain
 # properties like 'mandatory', 'index', etc. Its quite self-explanatory.
 

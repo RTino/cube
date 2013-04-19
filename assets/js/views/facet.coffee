@@ -1,10 +1,12 @@
 #### Facet View
+#
+# A Facet view is a facet category (root level on facet indexes). It has
+# has a type name (i.e. Team) and a list of distinct values along a count
+# for the amount of items that belong to it. It also allows to filter the
+# items collection.
 
 $ ->
 
-    # A facet view has a type name (i.e. Team) and a list of distinct values
-    # (i.e. Shop, Management...) and allows to filter the items collection.
-    # Appart from that, theres not much meat on the grill here.
     class window.FacetView extends Backbone.View
 
 

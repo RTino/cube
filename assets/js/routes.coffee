@@ -4,11 +4,12 @@ $ ->
 
     class window.Routes extends Backbone.Router
 
+
         routes:
             "qs/:qs"    : "getRoute"
             ""          : "root"
 
-        #### Route to a defined state
+
         # Route to the appropriate state based on the Querystring parameters.
         getRoute: (qs, params) =>
 
@@ -29,6 +30,7 @@ $ ->
                     return @onRoute params
             @onRoute params
 
+
         onRoute: (params) =>
             # Get view mode: list or thumbnail.
             window.Settings.view = params.view || 'list'
@@ -47,12 +49,6 @@ $ ->
                 window.App.navigate replace:yes
                 @trigger 'route'
 
-        parseToArr: (source) ->
-            return source unless typeof source is "string"
-            s = []
-            _.each source.split('|'), (v) ->
-                s.push v if v
-            return s
 
         #### Route to initial state
         root: () =>
@@ -68,6 +64,7 @@ $ ->
 
             # Reset facet filters
             window.App.resetAllFilters()
+
 
         #### Set ID
         # * If ID is 'New' show empty profile view to add a new item.
@@ -90,6 +87,7 @@ $ ->
                     if $("##{_id}", '#items').length
                         window.App.addToSelection $("##{_id}", '#items')
                 window.App.showGroupView()
+
 
         #### Set Filters state
         # 1. Get all filters from the querystring parameters
@@ -125,6 +123,7 @@ $ ->
                 error: () =>
                     window.App.showError()
 
+
         traverseUpwards: (f) =>
             sep = window.Settings.separator
             field = f.split(':')[1].split(sep)
@@ -134,6 +133,7 @@ $ ->
             return @traverseUpwards(f) unless @isFacetInFacets f
             return f
 
+
         #### Set search
         # Set the search text on the search input and filter the collection
         setSearch: (s) =>
@@ -142,20 +142,25 @@ $ ->
             window.collection.search = s
             $('#inputSearch').val s
 
+
         setSort: (s) =>
             window.collection.sort = s or window.Settings.sort
+
 
         setRows: (r) =>
             window.collection.rows = r or window.Settings.rows
 
+
         setPage: (p) =>
             window.collection.page = p
+
 
         # Check if the item is still in the items collection
         isItemInCol: (id) =>
             return yes if window.collection.get id
             window.App.navigate replace: yes
             return no
+
 
         # Check if the facet field is still in the facets collection
         isFacetInFacets: (f) =>
@@ -167,6 +172,7 @@ $ ->
                 return yes
             return no
 
+
         # Find the page where a member with ID is located at.
         getPageOfId: (id, page, cb) =>
             rows = parseFloat window.collection.rows
@@ -177,3 +183,11 @@ $ ->
                     index = i if id is doc.id
                 return cb Math.floor(index/rows) if index >= 0
                 return @getPageOfId id, page+1, cb
+
+
+        parseToArr: (source) ->
+            return source unless typeof source is "string"
+            s = []
+            _.each source.split('|'), (v) ->
+                s.push v if v
+            return s

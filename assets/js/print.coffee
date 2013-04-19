@@ -1,10 +1,12 @@
 #### Print View
+#
+# Shows a selected piece of information from the main backbone app for printing
 
 $ =>
 
-    # The Print View is actually a stripped down backbone application which
-    # uses the collection from the parent window to get items information.
-    # It as only two views: list view and profile view.
+    # Actually a stripped down backbone application which uses the collection
+    # from the parent window to get items information. It as only two views:
+    # list view and profile view.
     class AppView extends Backbone.View
 
 
