@@ -23,7 +23,8 @@
       "label": "Editorial",
       "index": true,
       "mandatory": true,
-      "search": true
+      "search": true,
+      "type": "facet"
     }, {
       "id": "pdate",
       "label": "Publish D.",
