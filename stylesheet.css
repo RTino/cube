@@ -607,10 +607,10 @@ section#slideshow ul li {
 }
 
 #slideshow_mask {
-    float: left;
     overflow: hidden;
+    float: left;
     height: 446px;
-    width: 816px;
+    width: 812px;
     margin: 0 30px;
 }
 
@@ -630,7 +630,7 @@ section#slideshow ul li {
 }
 
 #slides {
-    margin-left: -816px;
+    margin-left: -812px;
 }
 
 #slides img {

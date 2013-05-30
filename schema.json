@@ -1,5 +1,4 @@
 [
-
     {
       "id": "pic",
       "label": "Cover",
@@ -42,6 +41,4 @@
       "label": "No. Pages",
       "type": "integer"
     }
-
-
 ]

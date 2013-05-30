@@ -45,7 +45,7 @@ $(function() {
 });
 
 var slider  = {
-    "pic_size": 817,
+    "pic_size": 812,
     "speed": 700,
     "interval": 10000,
     "pid": null,
