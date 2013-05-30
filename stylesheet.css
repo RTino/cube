@@ -522,17 +522,22 @@ span.value {
     height: 50px;
     width: 1000px;
     margin-left: 192px;
-
-
-background: -moz-linear-gradient(top,  rgba(255,255,255,1) 45%, rgba(255,255,255,0.57) 68%, rgba(255,255,255,0) 99%, rgba(255,255,255,0) 100%); /* FF3.6+ */
-background: -webkit-gradient(linear, left top, left bottom, color-stop(45%,rgba(255,255,255,1)), color-stop(68%,rgba(255,255,255,0.57)), color-stop(99%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
-background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* Chrome10+,Safari5.1+ */
-background: -o-linear-gradient(top,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* Opera 11.10+ */
-background: -ms-linear-gradient(top,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* IE10+ */
-background: linear-gradient(to bottom,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* W3C */
+    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 45%, rgba(255,255,255,0.57) 68%, rgba(255,255,255,0) 99%, rgba(255,255,255,0) 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(45%,rgba(255,255,255,1)), color-stop(68%,rgba(255,255,255,0.57)), color-stop(99%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* W3C */
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#00ffffff',GradientType=0 ); /* IE6-9 */
+}
 
+#menu a, #menu span {
+    float: left;
+    margin: 0 5px;
+}
 
+#menu a:first-child {
+    margin-left: 0;
 }
 
 .column {
