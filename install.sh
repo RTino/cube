@@ -418,7 +418,7 @@ checkImageMagick(){
 
 # Download latest source code from GitHub.
 downloadFromGit(){
-    if [ ! -d ./.git ]; then
+    if [ ! -f ./cube-master.zip ]; then
         echo "It seems you have not downloaded the Cube App source from its GIT repository."
 
         CONFIRMED=$SILENT
@@ -442,12 +442,11 @@ downloadFromGit(){
         fi
 
         if [ "$CONFIRMED" = 1 ]; then
-            echo "Clone the Cube App repository..."
-            git clone https://github.com/zalando/cube.git ./cube_latest
-            rm -f cube_latest/install.sh
-            mv -f cube_latest/* ./
-            mv -f cube_latest/.git ./
-            rm -fr cube_latest
+            echo "Downloading latest source code of Cube"
+            curl -L https://github.com/zalando/cube/archive/master.zip -o cube-master.zip
+            unzip cube-master.zip
+            mv cube-master cube
+            cd cube
             echo "Installing Node.js modules..."
             sudo npm install
         fi

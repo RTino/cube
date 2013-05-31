@@ -84,19 +84,30 @@
       <p>The Cube is a NodeJs + BackboneJs application that presents your data in an organized way and gives you a set of tools to manage it. From importing it into the Solr database, to updating it through its web interface (select, sort, search, filter, add, edit or remove) and exporting it into a JSON, XML or CSV file or just printing it to paper. The cube has become one of our daily used apps for everyone here at Zalando's Technology department and we want to share it with you; it is now Open Source!</p>
       </section>
       <section id="installation" class="inner">
-        <h3>Installation</h3>
-        <h6>Automated</h6>
-        <p>Requirements: <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK</a> (&gt;= 1.6)</p>
-        <p>Download the installation script from <a href="http://zalando.github.io/cube/install.sh">here</a> and execute it, or with wget:</p>
-        <pre>$ wget http://zalando.github.io/cube/install.sh<br/>$ bash install.sh</pre>
-        <h6>Manual</h6>
-            <p>Requirements: <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK</a> (&gt;=1.6), <a href="http://maven.apache.org/">Maven</a> (2.2), <a href="http://nodejs.org">NodeJs</a> (&gt;=0.8) and <a href="http://www.imagemagick.org/script/index.php">ImageMagick</a> (&gt;=6.8.0)</p>
-            <pre>$ git clone git@github.com:zalando/cube.git<br/>$ cd cube<br/>$ npm install .</pre>
-            <p>Build and run the Solr Database</p>
-            <pre>$ cd solr<br/>$ mvn clean install tomcat:run-war -Pdevelopment</pre>
-            <p>Start the Cube on a new terminal</p>
-            <pre>$ cd cube<br>$ coffee cube.coffee</pre>
-            <p>Open it in your favorite browser<a class="biglink" href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+      <h3>Installation</h3>
+        <p>The Four steps to get the Cube up and running!</p>
+        <ol>
+            <li>
+                <h6>Resolve dependencies</h6>
+                <p>There are two ways to get the project installed: the easy way and the fun way. For both you need to have a working java environment with <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK</a> (&gt;= 1.6).</p>
+                <h6>Easy - installation script</h6>
+                <pre>$ curl -s http://zalando.github.io/cube/install.sh | bash</pre>
+                <h6>Fun - Manual install</h6>
+                    <p>Requirements: <a href="http://maven.apache.org/">Maven</a> (2.2), <a href="http://nodejs.org">NodeJs</a> (&gt;=0.8) and <a href="http://www.imagemagick.org/script/index.php">ImageMagick</a> (&gt;=6.8.0)</p>
+                    <pre>$ git clone git@github.com:zalando/cube.git<br/>$ cd cube<br/>$ npm install .</pre>
+            </li>
+            <li>Set up the Solr Database
+                <p>Build and run the Solr Database</p>
+                <pre>$ cd solr<br/>$ mvn clean install tomcat:run-war -Pdevelopment</pre>
+            </li>
+            <li>
+                <p>Start the Cube nodejs server on a new terminal</p>
+                <pre>$ cd cube<br>$ coffee cube.coffee</pre>
+            </li>
+            <li>Open it in your favorite browser
+            <p><a class="biglink" href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+            </li>
+        </ol>
      </section>
 
      <section id="tutorial" class="inner">
@@ -141,7 +152,7 @@
                         </li>
                         <li>
                             <p>Database config</p>
-                            <p>Configrue entities/library/db.json to point to the new Solr core</p>
+                            <p>Configure entities/library/db.json to point to the new Solr core</p>
                             <p>It should look something like this:</p>
                             <pre>
 {

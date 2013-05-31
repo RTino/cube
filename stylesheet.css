@@ -222,18 +222,21 @@ ul, ol, dl {
 }
 
 ul li {
-  list-style: inside;
   padding-left: 20px;
 }
 
 ol li {
-  list-style: decimal inside;
   padding-left: 20px;
 }
 
 ol.tutorial li p,
 ol.tutorial li pre {
   font-weight: normal;
+}
+
+section#installation ol {
+    list-style: decimal;
+    padding-left: 25px;
 }
 
 dl dt {
