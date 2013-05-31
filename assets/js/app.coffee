@@ -1301,6 +1301,19 @@ $ =>
             d = [ d.getDate(), monthNames[d.getMonth()], d.getFullYear() ]
             d.join ' '
 
+        # Parses a given Number into a readable formatted string like 000,000.00
+        formatNumber: (number) =>
+
+            return unless number
+
+            number = number.toString()
+
+            pattern = /(-?\d+)(\d{3})/
+            while pattern.test number
+                number = number.replace pattern, "$1,$2"
+
+            number
+
 
         # Show print view on a new window/ab
         print: () =>
