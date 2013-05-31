@@ -157,23 +157,7 @@ class SolrManager
         tag = "{!tag=_#{field}}"
         fq = "fq=#{tag}("
 
-        parse = (v) ->
-            return encodeURIComponent v if v[0] isnt '['
-
-            date1 = v.split(' ')[0]
-            date1 = date1.split('[')[1]
-            date1 = date1.split(']')[0]
-            date1 = new Date (date1)
-            date1 = date1.toISOString()
-            date2 =  v.split(' ')[2]
-            date2 = date2.split(']')[0]
-            date2 = date2.split('[')[1] if date2[0] is '['
-            date2 = new Date (date2) if date2[0] isnt '*'
-            date2 = date2.toISOString()
-            date = encodeURIComponent "#{date1} #{v.split(' ')[1]} #{date2}"
-            "[#{date}]"
-
-        value = parse values.pop()
+        value = encodeURIComponent values.pop()
 
         op = "#{field}%3A\"#{value}\""
 
@@ -181,6 +165,8 @@ class SolrManager
         # filtering by 'null' returns all items without the property.
         op = "(*:*%20-#{field}:[*%20TO%20*])" if value is 'null'
 
+
+        # TODO Make this generic
         if value is 'new'
             d = new Date()
             d.setDate d.getDate() - 31
