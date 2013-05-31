@@ -418,7 +418,7 @@ checkImageMagick(){
 
 # Download latest source code from GitHub.
 downloadFromGit(){
-    if [ ! -f ./cube-master.zip ]; then
+    if [ ! -d ./cube ]; then
         echo "It seems you have not downloaded the Cube App source from its GIT repository."
 
         CONFIRMED=$SILENT
