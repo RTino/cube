@@ -37,7 +37,7 @@ $(function() {
 
     startSlider();
 
-    offset = $('#menu').offset().top;
+    offset = $('#menu').offset().top - 20;
 
     stickyMenu(offset);
 
@@ -139,6 +139,6 @@ function stickyMenu(offset) {
         return $('#menu').css({ 'position': 'fixed', 'top':0 });
     }
 
-    $('#menu').css({ 'position': 'relative' });
+    $('#menu').css({ 'position': 'absolute' });
 
 }

@@ -372,7 +372,7 @@ span#logo {
 
 #header_wrap {
   background: url('cube_header.png') #d4d4d4 no-repeat 200px 0;
-  height: 195px;
+  height: 210px;
   position: relative;
 }
 
@@ -386,7 +386,7 @@ header {
     left: 0;
     right: 50%;
     top: 0;
-    bottom: 0;
+    bottom: 20px;
     margin-right: 320px;
     background: rgba(30, 144, 255, 0.8);
     color: white;
