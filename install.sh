@@ -475,7 +475,7 @@ howToStartServer(){
     echo "$ forever start -c coffee cube.coffee"
     echo ""
     echo "You also need to start the solr database in a new terminal."
-    echo "Please cd into the solr directory and run use:"
+    echo "Please cd into the solr directory and run:"
     echo "$ mvn clean install tomcat:run-war -Pdevelopment"
     echo ""
     echo "Enjoy :-)"
