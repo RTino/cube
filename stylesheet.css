@@ -483,7 +483,18 @@ ul#menu li#cube {
     border: none;
     background: url('hypercube_minilogo.png') no-repeat 0 0;
     padding: 0;
-    height: 25px;
+    color: black;
+    overflow: hidden;
+    position: relative;
+    top: -10px;
+    line-height: 25px;
+    white-space: nowrap;
+}
+
+ul#menu li span {
+    color: #666;
+    font-size: 14px;
+    padding-left: 5px;
 }
 
 #menu li.active {

@@ -147,11 +147,11 @@ function stickyMenu(offset) {
 
     if (scrollTop > offset) {
         $('ul#menu').css({ 'position': 'fixed', 'top': 0, 'padding-top': 10 });
-        $('ul#menu li#cube').animate({ 'width': 60 }, 100);
+        $('ul#menu li#cube').animate({ 'width': 110, 'padding-left': 30 }, 100);
         return
     }
 
     $('#menu').css({ 'position': 'absolute', 'top': '-25px', 'padding-top': 0 });
-    $('ul#menu li#cube').animate({ 'width': 0 }, 100);
+    $('ul#menu li#cube').animate({ 'width': 0, 'padding': 0 }, 100);
 
 }
