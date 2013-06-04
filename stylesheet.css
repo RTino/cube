@@ -234,6 +234,15 @@ ol.tutorial li pre {
   font-weight: normal;
 }
 
+section {
+    display: none;
+}
+
+section#main_content,
+section#slideshow {
+    display: block;
+}
+
 section#installation ol {
     list-style: decimal;
     padding-left: 25px;
@@ -312,7 +321,6 @@ Full-Width Styles
   max-width: 480px;
   position: relative;
   max-width: 1200px;
-  padding: 10px;
   padding-top: 0;
   margin: 0 auto;
   clear: both;
@@ -321,7 +329,7 @@ Full-Width Styles
 
 .inner {
   position: relative;
-  max-width: 810px;
+  max-width: 1110px;
   padding: 10px;
   padding-top: 0;
   margin: 0 auto;
@@ -374,112 +382,36 @@ span#logo {
 }
 
 #header_wrap {
-  background: url('cube_header.png') #d4d4d4 no-repeat 200px 0;
-  height: 210px;
+  background: #ccc;
+  height: 195px;
   position: relative;
 }
 
-#header_wrap .inner {
-  padding: 20px 10px 30px 10px;
-}
-
-header {
-    text-align: right;
-    position: absolute;
-    left: 0;
-    right: 50%;
-    top: 0;
-    bottom: 20px;
-    margin-right: 320px;
-    background: rgba(30, 144, 255, 0.8);
-    color: white;
-}
-
-header h6, header h3 {
-    color: white;
-    margin: 0;
-    padding: 0;
-    border: none;
-}
-
-header h3 {
-    font-size: 72px;
-    font-family: inherit;
-    line-height: 50px;
-}
-
-header #titleContainer {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    margin: 0 20px 15px 0;
-    padding: 0;
-    font-weight: bold;
-}
-
-header #titleContainer h6 {
-    font-size: 18px;
-}
-
-#project_title {
-  margin: 0;
-  color: #000;
-  font-size: 47px;
-  font-weight: 700;
-  text-shadow: 3px 4px 10px #999;
-  margin-left: 85px;
-}
-
-#project_tagline {
-  color: #222;
-  font-size: 16px;
-  font-weight: 300;
-  background: none;
-  text-shadow: #FFF 0px 0px 10px;
-  margin-left: 88px;
-  margin-top: 0;
-}
-
-#downloads {
+#header {
   position: absolute;
-  width: 210px;
-  z-index: 10;
-  bottom: -40px;
-  right: 0;
-  height: 70px;
-  background: url('../images/icon_download.png') no-repeat 0% 90%;
+  height: 150px;
+  top: 0;
+  left: 40px;
+  background: url('hypercube_logo_100.png') no-repeat 0 center;
 }
 
-.zip_download_link {
-  display: block;
-  float: right;
-  width: 90px;
-  height:70px;
-  text-indent: -5000px;
-  overflow: hidden;
-  background: url(../images/sprite_download.png) no-repeat bottom left;
+#header h1 {
+  margin-left: 100px;
+  font-size: 78px;
+  font-family: 'Calibri';
+  line-height:  132px;
 }
 
-.tar_download_link {
-  display: block;
-  float: right;
-  width: 90px;
-  height:70px;
-  text-indent: -5000px;
-  overflow: hidden;
-  background: url(../images/sprite_download.png) no-repeat bottom right;
-  margin-left: 10px;
+#header h6 {
+  margin-left: 100px;
+  top: -45px;
+  position: relative;
+  color: #666;
 }
 
 #main_content_wrap {
   background: #FFF;
-}
-
-#main_content_wrap section {
-  margin-top: -20px;
-  padding: 10px;
-  padding-top: 30px;
-  padding-bottom: 0;
+  padding-top: 40px;
 }
 
 #footer_wrap {
@@ -496,7 +428,6 @@ header #titleContainer h6 {
 }
 
 #example iframe {
-    border: 5px solid dodgerblue;
     background: white;
     position: relative;
     z-index: 3;
@@ -518,29 +449,53 @@ span.value {
     font-size: 20px;
 }
 
-#menu {
-    float: left;
-    color: #CCC;
-    z-index: 2;
-    height: 50px;
-    width: 1000px;
-    margin-left: 192px;
-    background: -moz-linear-gradient(top,  rgba(255,255,255,1) 45%, rgba(255,255,255,0.57) 68%, rgba(255,255,255,0) 99%, rgba(255,255,255,0) 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(45%,rgba(255,255,255,1)), color-stop(68%,rgba(255,255,255,0.57)), color-stop(99%,rgba(255,255,255,0)), color-stop(100%,rgba(255,255,255,0))); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* IE10+ */
-    background: linear-gradient(to bottom,  rgba(255,255,255,1) 45%,rgba(255,255,255,0.57) 68%,rgba(255,255,255,0) 99%,rgba(255,255,255,0) 100%); /* W3C */
-filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#00ffffff',GradientType=0 ); /* IE6-9 */
+#menu_wrap {
+    height: 0;
 }
 
-#menu a, #menu span {
-    float: left;
-    margin: 0 5px;
+ul#menu {
+    border-bottom: 2px solid black;
+    list-style: none;
+    width: 100%;
+    z-index: 1;
+    position: absolute;
+    top: -35px;
+    width: 1200px;
+    margin: 0 auto;
+    background: #ccc;
 }
 
-#menu a:first-child {
-    margin-left: 0;
+ul#menu li {
+    border: 2px solid #666;
+    border-bottom: none;
+    padding: 5px 10px;
+    display: inline-block;
+    line-height: 1em;
+    margin-left: 10px;
+    margin-right: 0;
+    color: #999;
+    cursor: pointer;
+    background: #eee;
+}
+
+ul#menu li#cube {
+    width: 0;
+    border: none;
+    background: url('hypercube_minilogo.png') no-repeat 0 0;
+    padding: 0;
+    height: 25px;
+}
+
+#menu li.active {
+    color: black;
+    border-color: black;
+    border-bottom-color: white;
+    margin-bottom: -1px;
+    position: relative;
+    top: 2px;
+    z-index: 1;
+    background: white;
+    padding-top: 7px;
 }
 
 .column {
@@ -573,12 +528,6 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
     vertical-align: middle;
     padding: 0;
     margin: 0;
-}
-
-section#slideshow {
-    position: relative;
-    padding-top: 50px;
-    white-space: nowrap;
 }
 
 section#slideshow ul li {
@@ -621,6 +570,7 @@ section#slideshow ul li {
     width: 988px;
     overflow: hidden;
     margin: 0 auto;
+    white-space: nowrap;
 }
 
 #slideshow_shadow {

@@ -35,9 +35,19 @@ $(function() {
         jump(id);
     });
 
+    $('ul#menu li').click(function(e) {
+        var $e = $(e.currentTarget);
+        var id = $e.attr('id');
+        $('section').hide();
+        $('section#'+id).show();
+        $('ul#menu li').removeClass('active');
+        $e.addClass('active');
+        window.scrollTo(0, 0);
+    });
+
     startSlider();
 
-    offset = $('#menu').offset().top - 20;
+    offset = $('#menu').offset().top - 10;
 
     stickyMenu(offset);
 
@@ -136,9 +146,12 @@ function stickyMenu(offset) {
     var scrollTop = $(window).scrollTop();
 
     if (scrollTop > offset) {
-        return $('#menu').css({ 'position': 'fixed', 'top':0 });
+        $('ul#menu').css({ 'position': 'fixed', 'top': 0, 'padding-top': 10 });
+        $('ul#menu li#cube').animate({ 'width': 60 }, 100);
+        return
     }
 
-    $('#menu').css({ 'position': 'absolute' });
+    $('#menu').css({ 'position': 'absolute', 'top': '-25px', 'padding-top': 0 });
+    $('ul#menu li#cube').animate({ 'width': 0 }, 100);
 
 }

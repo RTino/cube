@@ -34,29 +34,34 @@
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
 
-        <header>
-            <div id="titleContainer">
-                <h6>Zalando's IT Management Tool</h6>
-                <h3>CUBE</h3>
-            </div>
-       </header>
+        <div id="header">
+            <h1>Cube</h1>
+            <h6>Amazing hyper impressive catchy slogan goes here</h6>
+        </div>
+
     </div>
 
     <!-- MAIN CONTENT -->
 
-    <div id="main_content_wrap" class="outer">
-        <div id="menu">
-            <a href="#installation">installation</a><span>|</span>
-            <a href="#tutorial">tutorial</a><span>|</span>
-            <a href="#documentation">documentation</a><span>|</span>
-            <a href="#more">contribution</a>
-        </div>
+    <div id="menu_wrap" class="outer">
 
+        <ul id="menu">
+            <li id="cube"></li>
+            <li id="slideshow" class="active">home</li>
+            <li id="installation">installation</li>
+            <li id="tutorial">tutorial</li>
+            <li id="documentation">documentation</li>
+            <li id="contribution">contribution</li>
+        </ul>
+
+    </div>
+
+    <div id="main_content_wrap" class="outer">
         <section id="slideshow" class="outer">
             <div id="slideshow_wrap">
                 <span id="slideshow_left" class="slideshow_btn"></span>
                 <div id="slideshow_mask">
-                    <ul id="slides">
+                    <ul id="slides" class="list">
                         <li><img src="slideshow/slideshow6.jpg"></li><li><img src="slideshow/slideshow1.jpg"></li><li><img src="slideshow/slideshow2.jpg"></li><li><img src="slideshow/slideshow3.jpg"></li><li><img src="slideshow/slideshow4.jpg"></li><li><img src="slideshow/slideshow5.jpg"></li><li><img src="slideshow/slideshow6.jpg"></li><li><img src="slideshow/slideshow1.jpg"></li>
                     </ul>
                 </div>
@@ -76,10 +81,8 @@
                     </ul>
                 </div>
             </div>
-      </section>
 
       <div class="inner">
-      <section id="main_content" class="inner">
       <h3>Description</h3>
       <p>The Cube is a NodeJs + BackboneJs application that presents your data in an organized way and gives you a set of tools to manage it. From importing it into the Solr database, to updating it through its web interface (select, sort, search, filter, add, edit or remove) and exporting it into a JSON, XML or CSV file or just printing it to paper. The cube has become one of our daily used apps for everyone here at Zalando's Technology department and we want to share it with you; it is now Open Source!</p>
       </section>
@@ -243,7 +246,7 @@
         <h5>Field Type: Dropdown</h5>
         <p class="reference"><span>options</span> – Required property for any dropdown field, defined as an array of strings for the availablo options in the dropdown menu. </p><p class="reference value">Value type: <span class="value">Array [ "name1", "name2", ... ]</span></p>
         </section>
-    <section id="more">
+    <section id="contribution" class="inner">
         <h3>Contribution</h3>
         <p>Please visit our GitHub repository to get the code, report issues or request features. Feel free to send some pull requests ;)</p><a href="http://github.com/zalando/cube/" class="biglink">http://github.com/zalando/cube</a>
     </div>
