@@ -1366,6 +1366,8 @@ $ =>
 
             _.each entities, (e) ->
 
+                return if entities.hidden
+
                 return if e is window.Settings.entity
 
                 o = "<li id='#{e}'><span>#{e}</span></li>"
