@@ -8,6 +8,8 @@ $ ->
     # Show a list of entities available
     _.each entities, (settings) ->
 
+        return if settings.hidden
+
         name = settings.entity
 
         adminKey = if isAdmin() then "?admin=yes" else ''

@@ -161,10 +161,9 @@ class SolrManager
 
         op = "#{field}%3A\"#{value}\""
 
-        # A string null as a value is a not set value. In other words,
+        # A string 'null' as a value is a not set property. In other words,
         # filtering by 'null' returns all items without the property.
         op = "(*:*%20-#{field}:[*%20TO%20*])" if value is 'null'
-
 
         # TODO Make this generic
         if value is 'new'
