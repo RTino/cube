@@ -42,7 +42,7 @@ $(function() {
         $('section#'+id).show();
         $('ul#menu li').removeClass('active');
         $e.addClass('active');
-        window.scrollTo(0, 0);
+        if (window.scrollY > 150) { window.scrollTo(0, 180); }
     });
 
     startSlider();

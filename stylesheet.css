@@ -236,6 +236,7 @@ ol.tutorial li pre {
 
 section {
     display: none;
+    min-height: 600px;
 }
 
 section#main_content,
