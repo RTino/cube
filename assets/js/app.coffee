@@ -822,7 +822,7 @@ $ =>
         search: (attr) =>
 
             # Get lowercased string from search input field
-            letters = $("#inputSearch").val().toLowerCase()
+            letters = $("#inputSearch").val()
 
             # Avoid trigerring search if collection is already filtered by it.
             return if window.collection.search is letters
@@ -1365,8 +1365,6 @@ $ =>
             entities = window.Settings.entities
 
             _.each entities, (e) ->
-
-                return if entities.hidden
 
                 return if e is window.Settings.entity
 

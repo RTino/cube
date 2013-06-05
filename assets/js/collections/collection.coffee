@@ -7,7 +7,7 @@ class @Collection extends Backbone.Collection
 
     url: () =>
         url = window.App.commonURL @page, @rows
-        url += '&' + 'q=' + $("#inputSearch").val().toLowerCase()
+        url += '&' + 'q=' + $("#inputSearch").val()
         url
 
     parse: (res) ->
