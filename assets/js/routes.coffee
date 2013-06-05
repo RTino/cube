@@ -107,10 +107,11 @@ $ ->
             window.App.setFacetState _fs
             itemsUrl = window.App.getFilterQS(_fs)
 
+            @setSearch s
+
             window.facets.fetch
                 data: itemsUrl
                 success: () =>
-                    @setSearch s
                     window.App.hideError()
                     window.App.fetchItems
                         data: itemsUrl

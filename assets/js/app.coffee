@@ -794,6 +794,8 @@ $ =>
             fs.push "rows=#{rows}" if rows isnt undefined
             fs.push "sort=#{window.collection.sort}"
 
+            fs.push "q=#{window.collection.search}" if window.collection.search
+
             _.each window.Settings.Schema.getFacets(), (field) ->
                 fs.push 'facet.field=' + field.id
 
