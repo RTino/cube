@@ -824,7 +824,7 @@ $ =>
         search: (attr) =>
 
             # Get lowercased string from search input field
-            letters = $("#inputSearch").val()
+            letters = $("#inputSearch").val().toLowerCase()
 
             # Avoid trigerring search if collection is already filtered by it.
             return if window.collection.search is letters
