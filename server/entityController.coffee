@@ -229,6 +229,7 @@ class EntityController
     setFacets: (req, query) =>
         name = req.params.entity
         facetFilter = req.query["facet.field"]
+        facetFilter = [ facetFilter ] if typeof facetFilter is "string"
         _.each facetFilter, (f) ->
             fieldParam = solrManager.addSuffix name, f
             query.facet field: "{!ex=_#{fieldParam}}#{fieldParam}"
