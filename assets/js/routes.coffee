@@ -33,8 +33,8 @@ $ ->
 
         onRoute: (params) =>
             # Get view mode: list or thumbnail.
-            window.Settings.view = params.view || 'list'
-            if window.Settings.view isnt 'list'
+            window.settings.view = params.view || 'list'
+            if window.settings.view isnt 'list'
                 $('span#view').removeClass 'list'
 
             # If there is a profileView present, destroy it. It will generate
@@ -96,7 +96,7 @@ $ ->
         # 4. Filter the collection
         setFacet: (fs, s, cb) =>
             _fs = []
-            sep = window.Settings.separator
+            sep = window.settings.separator
             _.each fs, (facet) =>
                 if !@isFacetInFacets facet
                     facet = @traverseUpwards facet
@@ -126,7 +126,7 @@ $ ->
 
 
         traverseUpwards: (f) =>
-            sep = window.Settings.separator
+            sep = window.settings.separator
             field = f.split(':')[1].split(sep)
             field = field.slice(0, field.length-1).join(sep)
             return f unless field
@@ -145,11 +145,11 @@ $ ->
 
 
         setSort: (s) =>
-            window.collection.sort = s or window.Settings.sort
+            window.collection.sort = s or window.settings.sort
 
 
         setRows: (r) =>
-            window.collection.rows = r or window.Settings.rows
+            window.collection.rows = r or window.settings.rows
 
 
         setPage: (p) =>

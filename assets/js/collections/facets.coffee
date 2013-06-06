@@ -24,12 +24,12 @@ class @Facets extends Backbone.Collection
     # cleaner json object.
     # 6. For undefined fields (null) add them as 'not set'
     parse: (res) =>
-        s = window.Settings.Schema.getSpecials()
+        s = window.settings.Schema.getSpecials()
         facetFields = []
 
         _.each res.facet_counts?.facet_fields, (fields, name) =>
             name = name.split('-')[0]
-            window.Settings.Schema.getField name, (f) =>
+            window.settings.Schema.getField name, (f) =>
                 facetFields.push @createFacet(name, f, fields)
         facetFields
 
@@ -41,7 +41,7 @@ class @Facets extends Backbone.Collection
         facetName = field.id.split('-')[0]
         facetLabel = field.label
 
-        sep = field.separator || window.Settings.separator
+        sep = field.separator || window.settings.separator
 
         normal = []
         special = []
@@ -106,7 +106,7 @@ class @Facets extends Backbone.Collection
     # gray line on the facet pane.
     isSpecial: (name, field, sep) =>
         parent = field.split(sep)[0]
-        specials = window.Settings.Schema.getSpecials()
+        specials = window.settings.Schema.getSpecials()
         return no unless specials[name]
         return yes if specials[name].indexOf(parent) isnt -1
         return no

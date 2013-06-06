@@ -24,9 +24,9 @@ class @Item extends Backbone.Model
     # * This is used to relate facet categories to subcategories in solr.
     parseSubfields: () =>
         model = @toJSON()
-        sep = window.Settings.separator
+        sep = window.settings.separator
 
-        fields = window.Settings.Schema.getMultivalues()
+        fields = window.settings.Schema.getMultivalues()
         _.each fields, (field) =>
             values = model[field.id]
             unique = []
@@ -40,6 +40,6 @@ class @Item extends Backbone.Model
     # that have 'thumbnail'
     getTitle: () ->
         t = []
-        _.each window.Settings.Schema.getThumbnails(), (l) =>
+        _.each window.settings.Schema.getThumbnails(), (l) =>
             t.push @get l.id
         return t.join ' '

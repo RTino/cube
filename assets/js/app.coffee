@@ -116,7 +116,7 @@ $ =>
             @generateEntitiesMenu()
 
             # Fetch facets and start backbone history right after. This will
-            # route to window.Settings.Separator which in turn will fetch
+            # route to window.settings.Separator which in turn will fetch
             # items and draw app.
             @initFacets()
 
@@ -157,18 +157,11 @@ $ =>
         # Settings object holds all configuration parameters
         setAppSettings: () ->
 
-            # Entity settings
-            settings = window.settings
-
             # Etiquettes definition (etiquettes.json)
-            settings.etiquettes = window.etiquettes
+            window.settings.etiquettes = window.etiquettes
 
             # Available entities
-            settings.entities = window.entities
-
-            # Global Settings object
-            window.Settings = settings
-
+            window.settings.entities = window.entities
 
         # Set collection settings like sort and rows.
         setColSettings: () ->
@@ -177,17 +170,17 @@ $ =>
             window.collection.sort = @getSort()
 
             # Rows to show (default: 50)
-            window.collection.rows = window.Settings.rows
+            window.collection.rows = window.settings.rows
 
 
         # Set the application's title on top left corner (top entities menu)
         setAppTitle: () =>
 
             # Show name on top left corner and window title
-            $('#header #entityTitle h1').html window.Settings?.title
+            $('#header #entityTitle h1').html window.settings?.title
 
             # Show arrow on title if is possible to chose other entity
-            if window.Settings.entities.length > 1
+            if window.settings.entities.length > 1
                 $('#header #entityTitle').addClass 'selectable'
 
 
@@ -195,18 +188,18 @@ $ =>
         setViewMode: () =>
 
             # No picture? no thumbnail view.
-            pictureFields = window.Settings.Schema.getPictures()
+            pictureFields = window.settings.Schema.getPictures()
             $('span#view').hide() if pictureFields.length is 0
 
             # Set list view as default if in settings
-            $('span#view').addClass 'list' if window.Settings?.view is 'list'
+            $('span#view').addClass 'list' if window.settings?.view is 'list'
 
 
         # Set the facet pane state
         setAppFacetsState: () =>
 
             # Get facet fields from Schema
-            facets = window.Settings.Schema.getFacets()
+            facets = window.settings.Schema.getFacets()
 
             # If there are no facet fields, hide the facet pane
             return @disableFacets() unless facets.length
@@ -265,17 +258,17 @@ $ =>
         # Get schema and attach it to our Settings object
         createSchema: ->
 
-            window.Settings?.Schema = new window.Schema window.schema
+            window.settings?.Schema = new window.Schema window.schema
 
 
         # Switches between list view mode and thumbnail view mode
         toggleViewMode: () =>
 
             # Choose view mode to toggle to
-            v = if window.Settings.view is 'list' then 'thumbnail' else 'list'
+            v = if window.settings.view is 'list' then 'thumbnail' else 'list'
 
             # Set new view mode
-            window.Settings.view = v
+            window.settings.view = v
 
             # Set control icon appearance
             $('span#view').removeClass 'list'
@@ -306,7 +299,7 @@ $ =>
         # (picture and name) or in list mode (pic, full name, teams, etc.)
         addOne: (m) =>
 
-            view = window.Settings.view
+            view = window.settings.view
 
             return window.App.addOneThumbnail(m) if view is 'thumbnail'
 
@@ -330,7 +323,7 @@ $ =>
             view = new ItemThumbnailView model: item
 
             # Choose category to append it to appropriate container
-            cat = item.get window.Settings.Schema.getClassifier().id
+            cat = item.get window.settings.Schema.getClassifier().id
             cat = cat[0] if typeof cat is typeof []
             cat = 'null' if cat is undefined
             cat = window.categories.indexOf cat
@@ -342,7 +335,7 @@ $ =>
         # Render all items in the given collection
         addAll: (col, cb) =>
 
-            view = window.Settings.view
+            view = window.settings.view
 
             columnsMenuIsOpen = $('#columnsMenu').hasClass 'active'
 
@@ -425,7 +418,7 @@ $ =>
 
             height    = $container.height()
 
-            eHeight   = if window.Settings.view is 'list' then 39 else 196
+            eHeight   = if window.settings.view is 'list' then 39 else 196
 
             if posY + eHeight > height
                 top = scrollTop + eHeight - (height - posY)
@@ -796,7 +789,7 @@ $ =>
 
             fs.push "q=#{window.collection.search}" if window.collection.search
 
-            _.each window.Settings.Schema.getFacets(), (field) ->
+            _.each window.settings.Schema.getFacets(), (field) ->
                 fs.push 'facet.field=' + field.id
 
             url += '?' + fs.join '&' if fs.length
@@ -878,7 +871,7 @@ $ =>
         # Save sort criteria on localStorage
         saveSort: () ->
 
-            entity = window.Settings.entity
+            entity = window.settings.entity
 
             ls = window.localStorage[entity]
             ls = if ls then JSON.parse ls else {}
@@ -891,13 +884,13 @@ $ =>
         # Get sort criteria from localStorage or default configuration.
         getSort: () =>
 
-            entity = window.Settings.entity
+            entity = window.settings.entity
 
-            return window.Settings.sort unless window.localStorage[entity]
+            return window.settings.sort unless window.localStorage[entity]
 
             ls = JSON.parse window.localStorage[entity]
 
-            return window.Settings.sort unless ls.sort
+            return window.settings.sort unless ls.sort
 
             return ls.sort
 
@@ -1032,7 +1025,7 @@ $ =>
         # Renders containers for each category on the thumbnail view mode.
         renderCategoryView: (cb) =>
 
-            c = window.Settings.Schema.getClassifier()
+            c = window.settings.Schema.getClassifier()
 
             onProfile = ''
             onProfile = 'onProfile' if window.paneView or window.profileView
@@ -1082,7 +1075,7 @@ $ =>
             classes = "onProfile" if window.paneView or window.groupView
 
             $('#items').append _.template $('#table-template').html(),
-                h: window.Settings.Columns
+                h: window.settings.Columns
                 classes: classes
 
             cb()
@@ -1112,9 +1105,9 @@ $ =>
 
         # Returns the tag of the items on the search label. i.e. people, items.
         getItemType: () =>
-            itemType = window.Settings.itemType[1]
+            itemType = window.settings.itemType[1]
             if window.collection.length is 1
-                itemType = window.Settings.itemType[0]
+                itemType = window.settings.itemType[0]
             return itemType
 
         # Utility to determine if the given category for a item is listed in
@@ -1141,18 +1134,18 @@ $ =>
 
         # Check if admin key is present in QS
         isAdmin: () =>
-            return yes if window.Settings.editable is true
+            return yes if window.settings.editable is true
             qs = window.location.search.split('?')[1]
             new RegExp('admin=').test qs
 
         # Check if the entity is editable
         isEditable: () =>
-            return no if window.Settings.editable is false
+            return no if window.settings.editable is false
             yes
 
         isProfEditable: () =>
             return no unless @isEditable()
-            return yes if @isAdmin() or window.Settings.Schema.getAdditionals().length
+            return yes if @isAdmin() or window.settings.Schema.getAdditionals().length
             no
 
         # Set browsers URL to point to the current application state
@@ -1199,8 +1192,8 @@ $ =>
 
             nav.push "id=#{id}" if id
             nav.push fs if fs
-            if window.Settings.view isnt "list"
-                nav.push "view=#{window.Settings.view}"
+            if window.settings.view isnt "list"
+                nav.push "view=#{window.settings.view}"
             nav.push "s=#{encodeURI(search)}" if search
 
             nav
@@ -1364,11 +1357,11 @@ $ =>
         # Create the entities menu
         generateEntitiesMenu: () ->
 
-            entities = window.Settings.entities
+            entities = window.settings.entities
 
             _.each entities, (e) ->
 
-                return if e is window.Settings.entity
+                return if e is window.settings.entity
 
                 o = "<li id='#{e}'><span>#{e}</span></li>"
                 $("#entities ul", "#header").append o
@@ -1393,7 +1386,7 @@ $ =>
 
             template = _.template $('#columns-menu-template').html()
 
-            _.each window.Settings.Schema.get(), (field) =>
+            _.each window.settings.Schema.get(), (field) =>
 
                 $('#columnOptions ul').append template field: field
 
@@ -1403,7 +1396,7 @@ $ =>
 
             e.stopPropagation()
 
-            return unless window.Settings.entities.length > 1
+            return unless window.settings.entities.length > 1
 
             $('#entityTitle', '#header').toggleClass 'active'
 
@@ -1459,13 +1452,13 @@ $ =>
             id = $e.attr 'id'
 
             if $e.hasClass 'active'
-                _.each window.Settings.Schema.get(), (f) =>
+                _.each window.settings.Schema.get(), (f) =>
                     if f.id is id then f.index = false
                 $e.removeClass 'active'
                 @saveColumnSelection()
                 return @addAll window.collection
 
-            _.each window.Settings.Schema.get(), (f) =>
+            _.each window.settings.Schema.get(), (f) =>
                 if f.id is id then f.index = true
 
             $e.addClass 'active'
@@ -1478,7 +1471,7 @@ $ =>
         # Set the title for the window
         setWindowTitle: (t) ->
 
-            title = window.Settings?.title
+            title = window.settings?.title
 
             title += " - #{t}" if t
 
@@ -1502,7 +1495,7 @@ $ =>
 
             return w if w
 
-            entity = window.Settings.entity
+            entity = window.settings.entity
 
             return unless window.localStorage[entity]
 
@@ -1524,13 +1517,13 @@ $ =>
         # Save column selection on local storage
         saveColumnSelection: () =>
 
-            entity = window.Settings.entity
+            entity = window.settings.entity
 
             ls = window.localStorage[entity]
             ls = if ls then JSON.parse ls else {}
 
             indexes = []
-            _.each window.Settings.Schema.getIndexes(), (s) ->
+            _.each window.settings.Schema.getIndexes(), (s) ->
                 indexes.push s.id
             ls.columns = {} unless ls.columns
             ls.columns = indexes
@@ -1541,7 +1534,7 @@ $ =>
         # Set column selection from localStorage
         setColumnSelection: () =>
 
-            entity = window.Settings.entity
+            entity = window.settings.entity
 
             ls = window.localStorage[entity]
             return unless ls
@@ -1550,18 +1543,18 @@ $ =>
             columns = ls.columns
             return unless ls.columns
 
-            _.each window.Settings.Schema.getIndexes(), (i) ->
+            _.each window.settings.Schema.getIndexes(), (i) ->
                 i.index = no
 
             _.each columns, (c) ->
-                window.Settings.Schema.getField c, (f) ->
+                window.settings.Schema.getField c, (f) ->
                     f.index = yes
 
 
         # Save width of facet index
         saveFacetWidth: (event, ui) =>
 
-            entity = window.Settings.entity
+            entity = window.settings.entity
 
             ls = window.localStorage[entity]
             ls = if ls then JSON.parse ls else {}
@@ -1577,7 +1570,7 @@ $ =>
         # Set Facet index width from localStorage
         setFacetWidth: () =>
 
-            entity = window.Settings.entity
+            entity = window.settings.entity
 
             return unless window.localStorage[entity]
 
@@ -1594,7 +1587,7 @@ $ =>
 
             etq = null
 
-            _.each window.Settings.etiquettes, (e) ->
+            _.each window.settings.etiquettes, (e) ->
                 return etq = e if e.id is id
 
             etq
@@ -1617,10 +1610,10 @@ $ =>
         # Determines etiquettes for a given item
         getItemEtiquettes: (model) =>
 
-            return unless window.Settings.Schema.getTuples().length
+            return unless window.settings.Schema.getTuples().length
 
             facet = window.App.filterSelection.get()[0]
-            tuple = window.Settings.Schema.getTuples()[0].id
+            tuple = window.settings.Schema.getTuples()[0].id
             [team, role] = tuple.split(':') #team
 
             etiquettes = []
@@ -1659,7 +1652,7 @@ $ =>
         # Save open/closed state of facets on localStorage
         saveFacetOpenState: () =>
 
-            entity = window.Settings.entity
+            entity = window.settings.entity
 
             ls = window.localStorage[entity]
             ls = if ls then JSON.parse ls else {}
@@ -1671,7 +1664,7 @@ $ =>
         # Set facet open/closed state of facets on localStorage
         setFacetOpenState: () =>
 
-            entity = window.Settings.entity
+            entity = window.settings.entity
 
             return @initFacetOpenState() unless window.localStorage[entity]
 
@@ -1688,7 +1681,7 @@ $ =>
 
             window.facets.each (f) =>
                 name = f.get 'name'
-                field = window.Settings.Schema.getFieldById name
+                field = window.settings.Schema.getFieldById name
                 return if field.collapse
                 @facetOpenState.push cat: name, field: 'facet'
 
@@ -1706,7 +1699,7 @@ $ =>
         # Get the thumbnail label used in thumbnail views
         getThumbnailLabel: (m) =>
 
-            thumbnails = window.Settings.Schema.getThumbnails()
+            thumbnails = window.settings.Schema.getThumbnails()
 
             label = []
 
@@ -1718,7 +1711,7 @@ $ =>
         # Gets the key name for the img fields, useful for templates.
         getPicKey: () =>
 
-            pictures = window.Settings.Schema.getPictures()
+            pictures = window.settings.Schema.getPictures()
 
             return pictures[0]['id'] if pictures[0]
 
@@ -1726,7 +1719,7 @@ $ =>
         # Checks if id is a valid tuple field
         isTuple: (id) =>
 
-            tuples = window.Settings.Schema.getTuples()
+            tuples = window.settings.Schema.getTuples()
 
             allTuples = []
 

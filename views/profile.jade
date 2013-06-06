@@ -1,7 +1,7 @@
 script(type="text/template")#details-template
   | <%
   |   var model = m.parseSubfields();
-  |   var schema = window.Settings.Schema;
+  |   var schema = window.settings.Schema;
   |   var pic = window.App.getPicKey();
   |   var pictures = schema.getPictures().length
   |   var cls = pictures === 0 ? 'noPicture' : '';

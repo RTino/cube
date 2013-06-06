@@ -75,7 +75,7 @@
     |   if (sort.length == 3) {
     |       hid = sort.slice(0,2).join(':');
     |   };
-    |   var schema = window.Settings.Schema.get();
+    |   var schema = window.settings.Schema.get();
     |   function addHeaders() {
     |       _.each(schema, function(f) { %>
     |           <th id="<%= f.id %>"

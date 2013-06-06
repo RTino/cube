@@ -65,7 +65,7 @@ $ ->
 
                 id = $i.attr 'id'
 
-                f = window.Settings.Schema.getFieldById id.split('_')[0]
+                f = window.settings.Schema.getFieldById id.split('_')[0]
 
                 return unless !f.type or f.type is "text" or
                     f.type is "email" or  f.type is "multiline" or
@@ -92,7 +92,7 @@ $ ->
 
                 id = $i.attr 'id'
 
-                f = window.Settings.Schema.getFieldById id.split('_')[0]
+                f = window.settings.Schema.getFieldById id.split('_')[0]
 
                 return unless !f.type or f.type is "integer" or
                     f.type is "float"
@@ -151,7 +151,7 @@ $ ->
         # Set a model's picture field from the picture HTML element.
         setModelPicFields: (m, unset) =>
 
-            picFields = window.Settings.Schema.getPictures()
+            picFields = window.settings.Schema.getPictures()
 
             _.each picFields, (pf) ->
 
@@ -182,7 +182,7 @@ $ ->
 
                 val = []
 
-                f = window.Settings.Schema.getFieldById id.split('_')[0]
+                f = window.settings.Schema.getFieldById id.split('_')[0]
 
                 _.each $i.val().split(','), (v) =>
                     @setUniqueMultivalueField v, val
@@ -321,7 +321,7 @@ $ ->
 
             uniqueValues = []
 
-            sep = window.Settings.separator
+            sep = window.settings.separator
             tokens = value.split sep
 
             _.each value.split(sep), (v, i) ->
@@ -375,7 +375,7 @@ $ ->
 
             $('.validationFailed', '#pane').removeClass('validationFailed')
 
-            inputFields = window.Settings.Schema.getMandatories()
+            inputFields = window.settings.Schema.getMandatories()
 
             _.each inputFields, (f, i, fields) =>
 
@@ -756,7 +756,7 @@ $ ->
         # Add class mandatory to respective fields
         setMandatoryLabels: () =>
 
-            mandatoryFields = window.Settings.Schema.getMandatories()
+            mandatoryFields = window.settings.Schema.getMandatories()
 
             _.each mandatoryFields, (l) =>
                 $("label[for='#{l.id}']").addClass 'mandatory'
@@ -767,7 +767,7 @@ $ ->
 
             item = @model
 
-            _.each window.Settings.Schema.getMultilines(), (m) ->
+            _.each window.settings.Schema.getMultilines(), (m) ->
 
                 value = item.get m.id
                 return unless value
