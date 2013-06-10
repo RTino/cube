@@ -1,7 +1,7 @@
 {
     "entity": "team",
     "title": "The Team",
-    "description": "One usecase for the cube is as a team management tool.",
+    "description": "See how you can easily manage your teams in a Cube",
     "itemType": [ "person", "people" ],
     "separator": "/",
     "view": "list",
