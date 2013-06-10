@@ -355,6 +355,11 @@ th {
   text-align: center;
  }
 
+
+th#solr {
+  min-width: 110px;
+}
+
 td {
   padding: 10px;
   border: none;
