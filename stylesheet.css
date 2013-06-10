@@ -290,6 +290,10 @@ section#solr img#solr {
     margin-top: -10px;
 }
 
+section#solr p {
+    padding-top: 10px;
+}
+
 section#solr #right {
     width: 560px;
 }
