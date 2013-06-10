@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Cube">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheet.css">
+
+    <title>Cube</title>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-40533395-3', 'cubeapp.io');
+      ga('send', 'pageview');
+
+    </script>
+  </head>
+
+  <body>
+
+    <!-- MAIN CONTENT -->
+
+    <div id="main_content_wrap" class="outer">
+        <div id="menu_wrap" class="outer">
+        <ul id="menu" class="inner">
+            <li><a href="index.html">home<a/></li>
+            <li class="active"><a href="install.html">install</a></li>
+            <li><a href="tutorial.html">tutorial</a></li>
+            <li><a href="docs.html">docs</a></li>
+        </ul>
+    </div>
+
+      <section id="installation" class="inner">
+      <h3>Installation</h3>
+        <p>The Four steps to get the Cube up and running!</p>
+        <ol>
+            <li>
+                <h6>Resolve dependencies</h6>
+                <p>There are two ways to get the project installed: the easy way and the fun way. For both you need to have a working java environment with <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK</a> (&gt;= 1.6).</p>
+                <h6>Easy - installation script</h6>
+                <pre>$ bash &lt;(curl -s http://zalando.github.io/cube/install.sh) &amp;&amp; cd cube</pre>
+                <h6>Fun - Manual install</h6>
+                <p>Requirements: <a href="http://maven.apache.org/">Maven</a> (2.2), <a href="http://nodejs.org">NodeJs</a> (&gt;=0.8) and <a href="http://www.imagemagick.org/script/index.php">ImageMagick</a> (&gt;=6.8.0)</p>
+                <p>Download the cube app zipfile from <a href=" https://github.com/zalando/cube/archive/master.zip"> https://github.com/zalando/cube/archive/master.zip</a>
+                    <pre>$ unzip cube-master.zip<br/>$ mv cube-master cube<br/>$ cd cube<br/>$ npm install .</pre>
+            </li>
+            <li>Set up the Solr Database
+                <p>Build and run the Solr Database</p>
+                <pre>$ cd solr<br/>$ mvn clean install tomcat:run-war -Pdevelopment</pre>
+            </li>
+            <li>
+                <p>Start the Cube nodejs server on a new terminal, from the cube project directory</p>
+                <pre>$ coffee cube.coffee</pre>
+            </li>
+            <li>Open it in your favorite browser
+            <p><a class="biglink" href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+            </li>
+        </ol>
+        </section>
+
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Cube is maintained by <a href="https://github.com/zalando">zalando</a></p>
+      </footer>
+    </div>
+    <script src="jquery-1.9.1.min.js"></script>
+    <script src="index.js"></script>
+</body></html>

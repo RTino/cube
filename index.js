@@ -1,6 +1,7 @@
 $(function() {
 
-    $('#example').css('height', $(window).height() - 100 + 'px');
+    //$('#example').css('height', $(window).height() - 100 + 'px');
+    $('#example').css('height', $(example).width() * 9/16 -100)
 
     $('a#demo_banner').click(function() {
         if ($('#example').hasClass('visible')) {
@@ -35,6 +36,7 @@ $(function() {
         jump(id);
     });
 
+    /*
     $('ul#menu li').click(function(e) {
         var $e = $(e.currentTarget);
         var id = $e.attr('id');
@@ -44,14 +46,14 @@ $(function() {
         $e.addClass('active');
         if (window.scrollY > 150) { window.scrollTo(0, 180); }
     });
-
+    */
     startSlider();
 
-    offset = $('#menu').offset().top - 10;
+    //offset = $('#menu').offset().top - 10;
 
-    stickyMenu(offset);
+    //stickyMenu(offset);
 
-    $(window).scroll(function() { stickyMenu(offset); });
+    //$(window).scroll(function() { stickyMenu(offset); });
 });
 
 var slider  = {

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Cube">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheet.css">
+
+    <title>Cube</title>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-40533395-3', 'cubeapp.io');
+      ga('send', 'pageview');
+
+    </script>
+  </head>
+
+  <body>
+
+    <!-- MAIN CONTENT -->
+
+    <div id="main_content_wrap" class="outer">
+        <div id="menu_wrap" class="outer">
+        <ul id="menu" class="inner">
+            <li><a href="index.html">home<a/></li>
+            <li><a href="install.html">install</a></li>
+            <li><a href="tutorial.html">tutorial</a></li>
+            <li class="active"><a href="docs.html">docs</a></li>
+        </ul>
+    </div>
+
+    <section id="documentation" class="inner">
+        <h3>Documentation</h3>
+        <p>As mentioned before, the Cube is composed of a NodeJs backend, a Solr database and a BackboneJs frontend. If you're familiar with these technologies it shouldn't be much of a hassle to get around this app. Plus, annotated source code documentation generated with doccu can be found <a href="docs/app.html">here</a>.</p>
+        <a name="schema"></a>
+        <h6>Schema reference</h6>
+        <p>One of the main tasks when creating your own entity is writing a Schema. A Cube Schema is a json array of objects that describe the data structure of a collection of data. You can take a look at an <a href="docs/schema.html">example schema</a> which makes uses of almost all possible properties. Setting up yours is a matter of listing the fields you want your items to have with their IDs, Labels and a custom set of properties like field type (img, email, facet, etc).</p>
+        <p>Available Properties</p>
+        <p class="reference"><span>id</span> – Each field must have a unique ID composed of alphanumeric characters except '-' and '_'. This field is required.</p><p class="reference value">Value type: <span class="value">String (except '-' and '_')</span></p>
+
+        <p class="reference"><span>label</span> – IDs are not necessarily pretty or even human readable. A label is a must. Alphanumeric characters and spaces. </p><p class="reference value">Value type: <span class="value">String</span></p>
+        <p class="reference"><span>type</span> – The type field specifies which data type this field contains. It tells the cube how to store this value and also how to display it. Default (no type property specified) is String. Other data types are:</p>
+        <div class="deeper">
+                <p>integer – Stores (of course) integer numbers, not strings.</p>
+                <p>float – Store float numers. When displayed floats are rounded to 2 digits.</p>
+                <p>facet – This field will act as a facet field. It will appear on the facet index, listing all values that your items have in this field, along with a count of items with each value.</p>
+                <p>tuple – A tuple of facet fields, related to each other. i.e. in the team example, roles are related to teams in the tuple team:role field.</p>
+                <p>img – Image field. Items can have only one image field. This will be displayed as the profile picture on the profile view, it will activate the thumbnail view and it will be displayed as a small 25x25 pic on the list view.</p>
+                <p>email – Stores emails and renders them as clickable emailto: links.</p>
+                <p>skype – Stores skype usernames and renders them as clickable skypeto: links to open a chat window.</p>
+                <p>multiline – Multiple line field, renders a textarea instead of an input field.</p>
+                <p>dropdown – Shows you a &lt;select&gt; element, showing you a list of selectable options. This field will require you to define the options in an array under the property "options".</p>
+                <p>date – Shows a date and attaches a date picker for input.</p>
+                <p>Value type: <span class="value">String ( "facet" | "tuple" | "img" | "email" | "skype" | "multiline" | "dropdown" | "date" )<span></p>
+            </div>
+        <p class="reference"><span>mandatory</span> – Mark field as required for form validation when adding/editing items. </p><p class="reference value">Value type: <span class="value">Boolean (true | false)</span></p>
+        <p class="reference"><span>search</span> –  Mark field as searchable. This means that any search performed on the input search will try to match the values on this field. </p><p class="reference value">Value type: <span class="value">Boolean (true | false)</span></p>
+        <p class="reference"><span>index</span> – Field default visibility in the table view. </p><p class="reference value">Value type: <span class="value">Boolean (true | false)</span></p>
+        <p class="reference"><span>thumbnail</span> – Show field value as footer for items in Thumbnail view mode. </p><p class="reference value">Value type: <span class="value">Boolean (true | false)</span></p>
+        <p class="reference"><span>multiedit</span> – Editable on many items at once. Field will appear on the multiedit form</a>. </p><p class="reference value">Value type: <span class="value">Boolean (true | false)</span></p>
+        <p class="reference"><span>hidden</span> – Hides field from profile view. </p><p class="reference value">Value type: <span class="value">Boolean (true | false)</span></p>
+        <p class="reference"><span>additional</span> – This field will be part of the additional fields and will be showed at the bottom of the profile view, hidden inside the 'Additional info' section. </p><p class="reference value">Value type: <span class="value">Boolean (true | false)</span></p>
+        <h6>Type specific properties</h6>
+        <h5>Field Type: Facet</h5>
+        <p class="reference"><span>specials</span> – Each facet is splitted in two areas, separated by a gray line. Define this property with an array of strings and each facet field that matches will be displayed below the line. </p><p class="reference value">Value type: <span class="value">Array [ "name1", "name2", ... ]</span></p>
+        <p class="reference"><span>classifier</span> – Defines this field as the category to sort items on thumbnail view. The order of this array will determine the order of the sections on that view. </p><p class="reference value">Value type: <span class="value">Array [ "name1", "name2", ... ]</span></p>
+        <p class="reference"><span>order</span> – Define the order of the facet fields. If not specified, fields will be sorted alphabetically.</p><p class="reference value">Value type: <span class="value">Array [ "field1", "field2", ... ]</span></p>
+        <p class="reference"><span>collapse</span> – Define wich facets should render collapsed initially. Once you click on them, the state is stored in localStorage, overriding this setting.</p><p class="reference value">Value type: <span class="value">Boolean (true | false)</span></p>
+        <h5>Field Type: Dropdown</h5>
+        <p class="reference"><span>options</span> – Required property for any dropdown field, defined as an array of strings for the availablo options in the dropdown menu. </p><p class="reference value">Value type: <span class="value">Array [ "name1", "name2", ... ]</span></p>
+        </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+      <p class="copyright">Cube is maintained by <a href="https://github.com/zalando"><img src="zalando_logo_footer.png"></a></p>
+      </footer>
+    </div>
+    <script src="jquery-1.9.1.min.js"></script>
+    <script src="index.js"></script>
+</body></html>
