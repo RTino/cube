@@ -1475,7 +1475,7 @@ $ =>
 
             title += " - #{t}" if t
 
-            $('head title').html title
+            $('head title').text(title).html()
 
 
         # Set resizable handler for facet index
