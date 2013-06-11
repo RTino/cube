@@ -36,7 +36,7 @@ class @Item extends Backbone.Model
 
         _.each fields, (field) =>
 
-            model[field.id] = parseMultivalueField model[field.id]
+            model[field.id] = @parseMultivalueField model[field.id]
 
         model
 
