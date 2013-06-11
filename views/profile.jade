@@ -134,14 +134,10 @@ script(type="text/template")#details-template
   |           <div class="mask">
   |               <span id="left"  class="scroll"></span>
   |               <span id="right" class="scroll"></span>
-  |               <div class="text-container" id="<%= field.id %>"><%
-  |                   if (field.multivalue) {
-  |                       addMultivalue(value, field.id, 'filter', link);
-  |                   } else { %>
-  |                       <a class="link" target="_blank" href="<%= value %>">
-  |                           <%= value %>
-  |                       </a><%
-  |                   } %>
+  |               <div class="text-container" id="<%= field.id %>">
+  |                  <a class="link" target="_blank" href="<%= value %>">
+  |                      <%= value %>
+  |                  </a>
   |               </div>
   |           </div>
   |           <input type="text" id="<%= field.id %>" class="hidden" <%
