@@ -35,15 +35,14 @@
     </div>
 
      <section id="tutorial" class="inner">
-        <h3>How To make your own Cube</h3>
-        <p>Once you get the included example up and running, it will be easy to set up the cube to handle your own data. In the following small tutorial, I'll show you how to store your collection of books in the cube. As you will see its  basically a matter of writing a schema, editing a couple of config files and setting up the database.</p>
+        <h3>How to make your own Cube</h3>
+        <p>Once you get the included example up and running, it will be easy to set up the cube to handle your own data. This small tutorial will show you how to store a collection of books in the cube. As you will see it's  basically a matter of writing a schema, editing a couple of config files and setting up the database.</p>
         <ol class="tutorial">
             <li>
-                <h6>Add a new solr core</h6>
+                <h6>Add a new Solr core</h6>
                 <div>
                     <p>Add a core tag in solr/solr/solr.xml file. At the end it should look something like this</p>
-                    <pre class="code">
-&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+                    <pre class="code"><span class="filename">solr/solr/solr.xml</span>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
 &lt;solr sharedLib="lib" persistent="true"&gt;
   &lt;cores adminPath="/admin/cores"&gt;
     &lt;core name="team" instanceDir="conf/cube/" dataDir="conf/cube/team" /&gt;
@@ -66,13 +65,12 @@
             <li>
                 <h6>Configure</h6>
                 <div>
-                    <ol>
+                    <ol id="configure">
                         <li>
                             <h5>Schema</h5>
-                            <p>The Schema is one of the most important aspects of your entity. We recommend you to spend some time checking out the one provided in the example along with its documentation.<p>
-                            <p>Please check the Schema reference <a href="#schema">here</a>.</p>
-                            <p>For this example, I provide you with a schema. Get it from <a href="schema.json">here</a> and place it in entities/library/</p>
-                            <pre>$ cd cube/entities/library<br/>$ wget http://cubeapp.io/schema.json</pre>
+                            <p>The Schema is one of the most important aspects of your entity. We recommend you to spend some time checking out the <a href="docs.html">Schema Reference</a> and the <a target="_blank" href="https://github.com/zalando/cube/blob/master/entities/team/schema.json">Team example schema</a>.<p>
+                            <p>For this tutorial a schema is provided. Get it from <a href="schema.json">here</a> and place it in entities/library/</p>
+                            <pre>$ cd cube/entities/library<br/>$ curl -O http://cubeapp.io/schema.json</pre>
                         </li>
                         <li>
                             <h5>Database config</h5>
@@ -89,7 +87,7 @@
                        <li>
                             <h5>Entity Information</h5>
                             <p>We need to provide some information about the entity along with some settings. Please take a look at entities/library/settings.json. It should look something like this:</p>
-                            <pre class="code">{
+                            <pre class="code"><span class="filename">entities/library/settings.json</span>{
     "entity": "<span>library</span>",
     "title": "<span>Library</span>",
     "description": "<span>My huge book collection</span>",
@@ -104,9 +102,9 @@
                 </div>
                 </li>
             <li>
-                <h6>Add it to the list</h6>
+                <h6>Add your entity to the list</h6>
                 <p>Open the file called entities.json and add it to the array</p>
-                <pre class="code">[ "team"<span>, "library"</span> ]</pre>
+                <pre class="code"><span class="filename">entities.json</span>[ "team"<span>, "library"</span> ]</pre>
             </li>
             <li>
                 <h6>Start NodeJs</h6>
@@ -115,12 +113,13 @@
                 </div>
             </li>
             <li>
-                <h6>Visit your library</h6>
+            <h6>Visit your library</h6>
                 <div><a class="biglink" href="http://localhost:3000/library/?admin=yes">http://localhost:3000/library/?admin=yes</a></div>
+                <p>* Currently there is no authentication support in the Cube App (its on its way!), so for now the way to be able to add/edit all data from any entity, is by appending the "admin=yes" parameter to the querystring.</p>
             </li>
             <li>
                 <h6>Add your books!</h6>
-                <p>Click <img id="addbtn" src="add.png"> on the top right corner and start adding your books!</p>
+                <p>Click <a href="" class="cubebtn">Add</a>on the top right corner and start adding your books!</p>
             </li>
         </ol>
      </section>

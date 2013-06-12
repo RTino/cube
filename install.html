@@ -35,29 +35,28 @@
     </div>
 
       <section id="installation" class="inner">
-      <h3>Installation</h3>
-        <p>The Four steps to get the Cube up and running!</p>
+        <h3>Three steps to get the Cube up and running!</h3>
         <ol>
             <li>
                 <h6>Resolve dependencies</h6>
-                <p>There are two ways to get the project installed: the easy way and the fun way. For both you need to have a working java environment with <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK</a> (&gt;= 1.6).</p>
-                <h6>Easy - installation script</h6>
+                <p>An installation script is provided to help you solve the dependencies and download the latest version of the Cube app. Only the following operating systems are supported: Linux Ubuntu, Debian, Fedora, CentOS, Red Hat, and Mac OS X. If yours is not on the list, proceed to install manually. Please note that <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html">JDK</a> (&gt;= 1.6) is a requirement which won't be solved by this script.</p>
+                <h6>Script</h6>
                 <pre>$ bash &lt;(curl -s http://zalando.github.io/cube/install.sh) &amp;&amp; cd cube</pre>
-                <h6>Fun - Manual install</h6>
+                <h6>Manual</h6>
                 <p>Requirements: <a href="http://maven.apache.org/">Maven</a> (2.2), <a href="http://nodejs.org">NodeJs</a> (&gt;=0.8) and <a href="http://www.imagemagick.org/script/index.php">ImageMagick</a> (&gt;=6.8.0)</p>
                 <p>Download the cube app zipfile from <a href=" https://github.com/zalando/cube/archive/master.zip"> https://github.com/zalando/cube/archive/master.zip</a>
                     <pre>$ unzip cube-master.zip<br/>$ mv cube-master cube<br/>$ cd cube<br/>$ npm install .</pre>
             </li>
-            <li>Set up the Solr Database
+            <li><h6>Set up the Solr Database</h6>
                 <p>Build and run the Solr Database</p>
                 <pre>$ cd solr<br/>$ mvn clean install tomcat:run-war -Pdevelopment</pre>
             </li>
             <li>
+                <h6>Start the Cube App</h6>
                 <p>Start the Cube nodejs server on a new terminal, from the cube project directory</p>
                 <pre>$ coffee cube.coffee</pre>
-            </li>
-            <li>Open it in your favorite browser
-            <p><a class="biglink" href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+                <p>Open it in your favorite browser</p>
+                <p><a class="biglink" href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
             </li>
         </ol>
         </section>

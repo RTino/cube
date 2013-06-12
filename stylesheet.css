@@ -92,11 +92,11 @@ h4 {
 }
 
 h5 {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 h6 {
-  font-size: 20px;
+  font-size: 22px;
 }
 
 
@@ -227,6 +227,7 @@ section.inner {
     padding-top: 20px;
 }
 
+section#tutorial ol,
 section#installation ol {
     list-style: decimal;
     padding-left: 25px;
@@ -343,16 +344,14 @@ table {
   border: none;
   margin-bottom: 20px;
   text-align: left;
-  border-collapse: separate;
-  border-spacing: 10px;
  }
 
 th {
   font-family: 'Lucida Grande', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   padding: 5px;
-  color: black;
-  border: 1px solid #ccc;
+  color: white;
   text-align: center;
+  background: #333;
  }
 
 
@@ -361,9 +360,8 @@ th#solr {
 }
 
 td {
+  border: 1px solid #ccc;
   padding: 10px;
-  border: none;
-  background: #eee;
  }
 
 form {
@@ -632,6 +630,15 @@ ul#menu li a {
     vertical-align: middle;
     padding: 0;
     margin: 0;
+}
+
+.cubebtn {
+    padding: 10px;
+    background: url('addbtn.png') dodgerblue no-repeat 5px center;
+    color: white;
+    font-weight: bold;
+    margin: 0 5px;
+    padding-left: 25px;
 }
 
 section#slideshow ul li {

@@ -36,11 +36,11 @@
 
     <section id="documentation" class="inner">
         <h3>Documentation</h3>
-        <p>The Cube is composed of a NodeJs backend, a Solr database and a BackboneJs frontend. If you're familiar with these technologies it shouldn't be much of a hassle to get around this app. Plus, annotated source code documentation generated with doccu can be found <a href="docs/app.html">here</a>.</p>
+        <p>The Cube is composed of a NodeJs backend, a Solr database and a BackboneJs frontend. If you're familiar with these technologies it shouldn't be much of a hassle to get around this app; For the developer in you, annotated source code documentation generated with <a href="http://jashkenas.github.io/docco/">docco</a> can be found <a href="docs/app.html">here</a>.</p>
         <a name="schema"></a>
         <h6>Schema reference</h6>
-        <p>One of the main tasks when creating your own entity is writing a Schema. A Cube Schema is a json array of objects that describe the data structure of a collection of data. You can take a look at an <a href="docs/schema.html">example schema</a> which makes use of almost all possible properties. Setting up yours is a matter of listing the fields you want your items to have with their IDs, Labels and a custom set of properties like field type (img, email, facet, etc).</p>
-        <p>Available Properties</p>
+        <p>One of the main tasks when creating your own entity is writing a Schema. A Cube Schema is a json array of objects that describes the structure of your data collection. You can take a look at an <a href="docs/schema.html">example schema</a> which makes use of almost all possible properties. Setting up yours is a matter of listing the fields you want your items to have with their IDs, Labels and a custom set of properties like field type (img, email, facet, etc).</p>
+        <h5>Available Properties</h5>
 
         <table>
             <thead>
@@ -118,76 +118,64 @@ Value type</td>
                 <tbody>
         </table>
 
-        <p>Available Field Types</p>
+        <h5>Available Field Types</h5>
 
         <table>
             <thead>
                 <th>type</th>
                 <th>description</th>
-                <th id="solr">solr suffix</th>
             </thead>
             <tbody>
                 <tr>
                     <td>string</td>
                     <td>This type is by default. If a field has no 'type' property, then it is a string field. Allow you to store simple strings.</td>
-                    <td>-s, -sr, -sm</td>
                 </tr>
                 <tr>
                     <td>integer</td>
                     <td>Store integer numbers</td>
-                    <td>-i</td>
                 </tr>
                 <tr>
                     <td>float</td>
                     <td>Store float numbers</td>
-                    <td>-f</td>
                 </tr>
                 <tr>
                     <td>date</td>
                     <td>Stores a date in ISO format. A datepicker is attached to its input field to help setting its value.</td>
-                    <td>-s, -sr</td>
                 </tr>
 
                 <tr>
                     <td>facet</td>
                     <td>Stored as an array of strings, this field is used as a facet. It will show up on the facet index and allow you to use it as a filter. Counts for all its possible values will be also displayed. This is where the solr magic comes in.</td>
-                    <td>-sm</td>
                 </tr>
                 <tr>
                     <td>tuple</td>
                     <td>Relates a facet field with another facet field. i.e. team members have different roles for each of their teams. By making a tuple field 'team:role', we get filters for team, role, and a one to one correlation of them.</td>
-                    <td>-sm</td>
                 </tr>
                 <tr>
                     <td>img</td>
                     <td>Field stores a URL that points to an image. If its the only img field in your schema, it will render as a big profile picture on the profile view and allow users to upload images from the browser. A minified version of it will also be displayed on the table.</td>
-                    <td>-s, -sr</td>
                 </tr>
                 <tr>
                     <td>email</td>
                     <td>Contains one email address. Form validation for email will be applied, and it will be rendered as a clickable mailto: link.</td>
-                    <td>-s, -sr</td>
                 </tr>
                 <tr>
                     <td>skype</td>
                     <td>Containes one skype username. It will be rendered as a clickable skype chat link.</td>
-                    <td>-s, -sr</td>
                 </tr>
                 <tr>
                     <td>multiline</td>
                     <td>Containes a long string. Rendered as a text-area instead of as a single line text field</td>
-                    <td>-s, -sr</td>
                 </tr>
                 <tr>
                     <td>dropdown</td>
                     <td>Containes a definite set of options to select from. Render as a select element, it allows you to define options with the 'options' property</td>
-                    <td>-s, -sr</td>
                 </tr>
 
             </tbody>
         </table>
 
-        <p>Available properties for facet fields</p>
+        <h5>Available properties for facet fields</h5>
 
         <table>
             <thead>
@@ -221,7 +209,7 @@ Value type</td>
         </table>
 
 
-        <p>Available properties for dropdown fields</p>
+        <h5>Available properties for dropdown fields</h5>
 
         <table>
             <thead>
