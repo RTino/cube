@@ -77,6 +77,9 @@ class SolrManager
 
         _.each obj, (v, k) =>
 
+            # id is a reserved static field in solr, needs no suffix.
+            return if k is 'id'
+
             # Add suffix to the key
             ks = @addSuffix name, k
 
