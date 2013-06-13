@@ -1,0 +1,10 @@
+{
+    "entity": "team",
+    "title": "The Team",
+    "description": "See how you can easily manage your teams in a Cube",
+    "itemType": [ "person", "people" ],
+    "separator": "/",
+    "view": "list",
+    "rows": 50,
+    "sort": "name:asc"
+}

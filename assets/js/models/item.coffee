@@ -9,37 +9,56 @@ class @Item extends Backbone.Model
     initialize: () =>
         @bind 'sync', window.App.updateFacets, window.App
 
+    #### URLRoot
+    # Returns the base url part for a given entity
     urlRoot: () =>
         return "/#{window.entity}/collection/"
 
     #### Destroy
-    # Destroy the model but wait for the db to update
+    # Destroy the model but waiting for the db to update
     clear: () ->
         @destroy wait: yes
 
-    #### Parse en item
-    # Returns a JSON object where the multivalue properties are
-    # correctly parsed: i.e. 'cat1/subcat1, cat1/subcat2' should be
-    # returned as [cat, cat1/subcat1, cat1/subcat2].
-    # * This is used to relate facet categories to subcategories in solr.
+    #### Parse
+    # Forms a JSON object with the model propertie's and prepares it for
+    # rendering in the templates. Escapes HTML characters and forms
+    # multivalue strings.
     parseSubfields: () =>
-        model = @toJSON()
-        sep = window.Settings.separator
 
-        fields = window.Settings.Schema.getMultivalues()
+        model = @toJSON()
+
+        sep = window.settings.separator
+
+        _.each model, (value, field) =>
+            model[field] = _.escape value if typeof value is typeof "string"
+
+        fields = window.settings.Schema.getMultivalues()
+
         _.each fields, (field) =>
-            values = model[field.id]
-            unique = []
-            _.each values, (v, i) ->
-                rem = values.slice(i+1).join()
-                unique.push(v) if rem.indexOf(v) is -1
-            model[field.id] = unique
+
+            model[field.id] = @parseMultivalueField model[field.id]
+
         model
+
+    # Multivalue strings are stored in Solr in a special way. For example,
+    # given the string "TeamA/GroupX/Subgroup1" its stored in solr as:
+    # [ "TeamA", "TeamA/GroupX", "TeamA/GroupX/Subgroup1" ]. This reverses the
+    # array into the original string.
+    parseMultivalueField: (arr) =>
+
+        unique = []
+
+        _.each arr, (v, i) ->
+            rem = arr.slice(i+1).join()
+            unique.push(_.escape(v)) if rem.indexOf(v) is -1
+
+        unique
+
 
     # Return a string with the title of the item, based on the properties
     # that have 'thumbnail'
     getTitle: () ->
         t = []
-        _.each window.Settings.Schema.getThumbnails(), (l) =>
+        _.each window.settings.Schema.getThumbnails(), (l) =>
             t.push @get l.id
         return t.join ' '

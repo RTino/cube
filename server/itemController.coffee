@@ -134,9 +134,9 @@ class ItemController
 
                     # If its a multivalue field, add a copy field with its
                     # array stringified, so search and sort work on this field.
-                    if f.multivalue
+                    if solrManager.isMultivalue f
                         multivalueField = item[f.key].sort().join(" ")
-                        req.body["sort_#{f.key}-s"] = multivalueField
+                        req.body["#{f.key}-sort"] = multivalueField
 
             # If there is no picture field, respond with updated item object.
             if !req.body[picKey] or req.body[picKey] is item[picKey]
@@ -205,7 +205,7 @@ class ItemController
 
     # Get Picture fields from schema (type: "img").
     getPictureFields: (name) ->
-        schema = require "#{__dirname}/../extensions/#{name}/schema.json"
+        schema = require "#{__dirname}/../entities/#{name}/schema.json"
         arr = []
         _.each schema, (o) =>
             arr.push o if o.type is "img"
@@ -221,7 +221,7 @@ class ItemController
     # Get all schema fields that cointain a specific property
     # TODO Get from schema class
     getFieldsWithProperty: (name, p) ->
-        schema = require "#{__dirname}/../extensions/#{name}/schema.json"
+        schema = require "#{__dirname}/../entities/#{name}/schema.json"
         arr = []
         _.each schema, (o) =>
             arr.push o if o[p]
@@ -229,7 +229,7 @@ class ItemController
 
     # Get all fields that have a specific type in an entity's schema
     getFieldsByType: (name, t) ->
-        schema = require "#{__dirname}/../extensions/#{name}/schema.json"
+        schema = require "#{__dirname}/../entities/#{name}/schema.json"
         arr = []
         _.each schema, (o) =>
             arr.push o if o.type is t

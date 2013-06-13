@@ -10,7 +10,7 @@ script(type="text/template")#facet-template
   | };
   | var addFacetField = function(properties, pname) {
   |     var _pname = pname;
-  |     var sep = window.Settings.separator;
+  |     var sep = window.settings.separator;
   |     if (properties.amount === 0) { return; };
   |     if (pname === 'null') { _pname = 'not set'; }
   |     if (pname.split(sep)[1]) { _pname = pname.split(sep)[1]; };

@@ -109,7 +109,7 @@ $ =>
 
             $('table')
 
-                .tablesorter sortList: window.opener.Settings.ListSort,
+                .tablesorter sortList: window.opener.settings.ListSort,
                     textExtraction: @tableTextExtraction
 
                 .bind 'sortEnd',
@@ -118,7 +118,7 @@ $ =>
 
                         sort = sorter.target.config.sortList
 
-                        window.opener.Settings.ListSort = sort
+                        window.opener.settings.ListSort = sort
 
 
         # Check of admin in QS
@@ -140,7 +140,7 @@ $ =>
             fs.push "rows=#{rows}" if rows isnt undefined
             fs.push "sort=#{window.opener.collection.sort}"
 
-            _.each window.opener.Settings.Schema.getFacets(), (field) ->
+            _.each window.opener.settings.Schema.getFacets(), (field) ->
 
                 fs.push 'facet.field=' + field.id
 

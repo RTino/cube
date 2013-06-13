@@ -32,8 +32,7 @@ $ ->
 
 
         #### Render item
-        # Render an item view. parseSubfields() returns multivalue fields in
-        # a propper readable way.
+        # Render an item view
         render: () =>
 
             @$el.html @template m: @model

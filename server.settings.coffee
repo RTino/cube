@@ -13,27 +13,27 @@ ServerSettings = ->
 
 
     #### Default settings.
-    # Used when creating an extension from the CSV importer.
-    # To configure your extension's database, check:
-    # extensions/yourExtension/db.json
+    # Used when creating a new entity from the CSV importer.
+    # To configure your entitie's database, edit
+    # entities/<entity name>/db.json
     Default:
 
         # Default database settings.
         Database:
 
             production:
-                host: 'localhost'
-                port: '38730'
-                path: '/cube-solr'
-                method: 'GET'
-                dataRoot: "default"
+                host        : 'localhost'
+                port        : '38730'
+                path        : '/cube-solr'
+                method      : 'GET'
+                dataRoot    : "default"
 
             development:
-                host: 'localhost'
-                port: '38730'
-                path: '/cube-solr'
-                method: 'GET'
-                dataRoot: "default"
+                host        : 'localhost'
+                port        : '38730'
+                path        : '/cube-solr'
+                method      : 'GET'
+                dataRoot    : "default"
 
 
     #### Nodejs Paths
@@ -55,12 +55,12 @@ ServerSettings = ->
     # Default application settings
     Application:
 
-        description: "Dynamically generated entity"
-        itemType: [ "item", "items"]
-        separator: "/"
-        view: "list"
-        sort: "name:asc"
-        rows: 50
+        description : "Dynamically generated entity"
+        itemType    : [ "item", "items"]
+        separator   : "/"
+        view        : "list"
+        sort        : "name:asc"
+        rows        : 50
 
 
     # Default parameters of a field for solr's schema

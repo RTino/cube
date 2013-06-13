@@ -1,7 +1,7 @@
 script(type="text/template")#details-template
   | <%
   |   var model = m.parseSubfields();
-  |   var schema = window.Settings.Schema;
+  |   var schema = window.settings.Schema;
   |   var pic = window.App.getPicKey();
   |   var pictures = schema.getPictures().length
   |   var cls = pictures === 0 ? 'noPicture' : '';
@@ -134,14 +134,10 @@ script(type="text/template")#details-template
   |           <div class="mask">
   |               <span id="left"  class="scroll"></span>
   |               <span id="right" class="scroll"></span>
-  |               <div class="text-container" id="<%= field.id %>"><%
-  |                   if (field.multivalue) {
-  |                       addMultivalue(value, field.id, 'filter', link);
-  |                   } else { %>
-  |                       <a class="link" target="_blank" href="<%= value %>">
-  |                           <%= value %>
-  |                       </a><%
-  |                   } %>
+  |               <div class="text-container" id="<%= field.id %>">
+  |                  <a class="link" target="_blank" href="<%= value %>">
+  |                      <%= value %>
+  |                  </a>
   |               </div>
   |           </div>
   |           <input type="text" id="<%= field.id %>" class="hidden" <%
@@ -278,7 +274,7 @@ script(type="text/template")#details-template
   |     </ul>
   |     <div id="extensions"></div>
   | </div><%
-  | if (window.App.isEditable() || schema.getAdditionals().length) { %>
+  | if (window.App.isProfEditable()) { %>
   |     <div id="buttons">
   |         <a id="edit" class="btn">Edit</a>
   |         <a id="save" class="btn">Save</a><%

@@ -2,6 +2,9 @@
 # ExtensionController.coffee
 #
 # @author: Emanuel Lauria <emanuel.lauria@zalando.de>
+#
+# Note: This file is currently unmantained. Entity creation feature is on hold.
+#
 ###
 
 fs = require 'fs'
@@ -26,8 +29,8 @@ class ExtensionController
     module.exports = ExtensionController
 
     constructor: (app) ->
-        app.post    '/extension/:name',     (a...)  => @create  a...
-        app.delete  '/extension/:name',     (a...)  => @delete  a...
+        app.post    '/entity/:name',     (a...)  => @create  a...
+        app.delete  '/entity/:name',     (a...)  => @delete  a...
 
     create: (req, res) =>
         name = req.files.import.name.split('.')[0]
@@ -57,7 +60,7 @@ class ExtensionController
 
             generateSchema: (cb) =>
                 if entities.indexOf(name) isnt -1
-                    fs.readFile "./extensions/#{name}/schema.json", "utf8",
+                    fs.readFile "./entities/#{name}/schema.json", "utf8",
                         (err, s) ->
                             throw err if err
                             r.schema = s
@@ -107,7 +110,7 @@ class ExtensionController
 
     delete: (req, res) =>
         name = req.params.name
-        child = exec "rm -rf extensions/#{name} public/images/#{name}",
+        child = exec "rm -rf entities/#{name} public/images/#{name}",
             (err) =>
                 throw err if err
                 es = []
@@ -120,7 +123,7 @@ class ExtensionController
                         res.send 'Extension successfully removed'
 
     failedCreatingExtension: (name, err) =>
-        console.log 'Failed creating extension: ', name
+        console.log 'Failed creating entity: ', name
         @delete () ->
             throw err
 
@@ -129,7 +132,7 @@ class ExtensionController
         _.each ids, (id) =>
             return if id is 'id'
             schema.push @createSchemaField id, 'string'
-        path = "#{__dirname}/../extensions/#{name}/schema.json"
+        path = "#{__dirname}/../entities/#{name}/schema.json"
         @saveJsonToFile schema, path, () ->
             cb schema
 
@@ -138,11 +141,11 @@ class ExtensionController
         archivePath = "#{__dirname}/../public/images/#{name}/archive/"
         child = exec "mkdir -p #{archivePath}", (err) =>
             throw err if err
-        extPath = "#{__dirname}/../extensions/#{name}"
+        extPath = "#{__dirname}/../entities/#{name}"
         child = exec "mkdir -p #{extPath}", (err) =>
             throw err if err
             _.each [ 'code.coffee', 'style.styl', 'templates.jade' ], (file) =>
-                child = exec "touch extensions/#{name}/#{file}", (err) =>
+                child = exec "touch entities/#{name}/#{file}", (err) =>
                     failedCreatingExtension name, err if err
             @touchDBSettingsFile(name)
             @touchAppSettingsFile(name)
@@ -250,14 +253,14 @@ class ExtensionController
         return cb() if entities.indexOf(name) isnt -1
         db = _.extend {}, defaultDatabase
         db.core = name
-        @saveJsonToFile db, "extensions/#{name}/db.json", cb
+        @saveJsonToFile db, "entities/#{name}/db.json", cb
 
     touchAppSettingsFile: (name, cb) =>
         return cb() if entities.indexOf(name) isnt -1
         appSettings = _.extend {}, defaultAppSettings
         appSettings.entity = name
         appSettings.title = name
-        @saveJsonToFile appSettings, "extensions/#{name}/settings.json", cb
+        @saveJsonToFile appSettings, "entities/#{name}/settings.json", cb
 
     createSchemaField: (id, type) =>
         suffix = id.split('-')[1]
@@ -271,7 +274,7 @@ class ExtensionController
         field
 
     getFieldFromSchema: (name, id) =>
-        schema = require "#{__dirname}/../extensions/#{name}/schema.json"
+        schema = require "#{__dirname}/../entities/#{name}/schema.json"
         field = {}
         _.each schema, (o) =>
             if o.id is id

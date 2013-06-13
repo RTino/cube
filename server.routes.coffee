@@ -14,7 +14,7 @@ module.exports = (app, express, passport) ->
     async       = require "async"
 
 
-    # Server and default extension settings
+    # Server and default entity settings
     settings = require "#{__dirname}/server.settings.coffee"
 
     # List of available entities
@@ -137,6 +137,7 @@ module.exports = (app, express, passport) ->
 
         params =  entity: name, entities: entities
 
+        # Read all configuration files from filesystem
         async.parallel [
 
             (cb) =>
@@ -161,24 +162,25 @@ module.exports = (app, express, passport) ->
 
         ], () =>
 
+            # Render backbonejs app
             res.render 'app', params
 
 
     # Read a file and parse it as json, return a json object.
     getJsonFile = (file, entity, cb) =>
 
-        f = "#{__dirname}/extensions/#{entity}/#{file}"
+        f = "#{__dirname}/entities/#{entity}/#{file}"
 
         fs.readFile f, "utf8", (err, data) =>
             return cb({}) if err
             cb JSON.parse data
 
 
-    # Return templates from an extension
+    # Return templates from an entity
     getTemplates = (req, res, cb) ->
 
         entity = req.params.resource
-        file = "#{__dirname}/extensions/#{entity}/templates"
+        file = "#{__dirname}/entities/#{entity}/templates"
 
         res.render file, (err, html) =>
             throw err if err
@@ -192,9 +194,11 @@ module.exports = (app, express, passport) ->
 
         fs.readFile eFile, 'utf-8', (err, d) =>
             throw err if err
-            entities = JSON.parse d
-            es = []
 
+            es = []
+            entities = JSON.parse d
+
+            # Add each entitie's settings
             async.forEach entities,
 
                 (e, cb) ->

@@ -143,7 +143,7 @@ body
             &.active
                 background    facetActiveBg
 
-#search
+#header #search
   position          absolute
   left              200px
   top               0
@@ -406,6 +406,8 @@ span#columnsMenu
           background    tableItemHoverBg
         &.active
           border        1px solid thumbnailActiveBd
+        .view
+            height      188px
         .view .label
           word-break    break-word
           display       block
@@ -413,9 +415,12 @@ span#columnsMenu
           white-space   nowrap
           margin        10px 0
           overflow      hidden
+          position      absolute
+          bottom        0
+          max-width     150px
         .thumbnail
-          width               150px
-          height              150px
+          max-width               150px
+          max-height              150px
         .etiquettes
           position      absolute
           height        100%
@@ -688,10 +693,9 @@ span.miniEtq
       &.pic
         width               25px
         padding-right       10px
-        .miniPic
-          position        relative
-          width           25px
-          height          25px
+      .miniPic
+        position        relative
+        max-width       25px
 
       &:hover
           .hoverpic, .bigEtiquette, .etiquettes
@@ -699,8 +703,7 @@ span.miniEtq
       .hoverpic
         display         none
         position        absolute
-        width           200px
-        height          200px
+        max-width       200px
         top             tableRowHeight + 10px
         right           22px
         padding         10px
@@ -719,8 +722,8 @@ span.miniEtq
 
 #itemsContainer .miniPic
     float         left
-    width         35px
-    height        35px
+    max-width     35px
+    max-height    35px
 
 #print table tr td, #print table tr th
         display         table-cell
@@ -783,6 +786,7 @@ span.miniEtq
       top             0
       left            0
       -moz-transform  translate(-300px, 0pt) scale(15)
+      display         none
     .inputPicContainer
       position        absolute
       width           300px
@@ -919,6 +923,8 @@ span.miniEtq
       margin          5px
       &.additional
         margin-top    10px
+        .dropdownMask
+            left      -10px
         ul
           display     none
           margin-left 5px
@@ -959,7 +965,7 @@ span.miniEtq
           margin-left   100px
           max-height    400px
           min-height    16px
-          max-width     190px
+          max-width     184px
           margin-bottom 5px
           p
                 padding     0
@@ -996,14 +1002,14 @@ span.miniEtq
           overflow    hidden
           font-size   paneFontSize
           &.tuple
-            position    initial
+            position    static
             float       right
-            height      initial
+            height      auto
       .dropdownMask
           width       184px
-          left        -10px
           height      22px
       .scroll
+          display     none
           position    absolute
           width       13px
           height      16px

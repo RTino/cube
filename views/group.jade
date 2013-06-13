@@ -1,6 +1,6 @@
 script(type="text/template")#group-template
   | <%
-  |   var schema = window.Settings.Schema;
+  |   var schema = window.settings.Schema;
   |   var emailKey = '';
   |   var skypeKey = '';
   |   var emails = [];
@@ -17,6 +17,7 @@ script(type="text/template")#group-template
   |   function renderField(field, value) {
   |       rf = fieldText;
   |       if (field['type'] === 'tuple') { rf = fieldTuple; };
+  |       if (field['type'] === 'date') { rf = fieldDate; };
   |       rf(field, field['label']);
   |   };
   |   function fieldTuple(f) {

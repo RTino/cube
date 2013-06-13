@@ -52,7 +52,7 @@ class FacetManager
 
     # Returns all facet type fields on your schema
     getFacetsFromSchema: (name) =>
-        schema = require "../extensions/#{name}/schema.json"
+        schema = require "../entities/#{name}/schema.json"
         a = []
         _.each schema, (o) =>
             a.push o if o.type is 'facet'

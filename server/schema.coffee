@@ -17,7 +17,7 @@ class Schema
 
     # Initialize with schema from entity
     constructor: (@name) ->
-        @fields = require "../extensions/#{@name}/schema.json"
+        @fields = require "../entities/#{@name}/schema.json"
 
     # Get just one field from a field ID
     getFieldById: (id) =>

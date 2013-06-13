@@ -31,7 +31,7 @@ script(type="text/html")#item-template
 script(type="text/html")#item-table-template
   | <%
   |   var pic = window.App.getPicKey();
-  |   var schema = window.Settings.Schema.get();
+  |   var schema = window.settings.Schema.get();
   |   var etiquettes = window.App.getItemEtiquettes(m);
   |   var model = m.parseSubfields();
   |   var dimg = '/images/default-avatar.png';
@@ -56,6 +56,9 @@ script(type="text/html")#item-table-template
   |   function fieldDate(field, model) { %>
   |       <%= window.App.formatDate(model[field.id]) %><%
   |   };
+  |   function fieldNumber(field, model) { %>
+  |       <%= window.App.formatNumber(model[field.id]) %><%
+  |   };
   |   function fieldTuple(field, model) {
   |       addRowEtiquettes(etiquettes);
   |   };
@@ -63,6 +66,8 @@ script(type="text/html")#item-table-template
   |       rf = fieldText;
   |       if (field['type'] === 'facet')  { rf = fieldFacet;  };
   |       if (field['type'] === 'date')   { rf = fieldDate;   };
+  |       if (field['type'] === 'integer'){ rf = fieldNumber;   };
+  |       if (field['type'] === 'float')  { rf = fieldNumber;   };
   |       if (field['type'] === 'img')    { rf = fieldImg;    };
   |       if (field['type'] === 'tuple')  { rf = fieldTuple;  };
   |       rf(field, model);
@@ -114,7 +119,8 @@ script(type="text/html")#item-table-template
   |       </span><%
   |   };
   |   _.each(schema, function(f) { %>
-  |       <td class="<%= f.id %><% if (f.index) { %> visible<% }; %>"><%
+  |       <td class="<%= f.id %><% if (f.index) { %> visible<% }; %>"
+  |           title="<%= model[f.id] %>" data-type="<%= f.id %>"><%
   |           renderField(f, model); %>
   |       </td><%
   |   });

@@ -6,8 +6,8 @@ class @Facets extends Backbone.Collection
     model: window.Facet,
 
     # URL from QS
-    # As for the items collection, the facet collection needs to get the
-    # querystring parameters that will be used by solr.
+    # This collection needs to get the querystring parameters that will be 
+    # passed to solr.
     url: () =>
         window.App.commonURL()
 
@@ -24,21 +24,24 @@ class @Facets extends Backbone.Collection
     # cleaner json object.
     # 6. For undefined fields (null) add them as 'not set'
     parse: (res) =>
-        s = window.Settings.Schema.getSpecials()
+        s = window.settings.Schema.getSpecials()
         facetFields = []
 
         _.each res.facet_counts?.facet_fields, (fields, name) =>
             name = name.split('-')[0]
-            window.Settings.Schema.getField name, (f) =>
+            window.settings.Schema.getField name, (f) =>
                 facetFields.push @createFacet(name, f, fields)
         facetFields
 
+    # Create a facet category like 'team', 'group', 'role', etc. Composed of a
+    # label and normal and special fields. Normal fields go above a gray line,
+    # special fields below.
     createFacet: (facetName, field, fields) =>
 
         facetName = field.id.split('-')[0]
         facetLabel = field.label
 
-        sep = field.separator || window.Settings.separator
+        sep = field.separator || window.settings.separator
 
         normal = []
         special = []
@@ -49,9 +52,11 @@ class @Facets extends Backbone.Collection
             return special.push(field) if @isSpecial facetName, field, sep
             normal.push(field)
 
-        normal.sort()
-        special.sort()
+        normal = @sort field, normal
+        special = @sort field, special
 
+        # null values are not-set values, it has to show not-set values too
+        # and the amount of items who don't have this facet set.
         normal.push "null"
 
         root =
@@ -71,6 +76,8 @@ class @Facets extends Backbone.Collection
 
         root
 
+    # Create a facet field object with name, amount of items in it and
+    # all sub-facet fields. (deeper level nodes).
     createNode: (field, amounts, tree, sep) =>
         tokens = field.split sep
         name = tokens.pop()
@@ -82,9 +89,24 @@ class @Facets extends Backbone.Collection
             path: field
             subs: {}
 
+    # Sort facet fields based on a specific order (specified in entity's
+    # settings file) or alphabetically.
+    sort: (field, arr) =>
+        return arr.sort() unless field.order
+        order = field.order
+        sorted = []
+        _.each order, (field) ->
+            sorted.push field if arr.indexOf(field) isnt -1
+        _.each arr.sort(), (field) ->
+            sorted.push field if sorted.indexOf(field) is -1
+        sorted
+
+    # Determine if the facet field is listed in the special property array
+    # on the schema definition. If its special it will be rendered below a
+    # gray line on the facet pane.
     isSpecial: (name, field, sep) =>
         parent = field.split(sep)[0]
-        specials = window.Settings.Schema.getSpecials()
+        specials = window.settings.Schema.getSpecials()
         return no unless specials[name]
         return yes if specials[name].indexOf(parent) isnt -1
         return no

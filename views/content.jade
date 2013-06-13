@@ -49,7 +49,7 @@
 
   != js('libs/facetArray')
   != js('libs/schema')
-  != js('extensions/' + entity + '/code')
+  != js('entities/' + entity + '/code')
   != js('models/item')
   != js('models/facet')
   != js('collections/collection')
@@ -76,7 +76,7 @@
     |   if (sort.length == 3) {
     |       hid = sort.slice(0,2).join(':');
     |   };
-    |   var schema = window.Settings.Schema.get();
+    |   var schema = window.settings.Schema.get();
     |   function addHeaders() {
     |       _.each(schema, function(f) { %>
     |           <th id="<%= f.id %>"
