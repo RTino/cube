@@ -93,10 +93,12 @@ h4 {
 
 h5 {
   font-size: 20px;
+  font-weight: bold;
 }
 
 h6 {
   font-size: 22px;
+  font-weight: bold;
 }
 
 
@@ -485,6 +487,7 @@ span#logo {
   color: #222;
   text-shadow: 0px 2px 3px #ccc;
   font-size: 36px;
+  font-weight: normal;
 }
 
 #main_content_wrap {
