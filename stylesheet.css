@@ -480,12 +480,10 @@ span#logo {
   font-size: 100px;
   font-family: inherit;
   line-height: 100px;
-  text-shadow: 0px 2px 3px #999;
 }
 
 #header h6 {
   color: #222;
-  text-shadow: 0px 2px 3px #ccc;
   font-size: 36px;
   font-weight: normal;
 }
