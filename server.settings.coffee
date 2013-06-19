@@ -12,8 +12,29 @@ ServerSettings = ->
         defaultPort: 3000
 
     #### Authentication settings
+    # Available authentication mechanisms are basic and ldap.
+    # Basic authentication is Basic HTTP Authentication strategy that
+    # matches credentials against an array of plain text user entries.
+    # Add your users to the file .htpasswd. Example:
+    #
+    # Authentication:
+    #   strategy: 'basic'
+    #
+    # LDAP authentication is also Basic HTTP Authentication strategy but
+    # binds to an LDAP server to authorize the user. Exmaple:
+    #
+    # Authentication:
+    #   strategy: 'ldap'
+    #   options:
+    #            url             : 'ldaps://ldap.example.com:636'
+    #            adminDn         : 'uid=myadminusername,ou=users,o=example.com'
+    #            adminPassword   : 'mypassword'
+    #            searchBase      : 'ou=users,o=example.com'
+    #            searchFilter    : '(uid={{username}})'
+    #
+    # Avoid any authentication by setting strategy to 'none'
     Authentication:
-            strategy: 'none'                    # 'none', 'basic' or 'ldapauth'
+            strategy: 'none'                    # 'none', 'basic' or 'ldap'
 
 
     #### Default settings.
