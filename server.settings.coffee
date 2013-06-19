@@ -11,6 +11,10 @@ ServerSettings = ->
         # Port to run your nodejs service, i.e. 3000.
         defaultPort: 3000
 
+    #### Authentication settings
+    Authentication:
+            strategy: 'none'                    # 'none', 'basic' or 'ldapauth'
+
 
     #### Default settings.
     # Used when creating a new entity from the CSV importer.

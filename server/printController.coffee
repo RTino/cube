@@ -12,9 +12,9 @@ class PrintController
 
 
     # Print route
-    constructor: (app) ->
+    constructor: (app, auth) ->
 
-        app.get "/:entity/print", (a...) => @print a...
+        app.get "/:entity/print", auth, (a...) => @print a...
 
 
     # Render print view
