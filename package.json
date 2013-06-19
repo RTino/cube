@@ -18,6 +18,7 @@
         "express":"3.1.0",
         "passport": "0.1.16",
         "passport-http": "0.2.1",
+        "passport-ldapauth": "0.0.5",
         "bcrypt": "0.7.5",
         "jade":"0.28.2",
         "stylus":"0.32.1",

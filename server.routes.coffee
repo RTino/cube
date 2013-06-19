@@ -23,7 +23,6 @@ module.exports = (app, express, passport) ->
     # Default entity is the first entity defined in the entities array
     defaultEntity = entities[0]
 
-
     # Controllers
 
     # Serves any request about entities, like getting its collection
@@ -40,18 +39,18 @@ module.exports = (app, express, passport) ->
 
 
     # Create instances from controllers
-    new EntityController    app
-    new ItemController      app
-    new ExtensionController app
-    new PrintController     app
+    new EntityController    app, passport
+    new ItemController      app, passport
+    new ExtensionController app, passport
+    new PrintController     app, passport
 
-    #### Routes
 
     ensureAuth = (req, res, next) ->
         return next() if req.isAuthenticated()
-        console.log 'User not authenticated, redirecting to login form'
+        console.log 'User not authenticated, redirecting to login page'
         res.redirect '/login'
 
+    #### Routes
 
     # Root route
     app.get '/', ensureAuth, (a...) -> root a...
@@ -59,15 +58,21 @@ module.exports = (app, express, passport) ->
     app.get '/login', (req, res) ->
         res.render 'login'
 
+    app.get '/logout', (req, res) ->
+        req.logout()
+        res.redirect '/login'
+
+    # Response 'ok' for status (NAGIOS)
+    app.get '/status', (req, res) ->
+        res.send status: 'ok'
+
     # Entity route
     app.get '/:resource', ensureAuth, (a...) => resource a...
 
     # Authentication
-    app.post '/login', passport.authenticate('basic', {
-            session: true
-            failureRedirect: '/login'
-        }), (req, res) ->
-            res.redirect '/'
+    app.post '/login', passport.authenticate('ldapauth', failureRedirect: '/login'), (req, res) ->
+        console.log 'authenticated'
+        res.redirect '/'
 
 
     #### Functionality
@@ -99,15 +104,6 @@ module.exports = (app, express, passport) ->
 
         # Render the index page if e is a valid entity
         return renderApp(req, res) if isEntity r
-
-        # Response 'ok' for status (NAGIOS)
-        return res.send('ok') if r is 'status'
-
-        return res.render 'login' if r is 'login'
-
-        if r is 'logout'
-            req.logout()
-            return res.redirect '/login'
 
         # Return list of entities
         if r is 'entities' then return getEntities (e) ->

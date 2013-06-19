@@ -12,6 +12,17 @@ BasicStrategy   = passportHttp.BasicStrategy
 
 salt            = bcrypt.genSaltSync 10
 
+passportLdap    = require('passport-ldapauth')
+LdapStrategy    = passportLdap.Strategy
+
+ldapOPTS =
+    server:
+        url: 'ldap://'
+        adminDn: ''
+        adminPassword: ''
+        searchBase: ''
+        searchFilter: '(uid={{username}})'
+
 module.exports = (passport) ->
 
     findById = (id, cb) ->
@@ -26,16 +37,19 @@ module.exports = (passport) ->
             user = u if u.username is name
         cb null, user
 
+    ###
     passport.use new BasicStrategy {}, (uname, pword, cb) ->
         findByUsername uname, (err, user) ->
             return cb err if err
             return cb null, no unless user
             return cb null, no unless bcrypt.compareSync pword, user.password
             cb null, user
+    ###
+
+    passport.use new LdapStrategy ldapOPTS
 
     passport.serializeUser (user, cb) ->
-        cb null, user.id
+        cb null, user
 
-    passport.deserializeUser (id, cb) ->
-        findById id, (err, user) ->
-            cb null, user
+    passport.deserializeUser (obj, cb) ->
+        cb null, obj
