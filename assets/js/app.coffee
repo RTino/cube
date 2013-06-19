@@ -40,6 +40,7 @@ $ =>
             "click ul#facet>li>h4"          : "toggleFacetNode"
             "click span#print"              : "print"
             "click span#json"               : "toJson"
+            "click a#logout"                : "logOut"
             "click #entityTitle"            : "toggleEntitiesMenu"
             "click #columnsMenu"            : "toggleColumnsMenu"
             "click #columnOptions ul li"    : "toggleColumnVisibility"
@@ -1345,6 +1346,11 @@ $ =>
 
             window.open url, '_blank'
 
+
+        # Logs a user out by redirecting him to logout:logout@thisdomain
+        logOut: () =>
+            logoutUrl = "//logout:logout@#{window.location.host}"
+            window.location = logoutUrl
 
         # Hide facets container on the left
         disableFacets: () ->
