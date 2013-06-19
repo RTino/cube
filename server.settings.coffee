@@ -34,7 +34,7 @@ ServerSettings = ->
     #
     # Avoid any authentication by setting strategy to 'none'
     Authentication:
-            strategy: 'none'                    # 'none', 'basic' or 'ldap'
+            strategy: 'basic'                    # 'none', 'basic' or 'ldap'
 
 
     #### Default settings.
