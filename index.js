@@ -1,6 +1,5 @@
 $(function() {
 
-    //$('#example').css('height', $(window).height() - 100 + 'px');
     $('#example').css('height', $(example).width() * 9/16 -100)
 
     $('a#demo_banner').click(function() {
@@ -34,6 +33,27 @@ $(function() {
         var id = $e.attr('id');
         stopAnimation();
         jump(id);
+    });
+
+    $('#fullscreen').click(function() {
+        $iframe = $('#example');
+
+        if ($iframe.hasClass('fullscreen')) {
+            $iframe.removeClass('fullscreen');
+            $iframe.addClass('mwidth');
+            $('iframe').removeAttr('style');
+            $iframe.css('height', $iframe.width() * 9/16 -100)
+            return;
+        }
+        $iframe.removeAttr('style');
+        $iframe.removeClass('mwidth');
+        $iframe.addClass('fullscreen');
+        $('iframe').css('height', window.innerHeight - 40 )
+        /*
+        $('html, body').animate({
+             scrollTop: $("#example").offset().top - 50
+        }, 500);
+        */
     });
 
     /*
