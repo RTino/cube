@@ -269,7 +269,13 @@ section#technologies {
 }
 
 section#technologies #left {
+    float: left;
     width: 500px;
+}
+
+section#technologies #right {
+    width: 100%;
+    float: none;
 }
 
 section#technologies img {
@@ -297,17 +303,12 @@ section#technologies p {
     padding-top: 10px;
 }
 
-section#technologies #right {
-    width: 560px;
-}
-
-
 section#clone {
     background: #ccc;
 }
 
-section#clone #right img {
-    width: 200px;
+section#clone #right {
+    margin-bottom: 20px;
 }
 
 section#clone pre {
