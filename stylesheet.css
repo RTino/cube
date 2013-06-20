@@ -268,14 +268,8 @@ section#technologies {
     background: #eee;
 }
 
-section#technologies #left {
-    float: left;
-    width: 500px;
-}
-
 section#technologies #right {
-    width: 100%;
-    float: none;
+    width: 550px;
 }
 
 section#technologies img {
@@ -308,13 +302,12 @@ section#clone {
 }
 
 section#clone #right {
-    margin-bottom: 20px;
+    height: 100%;
 }
 
 section#clone pre {
     width: 550px;
-    margin: 0 auto;
-    margin-top: 60px;
+    margin: 10px auto;
 }
 
 section#ime {
@@ -411,8 +404,7 @@ Full-Width Styles
 .inner {
   position: relative;
   max-width: 1110px;
-  padding: 10px;
-  padding-top: 0;
+  padding: 10px 0;
   margin: 0 auto;
   clear: both;
 }
