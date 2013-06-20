@@ -241,12 +241,11 @@ section#title {
 }
 
 #left {
-    float: left;
-    width: 450px;
 }
 
 #right {
     float: right;
+    padding-left: 50px;
 }
 
 section#features {
@@ -265,40 +264,40 @@ section#features img {
     margin-top: 0;
 }
 
-section#solr {
+section#technologies {
     background: #eee;
 }
 
-section#solr #left {
-    width: auto;
+section#technologies #left {
+    width: 500px;
 }
 
-section#solr img {
+section#technologies img {
     margin: 0;
     margin-left: 40px;
     width: auto;
     float: left;
 }
 
-section#solr img:first-child {
-    margin-left: 0;
+section#technologies img#node {
+    margin: 0;
 }
 
-section#solr img#backbone {
+section#technologies img#backbone {
     width: 75px;
     margin-top: 10px;
 }
 
-section#solr img#solr {
+section#technologies img#solr {
     width: 200px;
     margin-top: -10px;
 }
 
-section#solr p {
+section#technologies p {
     padding-top: 10px;
 }
 
-section#solr #right {
+section#technologies #right {
     width: 560px;
 }
 
@@ -357,7 +356,7 @@ th {
  }
 
 
-th#solr {
+th#technologies {
   min-width: 110px;
 }
 
@@ -468,6 +467,7 @@ span#logo {
     margin-top: 50px;
     text-align: center;
     background: url('cube-transparent.png') no-repeat center 0;
+    max-width: 620px;
 }
 
 #header img {
@@ -484,7 +484,7 @@ span#logo {
 
 #header h6 {
   color: #222;
-  font-size: 36px;
+  font-size: 28px;
   font-weight: normal;
 }
 
