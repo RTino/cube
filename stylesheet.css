@@ -756,7 +756,7 @@ a#fork {
 Small Device Styles
 *******************************************************************************/
 
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 480px) {
   body {
     font-size:14px;
   }
@@ -802,10 +802,6 @@ Small Device Styles
     min-width: 320px;
     max-width: 480px;
     font-size: 18px;
-  }
-
-  ul#menu {
-      font-size: 42px;
   }
 
 }
