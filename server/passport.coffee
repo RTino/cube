@@ -5,8 +5,6 @@
 _               = require 'underscore'
 bcrypt          = require 'bcrypt'
 
-users           = require './../.htpasswd.json'
-
 passportHttp    = require('passport-http')
 BasicStrategy   = passportHttp.BasicStrategy
 
@@ -17,6 +15,8 @@ authSettings    = require('../server.settings.coffee').Authentication
 
 # Basic HTTP Authentication, clear text passwords matched agains users array.
 basicStrategy = new BasicStrategy {}, (uname, pword, cb) ->
+
+    users = require './../.htpasswd.json'
 
     findByUsername = (name, cb) ->
         user = null
