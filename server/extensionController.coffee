@@ -7,18 +7,18 @@
 #
 ###
 
-fs = require 'fs'
-_ = require 'underscore'
-mime = require 'mime-magic'
+fs      = require 'fs'
+_       = require 'underscore'
+mime    = require 'mime-magic'
 http    = require "http"
 async   = require "async"
 exec    = require("child_process").exec
 
-SolrManager = require './solrManager.coffee'
-ItemController = require './itemController.coffee'
+SolrManager     = require './solrManager.coffee'
+ItemController  = require './itemController.coffee'
 
-settings = require "#{__dirname}/../server.settings.coffee"
-entities = require "#{__dirname}/../entities.json"
+settings = require "../server.settings.coffee"
+entities = require "../entities.json"
 
 e = process.env.NODE_ENV
 defaultDatabase = settings.Default.Database.development

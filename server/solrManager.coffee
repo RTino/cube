@@ -30,8 +30,11 @@ class SolrManager
     # Create a Solr instance with propper database connection
     createClient: () =>
 
+        # Get nodejs process environment
+        env = global.process.env.NODE_ENV || 'development'
+
         # DB Settings for name entity
-        db = require "../entities/#{@name}/db.json"
+        db = require("../entities/#{@name}/db.json")[env]
 
         # Create client with settings
         @client = solr.createClient db.host, db.port, db.core, db.path
@@ -167,12 +170,6 @@ class SolrManager
         # A string 'null' as a value is a not set property. In other words,
         # filtering by 'null' returns all items without the property.
         op = "(*:*%20-#{field}:[*%20TO%20*])" if value is 'null'
-
-        # TODO Make this generic
-        if value is 'new'
-            d = new Date()
-            d.setDate d.getDate() - 31
-            op = "startDate-sr%3A[#{d.toISOString()}%20TO%20*]"
 
         options.push(op)
 
