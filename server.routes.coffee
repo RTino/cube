@@ -101,12 +101,6 @@ module.exports = (app, express) ->
         res.redirect "/#{defaultEntity}/"
 
 
-    # Redirect the client to the correct domain and entity for the team app.
-    redirectToDefaultHost = (req, res) ->
-
-        res.redirect "http://#{settings.Web.defaultHost}/#{defaultEntity}/"
-
-
     # Render main cube backbone app
     renderApp = (req, res) ->
 

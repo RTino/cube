@@ -5,14 +5,41 @@ ServerSettings = ->
     #### Web server settings
     Web:
 
-        # Default hostname of your project, please edit.
-        defaultHost: 'localhost'
-
         # Port to run your nodejs service, i.e. 3000.
         defaultPort: 3000
 
 
-    #### Default settings.
+    #### Nodejs Paths
+    Paths:
+
+        # Path to the Jade templates directory
+        viewsDir: __dirname + "/views/"
+
+        # Path to the public static folder
+        publicDir: __dirname + "/public/"
+
+        # Path to the coffee files
+        coffeeDir: __dirname + "/coffee/"
+
+
+    #### Entities json file
+    EntitiesFile: 'entities.json'
+
+
+    #### Entity creation defaults
+
+
+    # Default application settings
+    Application:
+
+        description : "Dynamically generated entity"
+        itemType    : [ "item", "items"]
+        separator   : "/"
+        view        : "list"
+        sort        : "name:asc"
+        rows        : 50
+
+
     # Used when creating a new entity from the CSV importer.
     # To configure your entitie's database, edit
     # entities/<entity name>/db.json
@@ -34,33 +61,6 @@ ServerSettings = ->
                 path        : '/cube-solr'
                 method      : 'GET'
                 dataRoot    : "default"
-
-
-    #### Nodejs Paths
-    Paths:
-
-        # Path to the Jade templates directory
-        viewsDir: __dirname + "/views/"
-
-        # Path to the public static folder
-        publicDir: __dirname + "/public/"
-
-        # Path to the coffee files
-        coffeeDir: __dirname + "/coffee/"
-
-
-    #### Entities json file
-    EntitiesFile: 'entities.json'
-
-    # Default application settings
-    Application:
-
-        description : "Dynamically generated entity"
-        itemType    : [ "item", "items"]
-        separator   : "/"
-        view        : "list"
-        sort        : "name:asc"
-        rows        : 50
 
 
     # Default parameters of a field for solr's schema
