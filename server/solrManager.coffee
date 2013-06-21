@@ -30,8 +30,11 @@ class SolrManager
     # Create a Solr instance with propper database connection
     createClient: () =>
 
+        # Get nodejs process environment
+        env = global.process.env.NODE_ENV || 'development'
+
         # DB Settings for name entity
-        db = require "../entities/#{@name}/db.json"
+        db = require("../entities/#{@name}/db.json")[env]
 
         # Create client with settings
         @client = solr.createClient db.host, db.port, db.core, db.path

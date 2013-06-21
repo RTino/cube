@@ -3,11 +3,18 @@
 ServerSettings = ->
 
     #### Web server settings
+    # Define web server settings on different environments like development,
+    # staging, production. Set the desired environment with NODE_ENV env var.
+    # Default port is 3000.
     Web:
 
-        # Port to run your nodejs service, i.e. 3000.
-        defaultPort: 3000
+        development:
 
+            port: 3000
+
+        production:
+
+            port: 3030
 
     #### Nodejs Paths
     Paths:

@@ -36,5 +36,5 @@ require("./server.config.coffee")(app, express)
 # Main routes file for express
 require("./server.routes.coffee")(app, express)
 
-# Listen usually on port 3000
-app.listen settings.Web.defaultPort
+# Listen by default on port 3000. Change on server.settings.coffee.
+app.listen settings.Web[global.process.env.NODE_ENV]?.port || 3000
