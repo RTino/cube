@@ -1367,7 +1367,7 @@ $ =>
 
             _.each entities, (e) ->
 
-                return if e is window.settings.entity
+                return if e.entity is window.settings.entity
 
                 o = "<li id='#{e}'><span>#{e}</span></li>"
                 $("#entities ul", "#header").append o

@@ -36,7 +36,6 @@ $ ->
     # File upload plugin
     $('input#import').fileupload dataType: 'json', done: ($e, data) ->
 
-
     $('input#import').bind 'fileuploaddone', (e, data) ->
         document.location.reload yes
 

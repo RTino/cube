@@ -117,10 +117,15 @@ module.exports = (app, express, passport) ->
 
         name = req.params.entity
 
-        params =  entity: name, entities: entities
+        params =  entity: name, entities: []
 
         # Read all configuration files from filesystem
         async.parallel [
+
+            (cb) =>
+                getEntities (es) =>
+                    params.entities = es
+                    cb()
 
             (cb) =>
                 getJsonFile 'settings.json', name, (settings) =>
