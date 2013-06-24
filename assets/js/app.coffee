@@ -1367,9 +1367,9 @@ $ =>
 
             _.each entities, (e) ->
 
-                return if e.entity is window.settings.entity
+                return if e.entity is window.settings.entity or e.hidden
 
-                o = "<li id='#{e}'><span>#{e}</span></li>"
+                o = "<li id='#{e.entity}'><span>#{e.title}</span></li>"
                 $("#entities ul", "#header").append o
 
             # Hide entities menu if only one entity available
