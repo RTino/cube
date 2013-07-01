@@ -92,17 +92,11 @@ script(type="text/template")#group-template
   | <div id="groupActions">
   |     <a class="btn" id="csv">CSV</a><%
   |     if (emails.length) { %>
-  |         <a class="btn" id="mailto" href="mailto:<%= emails.toString() %>">
-  |             Mail
-  |         </a>
-  |         <a class="btn" id="calendar" href="<%= calendar %>"
-  |             target="_blank">Cal</a><%
+  |         <a class="btn" id="mailto">Mail</a>
+  |         <a class="btn" id="calendar" target="_blank">Cal</a><%
   |     };
   |     if (skypes.length) { %>
-  |         <a class="btn" id="skype"
-  |             href="skype:<%= skypes.join(';') %>?chat">
-  |             Skype
-  |         </a><%
+  |         <a class="btn" id="skype">Skype</a><%
   |     };
   |     if (window.App.isAdmin() && schema.getMultiedits().length) { %>
   |         <a class="btn" id="edit">Edit</a><%

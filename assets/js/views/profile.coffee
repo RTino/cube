@@ -795,6 +795,9 @@ $ ->
             "click #groupActions a#edit.btn"          : "multipleEdit"
             "click #multipleEditActions a#cancel.btn" : "closeEdit"
             "click #multipleEditActions a#save.btn"   : "save"
+            "click #groupActions a#calendar.btn"      : "calendar"
+            "click #groupActions a#mailto.btn"        : "mail"
+            "click #groupActions a#skype.btn"         : "skype"
             "keypress"                                : "save"
             "keyup .tupleField:last-child"            : "addTupleField"
             "focus .tupleField"                       : "removeEmptyTupleFields"
@@ -807,7 +810,7 @@ $ ->
         # the calendar function
         render: () =>
 
-            @$el.html @template m: @app.itemSelection, calendar: @gCalendarURL()
+            @$el.html @template m: @app.itemSelection
             @
 
 
@@ -917,14 +920,55 @@ $ ->
 
             window.open url + qs.join '&'
 
+        # Open a mailto: link to a list of emails from the selected items
+        mail: () =>
+
+            window.location.href = "mailto:#{@getEmails()}"
+
+
+        # Get Email addresses from current item selection
+        getEmails: () =>
+
+            eid = settings.Schema.getEmails()[0]['id']
+
+            return [] unless eid
+
+            emails = []
+            @app.itemSelection.each (m) =>
+                emails.push m.get eid
+            emails
+
+
+        # Open a skype conversation with all selected members
+        skype: () =>
+
+            window.location.href = "skype:#{@getSkypes()}"
+
+
+        # Get a list of available skype names from selected members
+        getSkypes: () =>
+
+            eid = settings.Schema.getSkypes()[0]['id']
+
+            return [] unless eid
+
+            skypes = []
+            @app.itemSelection.each (m) =>
+                skypes.push m.get eid
+            skypes.join ';'
+
+
+        # Open a new window with google calendar form
+        calendar: () =>
+
+            window.open @gCalendarURL()
+
 
         # Forms the URL for the Calendar button.
         # ';' concatenated list of emails from selected items
         gCalendarURL: () =>
 
-            emails = []
-            @app.itemSelection.each (m) =>
-                emails.push m.get 'email'
+            emails = @getEmails()
 
             now = new Date()
             year = now.getFullYear()
