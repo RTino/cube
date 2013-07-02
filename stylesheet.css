@@ -826,8 +826,12 @@ Small Device Styles
       padding-left: 0;
   }
 
+  ul#menu li {
+    padding: 0 10px;
+  }
+
   ul#menu li a {
-    font-size: 18px;
+    font-size: 16px;
   }
 
   h1 {
