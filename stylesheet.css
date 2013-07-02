@@ -776,12 +776,15 @@ Small Device Styles
 
   body {
     font-size:14px;
-    color: blue;
   }
 
   .inner {
     min-width: 320px;
     max-width: 480px;
+  }
+
+  #example {
+      display: none;
   }
 
   h1 {
