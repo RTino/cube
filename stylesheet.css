@@ -7,8 +7,6 @@ by Jason Costello, @jsncostello
 MeyerWeb Reset
 *******************************************************************************/
 
-html { -webkit-text-size-adjust:none; }
-
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -263,7 +261,8 @@ section#features .features {
 section#features img {
     border: 1px solid #ccc;
     padding: 10px;
-    width: 550px;
+    max-width: 550px;
+    width: 100%;
     margin-top: 0;
 }
 
@@ -516,6 +515,10 @@ span#byzalando {
 
 .mwidth {
   max-width: 1200px;
+}
+
+#features_title {
+    display: none;
 }
 
 #example #fullscreen {
@@ -801,8 +804,21 @@ Small Device Styles
     top: auto;
   }
 
-  section#ime { 
-    display: none;
+  #features_title {
+    display: block;
+  }
+
+  .features #right {
+    float: none;
+    padding-left: 0;
+  }
+
+  .features #right img {
+    max-width: 380px
+  }
+
+  ul#menu li a {
+    font-size: 20px;
   }
 
   h1 {
