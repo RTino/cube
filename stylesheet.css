@@ -817,6 +817,15 @@ Small Device Styles
     max-width: 380px
   }
 
+  section#ime h3 {
+      font-weight: bold;
+  }
+
+  section#technologies #right {
+      width: auto;
+      padding-left: 0;
+  }
+
   ul#menu li a {
     font-size: 20px;
   }
@@ -847,7 +856,7 @@ Small Device Styles
 
   code, pre {
     min-width: 320px;
-    max-width: 480px;
+    max-width: 380px;
     font-size: 18px;
   }
 
