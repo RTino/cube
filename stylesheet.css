@@ -784,6 +784,7 @@ Small Device Styles
   .inner {
     min-width: 320px;
     max-width: 480px;
+    padding: 20px;
   }
 
   a#fork {
