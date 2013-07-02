@@ -789,13 +789,17 @@ Small Device Styles
 
   #example {
     text-align: center;
-    height: 100px;
   }
 
   iframe, #fullscreen {
     display: none;
   }
 
+  #demo_banner {
+    position: static;
+    right: auto;
+    top: auto;
+  }
 
   section#ime { 
     display: none;
