@@ -823,6 +823,7 @@ Small Device Styles
 
   section#ime ul li {
       padding-left: 0;
+      width: auto;
   }
 
   section#technologies #right {
