@@ -783,8 +783,22 @@ Small Device Styles
     max-width: 480px;
   }
 
+  a#fork {
+    display: none;
+  }
+
   #example {
-      display: none;
+    text-align: center;
+    height: 100px;
+  }
+
+  iframe, #fullscreen {
+    display: none;
+  }
+
+
+  section#ime { 
+    display: none;
   }
 
   h1 {
