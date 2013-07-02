@@ -747,11 +747,12 @@ img {
 section#ime ul {
     list-style: none;
     overflow: hidden;
+    text-align: center;
 }
 
 section#ime ul li {
-    float: left;
-    width: 300px;
+    display: inline-block;
+    width: 290px;
     text-align: center;
 }
 
