@@ -821,6 +821,10 @@ Small Device Styles
       font-weight: bold;
   }
 
+  section#ime ul li {
+      padding-left: 0;
+  }
+
   section#technologies #right {
       width: auto;
       padding-left: 0;
