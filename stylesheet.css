@@ -772,23 +772,16 @@ a#fork {
 Small Device Styles
 *******************************************************************************/
 
-@media screen and (max-width: 480px) {
+@media only screen and (max-width: 480px), only screen and (max-device-width: 480px) {
 
   body {
     font-size:14px;
-  }
-
-  #downloads {
-    display: none;
+    color: blue;
   }
 
   .inner {
     min-width: 320px;
     max-width: 480px;
-  }
-
-  #project_title {
-  font-size: 32px;
   }
 
   h1 {
