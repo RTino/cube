@@ -423,35 +423,13 @@ span#logo {
 }
 
 #demo_banner {
-  padding: 60px 35px 10px 10px;
+  padding: 5px 20px;
   color: #fff;
-  background: red;
-  font-weight: 700;
-  box-shadow: 0 3px 10px rgba(0,0,0,.8);
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
+  background: dodgerblue;
+  font-weight: bold;
   position: absolute;
-  top: -50px;
-  right: 0;
-  cursor: pointer;
-  z-index: 2;
-}
-
-#demo_banner a {
-  position: relative;
-}
-
-#demo_banner span#arrow {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    right: 0;
-    margin-right: 10px;
-    background: url('arrows.png') no-repeat -25px -18px;
-}
-
-#demo_banner.open span#arrow {
-    background-position: -25px 4px;
+  right: 24px;
+  top: 0;
 }
 
 #header {
@@ -519,6 +497,7 @@ span#byzalando {
   padding-top: 0;
   height: 100%;
   margin: 0 auto;
+  position: relative;
 }
 
 #example.fullscreen {
@@ -558,10 +537,7 @@ span#byzalando {
     background: white;
     position: relative;
     border: 3px solid dodgerblue;
-}
-
-#example.fullscreen iframe {
-    margin-top: 20px;
+    margin-top: 38px;
 }
 
 .info {
