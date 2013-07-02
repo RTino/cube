@@ -864,7 +864,7 @@ Small Device Styles
   }
 
   code, pre {
-    width: 100%;
+    width: auto;
     font-size: 18px;
   }
 
