@@ -871,8 +871,11 @@ Small Device Styles
     font-size: 12px;
   }
 
+  section#clone pre {
+      display: none;
+  }
+
   code, pre {
-    width: 300px;
     overflow: hidden;
     font-size: 18px;
   }
