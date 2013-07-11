@@ -1,8 +1,9 @@
 *.un~
+builtAssets
+gh-pages
 node_modules
 !node_modules/solr-client
+newrelic.js
 public/images
 solr/target
-builtAssets
-newrelic.js
 solr/src/main/webapp/WEB-INF/solr/conf/cube/data/index/
