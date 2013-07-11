@@ -1,245 +1,298 @@
 <!DOCTYPE html>
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="description" content="Cube App, Get your data organized and the right tools to get the most out of it. NodeJS + BackboneJS app ">
     <meta name="keywords" content="Data managemet, CubeApp, Cube App, Zalando, WebApp, Nodejs, Node, Backbone, Backbonejs, Solr, CRUD, data management tool">
     <meta name="author" content="Emanuel Lauria Izundegui">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-
+    <title>Cube – Get the most out of your data</title>
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheet.css">
     <link rel="canonical" href="http://cubeapp.io">
-    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" href="favicon.ico">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="template/templatescripts.js"></script>
+</head>
 
-    <title>Cube – Get the most out of your data</title>
+<body>
+    <div id="wrapper">
+        <div id="menu-wrapper"></div>
 
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        <div id="page">
 
-      ga('create', 'UA-40533395-3', 'cubeapp.io');
-      ga('send', 'pageview');
+            <section id="documentation" class="inner">
+                <h3>Documentation</h3>
 
-    </script>
-  </head>
+                <p>The Cube is composed of a NodeJs backend, a Solr database and a BackboneJs frontend. If you're
+                    familiar with
+                    these technologies it shouldn't be much of a hassle to get around this app; For the developer in
+                    you, annotated
+                    source code documentation generated with <a href="http://jashkenas.github.io/docco/">docco</a> can
+                    be found
+                    <a href="docs/app.html">here</a>.</p>
+                <a name="schema"></a>
+                <h6>Schema reference</h6>
 
-  <body>
+                <p>One of the main tasks when creating your own entity is writing a Schema. A Cube Schema is a json
+                    array of objects
+                    that describes the structure of your data collection. You can take a look at an
+                    <a href="docs/schema.html">example
+                        schema</a> which makes use of almost all possible properties. Setting up yours is a matter of
+                    listing the
+                    fields you want your items to have with their IDs, Labels and a custom set of properties like field
+                    type (img,
+                    email, facet, etc).</p>
+                <h5>Available Properties</h5>
 
-    <!-- MAIN CONTENT -->
+                <table>
+                    <thead>
+                        <th>key</th>
+                        <th class="optional">type</th>
+                        <th class="optional">default</th>
+                        <th>description</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>id</td>
+                            <td class="optional">String</td>
+                            <td class="optional"></td>
+                            <td>Each field must have a unique ID. This field is required for Solr, but not for the Cube.
+                                If defined in
+                                the Schema, it will become visible in your Cube, otherwise it will only be used by the
+                                database.
+                            </td>
+                        </tr>
 
-    <div id="main_content_wrap" class="outer">
-        <div id="menu_wrap" class="outer">
-        <ul id="menu" class="inner">
-            <li><a href="index.html">home<a/></li>
-            <li><a href="install.html">install</a></li>
-            <li><a href="tutorial.html">tutorial</a></li>
-            <li class="active"><a href="docs.html">docs</a></li>
-        </ul>
+                        <tr>
+                            <td>label</td>
+                            <td class="optional">String</td>
+                            <td class="optional"></td>
+                            <td>IDs are not necessarily pretty or even human readable. A label is a must. Alphanumeric
+                                characters and
+                                spaces.
+                                Value type
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>type</td>
+                            <td class="optional">String</td>
+                            <td class="optional">String</td>
+                            <td>Specifies which type of data will the field contain. It tells the cube how to store this
+                                value and also
+                                how to display it. Default (no type property specified) is String. For a list of types,
+                                consult the
+                                types table bellow.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>mandatory</td>
+                            <td class="optional">Boolean</td>
+                            <td class="optional">False</td>
+                            <td>Marks field to be validated and required by the database. Items will fail to be
+                                added/edited if a
+                                mandatory field is not defined and properly formatted.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Search</td>
+                            <td class="optional">Boolean</td>
+                            <td class="optional">False</td>
+                            <td>Add field to the list of fields to match search strings to.</td>
+                        </tr>
+                        <tr>
+                            <td>index</td>
+                            <td class="optional">Boolean</td>
+                            <td class="optional">True</td>
+                            <td>Show field in table view as a column. False values will hide the column field from the
+                                table.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>thumbnail</td>
+                            <td class="optional">Boolean</td>
+                            <td class="optional">False</td>
+                            <td>Use field as footer for images on thumbnail mode</td>
+                        </tr>
+                        <tr>
+                            <td>hidden</td>
+                            <td class="optional">Boolean</td>
+                            <td class="optional">False</td>
+                            <td>Hide field from profile (detailed) view</td>
+                        </tr>
+                        <tr>
+                            <td>additional</td>
+                            <td class="optional">Boolean</td>
+                            <td class="optional">False</td>
+                            <td>Show field inside the "Additional Information" section of the profile view</td>
+                        </tr>
+
+                        <tr>
+                            <td>multiedit</td>
+                            <td class="optional">Boolean</td>
+                            <td class="optional">False</td>
+                            <td>Allow multiple edition of this field (bulk operation). True adds the field to the
+                                multiple edition form
+                                on the Group View
+                            </td>
+                        </tr>
+                    <tbody>
+                </table>
+
+                <h5>Available Field Types</h5>
+
+                <table>
+                    <thead>
+                        <th>type</th>
+                        <th>description</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>string</td>
+                            <td>This type is by default. If a field has no 'type' property, then it is a string field.
+                                Allow you to
+                                store simple strings.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>integer</td>
+                            <td>Store integer numbers</td>
+                        </tr>
+                        <tr>
+                            <td>float</td>
+                            <td>Store float numbers</td>
+                        </tr>
+                        <tr>
+                            <td>date</td>
+                            <td>Stores a date in ISO format. A datepicker is attached to its input field to help setting
+                                its value.
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>facet</td>
+                            <td>Stored as an array of strings, this field is used as a facet. It will show up on the
+                                facet index and
+                                allow you to use it as a filter. Counts for all its possible values will be also
+                                displayed. This is
+                                where the solr magic comes in.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>tuple</td>
+                            <td>Relates a facet field with another facet field. i.e. team members have different roles
+                                for each of their
+                                teams. By making a tuple field 'team:role', we get filters for team, role, and a one to
+                                one correlation
+                                of them.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>img</td>
+                            <td>Field stores a URL that points to an image. If its the only img field in your schema, it
+                                will render as
+                                a big profile picture on the profile view and allow users to upload images from the
+                                browser. A minified
+                                version of it will also be displayed on the table.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>email</td>
+                            <td>Contains one email address. Form validation for email will be applied, and it will be
+                                rendered as a
+                                clickable mailto: link.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>skype</td>
+                            <td>Containes one skype username. It will be rendered as a clickable skype chat link.</td>
+                        </tr>
+                        <tr>
+                            <td>multiline</td>
+                            <td>Containes a long string. Rendered as a text-area instead of as a single line text
+                                field
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>dropdown</td>
+                            <td>Containes a definite set of options to select from. Render as a select element, it
+                                allows you to define
+                                options with the 'options' property
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                <h5>Available properties for facet fields</h5>
+
+                <table>
+                    <thead>
+                        <th>key</th>
+                        <th>type</th>
+                        <th>description</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>specials</td>
+                            <td>Array</td>
+                            <td>Each facet is splitted in two areas, separated by a gray line. Define this property with
+                                an array of
+                                strings and each facet field that matches will be displayed below the line.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>classifier</td>
+                            <td>Array</td>
+                            <td>Defines this field as the category to sort items on thumbnail view. The order of this
+                                array will
+                                determine the order of the sections on that view.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>order</td>
+                            <td>Array</td>
+                            <td>Define the order of the facet fields. If not specified, fields will be sorted
+                                alphabetically.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>collapse</td>
+                            <td>Boolean</td>
+                            <td>Define wich facets should show collapsed initially (folded) on the facet index. Once you
+                                click on them,
+                                the state is stored in localStorage, overriding this setting
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+
+                <h5>Available properties for dropdown fields</h5>
+
+                <table>
+                    <thead>
+                        <th>key</th>
+                        <th>type</th>
+                        <th>description</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>options</td>
+                            <td>Array</td>
+                            <td>Defined as an array of strings for the availablo options in the dropdown menu.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </section>
+        </div>
+
+        <div id="footer-wrapper"></div>
     </div>
-
-    <section id="documentation" class="inner">
-        <h3>Documentation</h3>
-        <p>The Cube is composed of a NodeJs backend, a Solr database and a BackboneJs frontend. If you're familiar with these technologies it shouldn't be much of a hassle to get around this app; For the developer in you, annotated source code documentation generated with <a href="http://jashkenas.github.io/docco/">docco</a> can be found <a href="docs/app.html">here</a>.</p>
-        <a name="schema"></a>
-        <h6>Schema reference</h6>
-        <p>One of the main tasks when creating your own entity is writing a Schema. A Cube Schema is a json array of objects that describes the structure of your data collection. You can take a look at an <a href="docs/schema.html">example schema</a> which makes use of almost all possible properties. Setting up yours is a matter of listing the fields you want your items to have with their IDs, Labels and a custom set of properties like field type (img, email, facet, etc).</p>
-        <h5>Available Properties</h5>
-
-        <table>
-            <thead>
-                <th>key</th>
-                <th class="optional">type</th>
-                <th class="optional">default</th>
-                <th>description</th>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>id</td>
-                    <td class="optional">String</td>
-                    <td class="optional"></td>
-                    <td>Each field must have a unique ID. This field is required for Solr, but not for the Cube. If defined in the Schema, it will become visible in your Cube, otherwise it will only be used by the database.</td>
-                </tr>
-
-                <tr>
-                    <td>label</td>
-                    <td class="optional">String</td>
-                    <td class="optional"></td>
-                    <td>IDs are not necessarily pretty or even human readable. A label is a must. Alphanumeric characters and spaces.
-Value type</td>
-                </tr>
-                <tr>
-                    <td>type</td>
-                    <td class="optional">String</td>
-                    <td class="optional">String</td>
-                    <td>Specifies which type of data will the field contain. It tells the cube how to store this value and also how to display it. Default (no type property specified) is String. For a list of types, consult the types table bellow.</td>
-                </tr>
-
-                <tr>
-                    <td>mandatory</td>
-                    <td class="optional">Boolean</td>
-                    <td class="optional">False</td>
-                    <td>Marks field to be validated and required by the database. Items will fail to be added/edited if a mandatory field is not defined and properly formatted.</td>
-                </tr>
-                <tr>
-                    <td>Search</td>
-                    <td class="optional">Boolean</td>
-                    <td class="optional">False</td>
-                    <td>Add field to the list of fields to match search strings to.</td>
-                </tr>
-                <tr>
-                    <td>index</td>
-                    <td class="optional">Boolean</td>
-                    <td class="optional">True</td>
-                    <td>Show field in table view as a column. False values will hide the column field from the table.</td>
-                </tr>
-
-                <tr>
-                    <td>thumbnail</td>
-                    <td class="optional">Boolean</td>
-                    <td class="optional">False</td>
-                    <td>Use field as footer for images on thumbnail mode</td>
-                </tr>
-                <tr>
-                    <td>hidden</td>
-                    <td class="optional">Boolean</td>
-                    <td class="optional">False</td>
-                    <td>Hide field from profile (detailed) view</td>
-                </tr>
-                <tr>
-                    <td>additional</td>
-                    <td class="optional">Boolean</td>
-                    <td class="optional">False</td>
-                    <td>Show field inside the "Additional Information" section of the profile view</td>
-                </tr>
-
-                <tr>
-                    <td>multiedit</td>
-                    <td class="optional">Boolean</td>
-                    <td class="optional">False</td>
-                    <td>Allow multiple edition of this field (bulk operation). True adds the field to the multiple edition form on the Group View</td>
-                </tr>
-                <tbody>
-        </table>
-
-        <h5>Available Field Types</h5>
-
-        <table>
-            <thead>
-                <th>type</th>
-                <th>description</th>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>string</td>
-                    <td>This type is by default. If a field has no 'type' property, then it is a string field. Allow you to store simple strings.</td>
-                </tr>
-                <tr>
-                    <td>integer</td>
-                    <td>Store integer numbers</td>
-                </tr>
-                <tr>
-                    <td>float</td>
-                    <td>Store float numbers</td>
-                </tr>
-                <tr>
-                    <td>date</td>
-                    <td>Stores a date in ISO format. A datepicker is attached to its input field to help setting its value.</td>
-                </tr>
-
-                <tr>
-                    <td>facet</td>
-                    <td>Stored as an array of strings, this field is used as a facet. It will show up on the facet index and allow you to use it as a filter. Counts for all its possible values will be also displayed. This is where the solr magic comes in.</td>
-                </tr>
-                <tr>
-                    <td>tuple</td>
-                    <td>Relates a facet field with another facet field. i.e. team members have different roles for each of their teams. By making a tuple field 'team:role', we get filters for team, role, and a one to one correlation of them.</td>
-                </tr>
-                <tr>
-                    <td>img</td>
-                    <td>Field stores a URL that points to an image. If its the only img field in your schema, it will render as a big profile picture on the profile view and allow users to upload images from the browser. A minified version of it will also be displayed on the table.</td>
-                </tr>
-                <tr>
-                    <td>email</td>
-                    <td>Contains one email address. Form validation for email will be applied, and it will be rendered as a clickable mailto: link.</td>
-                </tr>
-                <tr>
-                    <td>skype</td>
-                    <td>Containes one skype username. It will be rendered as a clickable skype chat link.</td>
-                </tr>
-                <tr>
-                    <td>multiline</td>
-                    <td>Containes a long string. Rendered as a text-area instead of as a single line text field</td>
-                </tr>
-                <tr>
-                    <td>dropdown</td>
-                    <td>Containes a definite set of options to select from. Render as a select element, it allows you to define options with the 'options' property</td>
-                </tr>
-
-            </tbody>
-        </table>
-
-        <h5>Available properties for facet fields</h5>
-
-        <table>
-            <thead>
-                <th>key</th>
-                <th>type</th>
-                <th>description</th>
-            </thead>
-            <tbody>
-            <tr>
-                <td>specials</td>
-                <td>Array</td>
-                <td>Each facet is splitted in two areas, separated by a gray line. Define this property with an array of strings and each facet field that matches will be displayed below the line.</td>
-            </tr>
-            <tr>
-                <td>classifier</td>
-                <td>Array</td>
-                <td>Defines this field as the category to sort items on thumbnail view. The order of this array will determine the order of the sections on that view.</td>
-            </tr>
-            <tr>
-                <td>order</td>
-                <td>Array</td>
-                <td>Define the order of the facet fields. If not specified, fields will be sorted alphabetically.</td>
-            </tr>
-            <tr>
-                <td>collapse</td>
-                <td>Boolean</td>
-                <td>Define wich facets should show collapsed initially (folded) on the facet index. Once you click on them, the state is stored in localStorage, overriding this setting</td>
-            </tr>
-
-            </tbody>
-        </table>
-
-
-        <h5>Available properties for dropdown fields</h5>
-
-        <table>
-            <thead>
-                <th>key</th>
-                <th>type</th>
-                <th>description</th>
-            </thead>
-            <tbody>
-            <tr>
-                <td>options</td>
-                <td>Array</td>
-                <td>Defined as an array of strings for the availablo options in the dropdown menu.</td>
-            </tr>
-            </tbody>
-        </table>
-
-        </section>
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-      <a href="http://www.zalando.de"><img src="zalando_logo_footer.png"></a>
-      <p>Cube is maintained by</p>
-      </footer>
-    </div>
-
-    <script src="jquery-1.9.1.min.js"></script>
-    <script src="index.js"></script>
-</body></html>
+</body>
+</html>
