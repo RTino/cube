@@ -782,10 +782,6 @@ Small Device Styles
     font-size: 18px;
   }
 
-  .inner {
-    padding: 20px;
-  }
-
   a#fork {
     display: none;
   }
@@ -816,6 +812,10 @@ Small Device Styles
 
   .features #right img {
     max-width: 380px
+  }
+
+  section {
+      padding: 0 10px;
   }
 
   section#ime h3 {
@@ -885,6 +885,10 @@ Small Device Styles
     overflow: hidden;
     overflow-x: auto;
     font-size: 14px;
+  }
+
+  .optional {
+    display: none;
   }
 
 }

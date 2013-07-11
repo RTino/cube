@@ -50,74 +50,74 @@
         <table>
             <thead>
                 <th>key</th>
-                <th>type</th>
-                <th>default</th>
+                <th class="optional">type</th>
+                <th class="optional">default</th>
                 <th>description</th>
             </thead>
             <tbody>
                 <tr>
                     <td>id</td>
-                    <td>String</td>
-                    <td></td>
+                    <td class="optional">String</td>
+                    <td class="optional"></td>
                     <td>Each field must have a unique ID. This field is required for Solr, but not for the Cube. If defined in the Schema, it will become visible in your Cube, otherwise it will only be used by the database.</td>
                 </tr>
 
                 <tr>
                     <td>label</td>
-                    <td>String</td>
-                    <td></td>
+                    <td class="optional">String</td>
+                    <td class="optional"></td>
                     <td>IDs are not necessarily pretty or even human readable. A label is a must. Alphanumeric characters and spaces.
 Value type</td>
                 </tr>
                 <tr>
                     <td>type</td>
-                    <td>String</td>
-                    <td>String</td>
+                    <td class="optional">String</td>
+                    <td class="optional">String</td>
                     <td>Specifies which type of data will the field contain. It tells the cube how to store this value and also how to display it. Default (no type property specified) is String. For a list of types, consult the types table bellow.</td>
                 </tr>
 
                 <tr>
                     <td>mandatory</td>
-                    <td>Boolean</td>
-                    <td>False</td>
+                    <td class="optional">Boolean</td>
+                    <td class="optional">False</td>
                     <td>Marks field to be validated and required by the database. Items will fail to be added/edited if a mandatory field is not defined and properly formatted.</td>
                 </tr>
                 <tr>
                     <td>Search</td>
-                    <td>Boolean</td>
-                    <td>False</td>
+                    <td class="optional">Boolean</td>
+                    <td class="optional">False</td>
                     <td>Add field to the list of fields to match search strings to.</td>
                 </tr>
                 <tr>
                     <td>index</td>
-                    <td>Boolean</td>
-                    <td>True</td>
+                    <td class="optional">Boolean</td>
+                    <td class="optional">True</td>
                     <td>Show field in table view as a column. False values will hide the column field from the table.</td>
                 </tr>
 
                 <tr>
                     <td>thumbnail</td>
-                    <td>Boolean</td>
-                    <td>False</td>
+                    <td class="optional">Boolean</td>
+                    <td class="optional">False</td>
                     <td>Use field as footer for images on thumbnail mode</td>
                 </tr>
                 <tr>
                     <td>hidden</td>
-                    <td>Boolean</td>
-                    <td>False</td>
+                    <td class="optional">Boolean</td>
+                    <td class="optional">False</td>
                     <td>Hide field from profile (detailed) view</td>
                 </tr>
                 <tr>
                     <td>additional</td>
-                    <td>Boolean</td>
-                    <td>False</td>
+                    <td class="optional">Boolean</td>
+                    <td class="optional">False</td>
                     <td>Show field inside the "Additional Information" section of the profile view</td>
                 </tr>
 
                 <tr>
                     <td>multiedit</td>
-                    <td>Boolean</td>
-                    <td>False</td>
+                    <td class="optional">Boolean</td>
+                    <td class="optional">False</td>
                     <td>Allow multiple edition of this field (bulk operation). True adds the field to the multiple edition form on the Group View</td>
                 </tr>
                 <tbody>
