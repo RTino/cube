@@ -290,11 +290,7 @@ section#title
     padding-left: 100px;
 }
 
-#left
-{
-}
-
-#right
+.right
 {
     float: right;
     padding-left: 50px;
@@ -325,7 +321,7 @@ section#technologies
     background: #eee;
 }
 
-section#technologies #right
+section#technologies .right
 {
     width: 550px;
 }
@@ -365,7 +361,7 @@ section#clone
     background: #ccc;
 }
 
-section#clone #right
+section#clone .right
 {
     height: 100%;
 }
@@ -436,12 +432,6 @@ form
 {
     background: #f2f2f2;
     padding: 20px;
-}
-
-img
-{
-    width: 100%;
-    max-width: 100%;
 }
 
 em
@@ -545,37 +535,6 @@ span#logo
     color: #222;
     font-size: 28px;
     font-weight: normal;
-}
-
-#footer_wrap
-{
-    background: #bbb;
-    padding-top: 10px;
-    text-align: center;
-    overflow: hidden;
-}
-
-footer p
-{
-    color: black;
-    float: right;
-    padding-right: 5px;
-    color: #333;
-}
-
-footer img
-{
-    float: right;
-    width: auto;
-    padding-top: 15px;
-}
-
-span#byzalando
-{
-    position: absolute;
-    right: 0;
-    padding-right: 135px;
-    background: url('images/zalando_logo_footer.png') no-repeat center center;
 }
 
 #example
@@ -895,14 +854,14 @@ Small Device Styles
         display: block;
     }
 
-    .features #right
+    .features .right
     {
         float: none;
         padding-left: 0;
         margin-top: 20px;
     }
 
-    .features #right img
+    .features .right img
     {
         max-width: 380px
     }
@@ -929,14 +888,14 @@ Small Device Styles
         width: auto;
     }
 
-    section#features #left h3
+    section#features .left h3
     {
         font-weight: bold;
         position: absolute;
         top: 0;
     }
 
-    section#technologies #right
+    section#technologies .right
     {
         width: auto;
         padding-left: 0;
