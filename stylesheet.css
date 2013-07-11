@@ -436,7 +436,8 @@ span#logo {
 
 #header {
     color: black;
-    padding: 160px 0 40px 0;
+    padding: 0;
+    padding-top: 160px;
     margin-top: 50px;
     text-align: center;
     background: url('cube-transparent.png') no-repeat center 0;
@@ -777,8 +778,8 @@ Small Device Styles
 
 @media only screen and (max-width: 480px), only screen and (max-device-width: 480px) {
 
-  body {
-    font-size:14px;
+  body, p {
+    font-size: 18px;
   }
 
   .inner {
@@ -810,6 +811,7 @@ Small Device Styles
   .features #right {
     float: none;
     padding-left: 0;
+    margin-top: 20px;
   }
 
   .features #right img {
@@ -832,7 +834,11 @@ Small Device Styles
 
   section#features #left h3 {
       font-weight: bold;
+      position: absolute;
+      top: 0;
   }
+
+
 
   section#technologies #right {
       width: auto;
@@ -840,7 +846,7 @@ Small Device Styles
   }
 
   ul#menu li {
-    padding: 0 10px;
+    padding: 5px 10px;
   }
 
   ul#menu li a {
@@ -856,7 +862,7 @@ Small Device Styles
   }
 
   h3 {
-    font-size: 24px;
+    font-size: 21px;
   }
 
   h4 {
@@ -864,7 +870,7 @@ Small Device Styles
   }
 
   h5 {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   h6 {
@@ -878,7 +884,7 @@ Small Device Styles
   code, pre {
     overflow: hidden;
     overflow-x: auto;
-    font-size: 18px;
+    font-size: 14px;
   }
 
 }
