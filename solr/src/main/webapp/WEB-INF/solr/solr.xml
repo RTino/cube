@@ -2,6 +2,5 @@
 <solr sharedLib="lib" persistent="true">
   <cores adminPath="/admin/cores">
       <core name="team" instanceDir="conf/cube/" dataDir="conf/cube/team"/>
-      <core name="jira" instanceDir="conf/cube/" dataDir="/data/zalando/app/${jvm.process.name:default}/solr/data/jira"/>
   </cores>
 </solr>
