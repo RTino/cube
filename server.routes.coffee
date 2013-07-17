@@ -30,6 +30,8 @@ module.exports = (app, express, passport) ->
     # Default entity is the first entity defined in the entities array
     defaultEntity = entities[0]
 
+    # Application themes
+    themes = require './themes.json'
 
     # Controllers
 
@@ -117,7 +119,7 @@ module.exports = (app, express, passport) ->
 
         name = req.params.entity
 
-        params =  entity: name, entities: []
+        params =  entity: name, entities: [], themes: themes, user: mail: req.user?.mail
 
         # Read all configuration files from filesystem
         async.parallel [

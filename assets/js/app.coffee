@@ -30,31 +30,39 @@ $ =>
         el: $('#app')
 
         events:
-            "keyup #inputSearch"            : "onSearchInput"
-            "click a#add.btn"               : "addNewItem"
-            "click ul#facet ul li .field"   : "handleFacetClick"
-            "click span#reset a"            : "resetAllFilters"
-            "click span#view"               : "toggleViewMode"
-            "click ul#facet li ul span.fold": "toggleFacetSubfields"
-            "click ul#facet>li>span.fold"   : "toggleFacetNode"
-            "click ul#facet>li>h4"          : "toggleFacetNode"
-            "click span#print"              : "print"
-            "click span#json"               : "toJson"
-            "click a#logout"                : "logOut"
-            "click #entityTitle"            : "toggleEntitiesMenu"
-            "click #columnsMenu"            : "toggleColumnsMenu"
-            "click #columnOptions ul li"    : "toggleColumnVisibility"
-            "click #entities ul li"         : "redirectToEntity"
-            "click span#pageL"              : "previousPage"
-            "click span#pageR"              : "nextPage"
-            "click span#jumpToFirst"        : "jumpToFirst"
-            "click span#jumpToLast"         : "jumpToLast"
-            "click #footer li"              : "jumpToPage"
-            "click table .th-inner"         : "sortTable"
-            "mouseenter #columnsMenu"       : "overColumnsMenu"
-            "mouseenter .th-inner"          : "showColumnsBtn"
-            "mouseleave .th-inner"          : "hideColumnsBtn"
-            "click"                         : "documentClick"
+            "keyup #inputSearch"                        : "onSearchInput"
+            "click a#add.btn"                           : "addNewItem"
+            "click ul#facet ul li .field"               : "handleFacetClick"
+            "click span#reset a"                        : "resetAllFilters"
+            "click span#view"                           : "toggleViewMode"
+            "click ul#facet li ul span.fold"            : "toggleFacetSubfields"
+            "click ul#facet>li>span.fold"               : "toggleFacetNode"
+            "click ul#facet>li>h4"                      : "toggleFacetNode"
+            "click span#print"                          : "print"
+            "click span#json"                           : "toJson"
+            "click a#logout"                            : "logOut"
+            "click #entityTitle"                        : "toggleEntitiesMenu"
+            "click #columnsMenu"                        : "toggleColumnsMenu"
+            "click #columnOptions ul li span"           : "handleColumnsMenuClick"
+            "click #entities ul li"                     : "redirectToEntity"
+            "click span#pageL"                          : "previousPage"
+            "click span#pageR"                          : "nextPage"
+            "click span#jumpToFirst"                    : "jumpToFirst"
+            "click span#jumpToLast"                     : "jumpToLast"
+            "click #footer li"                          : "jumpToPage"
+            "click table th .sort"                      : "sortTable"
+            "mouseenter #columnsMenu"                   : "overColumnsMenu"
+            "mouseenter .th-inner"                      : "showColumnsBtn"
+            "mouseleave .th-inner"                      : "hideColumnsBtn"
+            "click"                                     : "documentClick"
+            "mousedown table th .ganttLeftArrow"        : "ganttMove"
+            "mousedown table th .ganttRightArrow"       : "ganttMove"
+            "mouseup table th .ganttLeftArrow"          : "ganttMove"
+            "mouseup table th .ganttRightArrow"         : "ganttMove"
+            "mouseleave table th .ganttLeftArrow"       : "ganttMove"
+            "mouseleave table th .ganttRightArrow"      : "ganttMove"
+            "mouseenter .ganttCell"                     : "ganttNotification"
+            "mouseleave .ganttCell"                     : "ganttNotification"
 
         #### Initialize
         initialize: () =>
@@ -70,6 +78,9 @@ $ =>
 
             # Set the schema ffor the entity
             @createSchema()
+
+            # Create style object
+            @style = new window.Style
 
             #### Collections bindings
 
@@ -132,6 +143,9 @@ $ =>
 
             # Listen for arrow keys to move between items
             @setMoveKeybindings()
+
+            # Set listener for resize event
+            @setResizeListener()
 
 
         # Facet collection init
@@ -222,6 +236,10 @@ $ =>
         setProfileState: () =>
 
             window.additionalOpen = no
+
+        setResizeListener: () =>
+            window.onresize = () =>
+                @ganttInfoInit()
 
 
         # Get extesion HTML/JS code and append it to current dom.
@@ -364,6 +382,18 @@ $ =>
                 # Show columns menu if it was active before
                 $('#columnOptions').show() if columnsMenuIsOpen
                 $('#columnsMenu').addClass 'active' if columnsMenuIsOpen
+
+                 # Fix gantt width (firefox issue)
+                @ganttWidthFix()
+
+                # Set gantt arrows
+                @ganttInfoInit()
+
+                # Apply content style from schema
+                @style.apply()
+
+                #Add Color to columns
+                @colorize()
 
                 cb() if cb
 
@@ -672,10 +702,17 @@ $ =>
             if total > rows
                 $('#content').removeClass 'noPages'
                 $('#footer').html template()
+
+                # Apply content style from schema
+                @style.apply()
+
                 return $('#footer').show()
 
             $('#content').addClass 'noPages'
             $('#footer').hide()
+
+            # Apply content style from schema
+            @style.apply()
 
         # Handle a click on a facet field. Add facet to selection, filter
         # with new selection and activate field
@@ -1449,29 +1486,47 @@ $ =>
             $('#columnsMenu').toggleClass 'active'
 
 
-        # Show/hide a column from the table
-        toggleColumnVisibility: (e) ->
-
+        # Change visibility or background color of table columns
+        handleColumnsMenuClick: (e) ->
             e.stopPropagation()
 
-            $e = $(e.currentTarget)
-            id = $e.attr 'id'
+            conf =
+                visible:
+                    schemaFiled: 'index'
+                    save:        @saveColumnSelection
+                    action:      @toggleColumnVisibility
+                colorize:
+                    schemaFiled: 'colorize'
+                    save:        @saveColumnColors
+                    action:      @colorize
 
-            if $e.hasClass 'active'
-                _.each window.settings.Schema.get(), (f) =>
-                    if f.id is id then f.index = false
-                $e.removeClass 'active'
-                @saveColumnSelection()
-                return @addAll window.collection
+            $e = $(e.currentTarget)
+            id = $e.parents('li').attr('id')
+            cl = $(e.currentTarget).attr('class').replace('active', '').trim()
+
+            return if cl == 'label'
+
+            state = if $e.hasClass 'active' then false else true
 
             _.each window.settings.Schema.get(), (f) =>
-                if f.id is id then f.index = true
+                if f.id is id then f[conf[cl].schemaFiled] = state
 
-            $e.addClass 'active'
+            if state then $e.addClass 'active' else $e.removeClass 'active'
 
-            @saveColumnSelection()
+            conf[cl].save()
+            conf[cl].action(id, state)
 
-            @addAll window.collection
+            @style.apply()
+
+            #fix for problem with table header
+            @addAll window.collection if cl == 'visible'
+
+
+        # Show/hide a column from the table
+        toggleColumnVisibility: (id, state) =>
+            id = id.replace(new RegExp(':', 'g'), '\\\\:')
+            $th =  $("table ##{id}").toggle()
+            $td =  $("table .#{id}").toggle()
 
 
         # Set the title for the window
@@ -1537,7 +1592,7 @@ $ =>
             window.localStorage[entity] = JSON.stringify ls
 
 
-        # Set column selection from localStorage
+         # Set column selection from localStorage
         setColumnSelection: () =>
 
             entity = window.settings.entity
@@ -1552,10 +1607,45 @@ $ =>
             _.each window.settings.Schema.getIndexes(), (i) ->
                 i.index = no
 
-            _.each columns, (c) ->
-                window.settings.Schema.getField c, (f) ->
-                    f.index = yes
+            _.each columns, (cid) ->
+                f = window.settings.Schema.getFieldById cid
+                f.index = yes
 
+        # Save column color on local storage
+        saveColumnColors: () =>
+
+            entity = window.settings.entity
+
+            ls = window.localStorage[entity]
+            ls = if ls then JSON.parse ls else {}
+
+            colorize = []
+            _.each window.settings.Schema.getColorized(), (s) ->
+                colorize.push s.id
+
+            ls.colorize = {} unless ls.colorize
+            ls.colorize = colorize
+
+            window.localStorage[entity] = JSON.stringify ls
+
+        # Set column selection from localStorage
+        setColumnColors: () =>
+
+            entity = window.settings.entity
+
+            ls = window.localStorage[entity]
+            return unless ls
+
+            ls = JSON.parse ls
+            colorize = ls.colorize
+            return unless ls.colorize
+
+            _.each window.settings.Schema.getColorized(), (i) ->
+                i.colorize = no
+
+            _.each colorize, (cid) ->
+                f = window.settings.Schema.getFieldById cid
+                f.colorize = yes
 
         # Save width of facet index
         saveFacetWidth: (event, ui) =>
@@ -1756,6 +1846,216 @@ $ =>
 
             return navigator.userAgent.match(/iPad|Android/i) isnt null
 
+        # Colorize table columns
+        colorize: (column = null, active = true) =>
+
+            colorize = new window.Colorize
+
+            if column?
+                column = column.replace(new RegExp(':', 'g'), '\\:')
+
+                return  $("td.#{column}").css 'background-color', '' unless active
+
+                colorize.set({selector: "td.#{column}", mixWith: {r: 255, g: 255, b: 255}}).select().apply()
+            else
+                _.each window.settings.Schema.get(), (item) =>
+
+                    if item.colorize? and item.colorize == true
+                        column = item.id.replace(new RegExp(':', 'g'), '\\:')
+                        colorize.set({selector: "td.#{column}", mixWith: {r: 255, g: 255, b: 255}}).select().apply()
+
+        # Handle Gantt movement
+        ganttMove: (e) =>
+
+            field = $(e.currentTarget).parents('th')
+
+            direction = $(e.currentTarget).attr('data-direction')
+
+            event = e.type
+
+            if event == 'mousedown'
+
+                @ganttEvent = setInterval ( => @ganttMoveTo direction, field ), 100
+
+            else
+
+                window.clearInterval @ganttEvent
+
+
+        # Move Gantt chart in left/right direction
+        ganttMoveTo: (direction, field) =>
+
+            configuration =
+                left:
+                    limit: 0
+                    arrow: field.find '.ganttLeftArrow'
+                    step: 40
+                    week: -1
+                right:
+                    limit: 40
+                    arrow: field.find '.ganttRightArrow'
+                    step: -40
+                    week: 1
+
+            settings = configuration[direction]
+
+            items = $(".#{field.attr('id')} .ganttItem")
+
+            ganttBtn = field.find('.ganttBtn')
+
+            arrow = settings.arrow
+
+            position = @ganttPosition(field)
+
+            if position[direction] == settings.limit + (-1 * settings.step)
+
+                arrow.css {'background-color': '#CCC', 'cursor': 'default'}
+
+            else if position[direction] == settings.limit
+
+                return
+
+            else
+
+                ganttBtn.css {'background-color': '#999', 'cursor': 'pointer'}
+
+            @ganttChangeWeek(settings.week, field)
+
+            items.each (key, item) =>
+
+                item = $(item)
+
+                itemPosition = item.css('margin-left').replace('px', '')
+
+                item.css('margin-left', "#{parseInt(itemPosition, 10) + settings.step}px")
+
+                @ganttInfo item
+
+        # Show/Hide notification relative to Gantt Cell
+        ganttNotification: (e) =>
+
+            type = e.type
+
+            item = $(e.currentTarget)
+
+            fieldId = item.parents('td').attr('class').split(' ')[0]
+
+            header = $("##{fieldId}").find('.ganttHeaderContent')
+
+            header.empty()
+
+            header.append(item.attr('data-notification')) if type != 'mouseleave'
+
+        # Show/Hide Gantt info
+        ganttInfo: (item) =>
+
+            info =
+                left:     false
+                centar:   false
+                right:    false
+
+            chartCell = item.parent()
+
+            lInfo = chartCell.find('.ganttInfoL')
+
+            cInfo = chartCell.find('.ganttInfoC')
+
+            rInfo = chartCell.find('.ganttInfoR')
+
+            visible = Math.floor chartCell.width() / 40
+
+            start = parseInt item.attr('data-start'), 10
+
+            end = parseInt item.attr('data-end'), 10
+
+            current = parseInt item.attr('data-current'), 10
+
+            info.left = true if start + 3 < current && current <= end + 3
+
+            info.right = true if end + 3 >= current + visible and current + visible >= start + 3
+
+            info.center = true if current + visible < start + 3 || current > end + 3
+
+            if current < end + 3 then cInfo.css('left' , chartCell.width() - 80) else cInfo.css('left' , 0)
+
+            if current < end + 3 then cInfo.css('left' , chartCell.width() - 80) else cInfo.css('left' , 0)
+
+            if current < end + 3 then cInfo.css('left' , chartCell.width() - 80) else cInfo.css('left' , 0)
+
+            start = if start < 1 then "&lt; #{start + 52}" else "&lt; #{start}"
+
+            end = if end > 52 then "#{end - 52} &gt;" else "#{end} &gt;"
+
+            lInfo.html(start)
+
+            cInfo.html("#{start} #{end}")
+
+            rInfo.html(end)
+
+            if info.left then lInfo.show() else lInfo.hide()
+
+            if info.center then cInfo.show() else cInfo.hide()
+
+            if info.right then rInfo.show() else rInfo.hide()
+
+
+        # Show/Hide info for all Gantt intems
+        ganttInfoInit: () =>
+            $('.ganttItem').each (key, item) =>
+                @ganttInfo $(item)
+
+
+        # Chnage week
+        ganttChangeWeek: (step, field) =>
+
+            items = $(".#{field.attr('id')} .ganttItem")
+
+            current = parseInt items.attr('data-current'), 10
+
+            items.attr('data-current', current + step)
+
+
+        # Calculate poistion of Gantt chart
+        ganttPosition: (field) =>
+
+            position =
+                left:     0
+                right:    0
+                maxWidth: 0
+
+            items = $(".#{field.attr('id')} .ganttItem")
+
+            items.each (key, item) =>
+
+                left = parseInt $(item).css('margin-left').replace('px', ''), 10
+
+                width = $(item).find('.ganttCell').length  * 40
+
+                right = left + width
+
+                position.left = left if left < position.left
+
+                position.right = right if right > position.right
+
+            position.maxWidth = position.right - position.left
+
+            position
+
+
+        # Set width of Gantt items to be == to item with largest width
+        ganttWidthFix: () =>
+            $('th[data-type="gantt"]').each (key, field) =>
+                field = $(field)
+                position = @ganttPosition field
+                $(".#{field.attr('id')} .ganttItem").css 'width', position.maxWidth
+
+
+        # Looks for an entity in the entities list and returns its settings
+        getEntitySettings: (id) =>
+            entity = {}
+            _.each window.entities, (e) ->
+                return entity = e if e.entity is id
+            entity
 
         # Keep an array of the selected facet fields
         # TODO Use a backbone collection for this
