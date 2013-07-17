@@ -96,13 +96,5 @@
       "label": "About Me",
       "additional": true,
       "type": "multiline"
-    }, {
-      "id": "gantt",
-      "label": "Gantt Chart",
-      "type": "gantt",
-      "start": "startDate",
-      "end": "startDate",
-      "dateFormat": "%sd, %sm %dd, %yyyy",
-      "sort": false
     }
 ]

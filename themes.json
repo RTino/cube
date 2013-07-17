@@ -1,0 +1,37 @@
+{
+    "green": {
+        "text":       "#000" ,
+        "baseColor":  "#85DB18",
+        "hoverColor": "#CDE855",
+        "selected": "#CCC",
+        "disabled":    "transparent",
+        "disabledBorder": "#CCC"
+    },
+
+    "orange": {
+        "text":      "#000",
+        "baseColor":  "#FF974F",
+        "hoverColor": "#F77A52",
+        "selected": "#CCC",
+        "disabled":   "transparent",
+        "disabledBorder": "#CCC"
+    },
+
+    "blue": {
+        "text":       "#000",
+        "baseColor":  "dodgerBlue",
+        "hoverColor": "#cfe8ff",
+        "selected": "#CCC",
+        "disabled":   "transparent",
+        "disabledBorder": "#CCC"
+    },
+
+    "red": {
+        "text":       "#000",
+        "baseColor":  "red",
+        "hoverColor": "#fee",
+        "selected": "#CCC",
+        "disabled":   "transparent",
+        "disabledBorder": "#CCC"
+    }
+}
