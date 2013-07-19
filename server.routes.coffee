@@ -119,7 +119,7 @@ module.exports = (app, express, passport) ->
 
         name = req.params.entity
 
-        params =  entity: name, entities: [], themes: themes, user: mail: req.user?.mail
+        params =  entity: name, entities: [], themes: themes
 
         # Read all configuration files from filesystem
         async.parallel [
