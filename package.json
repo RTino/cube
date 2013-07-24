@@ -35,6 +35,7 @@
         "ldapauth": ">= 2.2.2",
         "lodash":">= 1.2.1",
         "mime-magic": ">= 5.14.0",
+        "moment": ">= 2.0.0",
         "passport": ">= 0.1.16",
         "passport-http": ">= 0.2.1",
         "request": ">= 2.21.0",
