@@ -1,148 +1,148 @@
 #app
-  #header
-    #controls.unselectable
-      span(title="Connection Failed")#error
-      #extensions
-      span(title="View Mode")#view
-      span(title="Print")#print
-      span(title="Json")#json
-      a(title="Log Out")#logout.control
-      a(title="Add a New Item")#add.btn Add
-    #entityTitle.unselectable
-      h1
-      span#arrow
-    #entities.menu.unselectable
-      ul
-    #search
-      input(type="text", placeholder="Type to search")#inputSearch.editing
-      #searchInfo.unselectable
-        span#total
-        label
-        span#reset (
-          a reset filter
-          )
-  #index.unselectable
-    #innerIndex
-      ul#facet.unselectable
-  #content
-    #pane
-    span#loading.unselectable
-    #items
-    #columnsSelectWrapper.unselectable
-      span#columnsMenu
-      #columnOptions.menu
-        ul
-  #footer.unselectable
-  #extensions
+    #header
+        #controls.unselectable
+            span(title="Connection Failed")#error
+            #extensions
+            span(title="View Mode")#view
+            span(title="Print")#print
+            span(title="Json")#json
+            a(title="Log Out")#logout.control
+            a(title="Add a New Item")#add.btn Add
+        #entityTitle.unselectable
+            h1
+            span#arrow
+        #entities.menu.unselectable
+            ul
+        #search
+            input(type="text", placeholder="Type to search")#inputSearch.editing
+            #searchInfo.unselectable
+                span#total
+                label
+                span#reset (
+                    a reset filter
+                    )
+    #index.unselectable
+        #innerIndex
+            ul#facet.unselectable
+    #content
+        #pane
+        span#loading.unselectable
+        #items
+        #columnsSelectWrapper.unselectable
+            span#columnsMenu
+            #columnOptions.menu
+                ul
+    #footer.unselectable
+    #extensions
 
-  script(src="/js/json2.js")
-  script(src="/js/jquery-1.9.1.min.js")
-  script(src="/js/jquery.cookie.js")
-  script(src="/js/jquery-ui-1.9.2.custom.min.js")
+    script(src="/js/json2.js")
+    script(src="/js/jquery.min.js")
+    script(src="/js/jquery.cookie.js")
+    script(src="/js/jquery-ui.min.js")
 
-  script(src="/js/jquery.iframe-transport.js")
-  script(src="/js/jquery.fileupload.js")
+    script(src="/js/jquery.iframe-transport.js")
+    script(src="/js/jquery.fileupload.js")
 
-  script(src="/js/underscore-1.4.4.js")
-  script(src="/js/backbone-min.js")
-  script(src="/js/backbone.queryparams.js")
+    script(src="/js/lodash.js")
+    script(src="/js/backbone-min.js")
+    script(src="/js/backbone.queryparams.js")
 
-  != js('libs/facetArray')
-  != js('libs/schema')
-  != js('entities/' + entity + '/code')
-  != js('models/item')
-  != js('models/facet')
-  != js('collections/collection')
-  != js('collections/facets')
-  != js('views/profile')
-  != js('views/facet')
-  != js('views/item')
-  != js('routes')
-  != js('app')
+    != js('libs/facetArray')
+    != js('libs/schema')
+    != js('entities/' + entity + '/code')
+    != js('models/item')
+    != js('models/facet')
+    != js('collections/collection')
+    != js('collections/facets')
+    != js('views/profile')
+    != js('views/facet')
+    != js('views/item')
+    != js('routes')
+    != js('app')
 
-  script(type="text/javascript)
-    var entity    = !{JSON.stringify(entity)};
-    var entities  = !{JSON.stringify(entities)};
-    var settings  = !{JSON.stringify(settings)};
-    var schema    = !{JSON.stringify(schema)};
-    var etiquettes= !{JSON.stringify(etiquettes)};
-    var pdata     = !{JSON.stringify(pdata)};
+    script(type="text/javascript")
+        var entity    = !{JSON.stringify(entity)};
+        var entities  = !{JSON.stringify(entities)};
+        var settings  = !{JSON.stringify(settings)};
+        var schema    = !{JSON.stringify(schema)};
+        var etiquettes= !{JSON.stringify(etiquettes)};
+        var pdata     = !{JSON.stringify(pdata)};
 
-  script(type="text/template")#table-template
-    | <%
-    |   var sort = window.collection.sort.split(':');
-    |   var ord = sort[sort.length-1];
-    |   var hid = sort[0];
-    |   if (sort.length == 3) {
-    |       hid = sort.slice(0,2).join(':');
-    |   };
-    |   var schema = window.settings.Schema.get();
-    |   function addHeaders() {
-    |       _.each(schema, function(f) { %>
-    |           <th id="<%= f.id %>"
-    |               class="header <% if (f.index) { %>visible<% } %>">
-    |               <div class="th-inner <% if (hid === f.id) {%><%= ord %><%}%>">
-    |                   <span><%= f.label %></span>
-    |                   <span id="sortArrow"></span>
-    |                 </div>
-    |           </th><%
-    |       });
-    |   };
-    | %>
-    | <div id="tableContainer" class="<%= classes %>">
-    |     <div class="fixed-table-container-inner">
-    |         <table>
-    |             <thead><tr><% addHeaders() %></tr></thead>
-    |             <tbody></tbody>
-    |         </table>
-    |     </div>
-    | </div>
+    script(type="text/template")#table-template
+        | <%
+        | var sort = window.collection.sort.split(':');
+        | var ord = sort[sort.length-1];
+        | var hid = sort[0];
+        | if (sort.length == 3) {
+        | hid = sort.slice(0,2).join(':');
+        | };
+        | var schema = window.settings.Schema.get();
+        | function addHeaders() {
+        | _.each(schema, function(f) { %>
+        | <th id="<%= f.id %>"
+        | class="header <% if (f.index) { %>visible<% } %>">
+        | <div class="th-inner <% if (hid === f.id) {%><%= ord %><%}%>">
+        | <span><%= f.label %></span>
+        | <span id="sortArrow"></span>
+        | </div>
+        | </th><%
+        | });
+        | };
+        | %>
+        | <div id="tableContainer" class="<%= classes %>">
+        | <div class="fixed-table-container-inner">
+        | <table>
+        | <thead><tr><% addHeaders() %></tr></thead>
+        | <tbody></tbody>
+        | </table>
+        | </div>
+        | </div>
 
-  script(type="text/template")#columns-menu-template
-    | <li id="<%= field.id %>" class="<% if (field.index) { %>active<%}%>">
-    |     <span class="label"><%= field.label %></span>
-    | </li>
+    script(type="text/template")#columns-menu-template
+        | <li id="<%= field.id %>" class="<% if (field.index) { %>active<%}%>">
+        |     <span class="label"><%= field.label %></span>
+        | </li>
 
-  script(type="text/template")#tuple-field-template
-    | <div id="<%= id %>" class="tupleField">
-    |     <input type="text" id="<%= id %>_1" class="autocomplete tuple p1"
-    |         data-type="tuple" value="" /><span class="tupleColon">:
-    |     <input type="text" id="<%= id %>_2" class="autocomplete tuple p2"
-    |         data-type="tuple" value="" />
-    | </div>
+    script(type="text/template")#tuple-field-template
+        | <div id="<%= id %>" class="tupleField">
+        |     <input type="text" id="<%= id %>_1" class="autocomplete tuple p1"
+        |         data-type="tuple" value="" /><span class="tupleColon">:
+        |     <input type="text" id="<%= id %>_2" class="autocomplete tuple p2"
+        |         data-type="tuple" value="" />
+        | </div>
 
-  script(type="text/template")#category-template
-    | <li class="category" id="category-<%= index %>">
-    |     <label class="category">
-    |         <%= cat === 'null' ? 'not set' : cat %> <span>- <em></em></span>
-    |     </label>
-    |     <ul class="container"></ul>
-    | </li>
+    script(type="text/template")#category-template
+        | <li class="category" id="category-<%= index %>">
+        |     <label class="category">
+        |         <%= cat === 'null' ? 'not set' : cat %> <span>- <em></em></span>
+        |     </label>
+        |     <ul class="container"></ul>
+        | </li>
 
-  script(type="text/template")#pagination-index-template
-    | <%
-    |   var total = parseFloat(window.collection.total);
-    |   var rows = parseFloat(window.collection.rows);
-    |   var page = parseFloat(window.collection.page) + 1;
-    |   var first = parseFloat(page * rows) - rows + 1;
-    |   var last = page * rows > total ? total : page * rows;
-    | %>
-    | <div id="wrapper">
-    |   <span id="pageStatus">
-    |       <%= first %>-<%= last %>
-    |       <span id="normal"> of </span>
-    |       <%= total %>
-    |   </span>
-    |   <span id="jumpToFirst" class="btn <%
-    |       if (page == 1) { %> disabled <% } %>">
-    |   </span>
-    |   <span id="pageL" class="btn <%
-    |       if (page == 1) { %> disabled <% } %>">
-    |   </span>
-    |   <span id="pageR" class="btn <%
-    |       if (last == total) { %> disabled <% } %>">
-    |   </span>
-    |   <span id="jumpToLast" class="btn <%
-    |       if (last == total) { %> disabled <% } %>">
-    |   </span>
-    | </div>
+    script(type="text/template")#pagination-index-template
+        | <%
+        |   var total = parseFloat(window.collection.total);
+        |   var rows = parseFloat(window.collection.rows);
+        |   var page = parseFloat(window.collection.page) + 1;
+        |   var first = parseFloat(page * rows) - rows + 1;
+        |   var last = page * rows > total ? total : page * rows;
+        | %>
+        | <div id="wrapper">
+        |   <span id="pageStatus">
+        |       <%= first %>-<%= last %>
+        |       <span id="normal"> of </span>
+        |       <%= total %>
+        |   </span>
+        |   <span id="jumpToFirst" class="btn <%
+        |       if (page == 1) { %> disabled <% } %>">
+        |   </span>
+        |   <span id="pageL" class="btn <%
+        |       if (page == 1) { %> disabled <% } %>">
+        |   </span>
+        |   <span id="pageR" class="btn <%
+        |       if (last == total) { %> disabled <% } %>">
+        |   </span>
+        |   <span id="jumpToLast" class="btn <%
+        |       if (last == total) { %> disabled <% } %>">
+        |   </span>
+        | </div>
