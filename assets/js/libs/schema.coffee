@@ -14,46 +14,41 @@ class window.Schema
     set: (a) ->
         @arr = a
 
-    #TODO no need for cb
-    getField: (id, cb) ->
-        _.each @arr, (f) ->
-            return cb(f) if f.id is id
-
     getFieldById: (id) ->
         field = null
         _.each @arr, (f) ->
             field = f if f.id is id
         field
 
-    getObjectsWithProperty: (p) ->
-        arr = []
-        _.each @arr, (o) =>
-            arr.push o if o[p]
-        arr
-
-    getObjectsWithType: (t) ->
+    getFieldsByType: (t) ->
         arr = []
         _.each @arr, (o) =>
             arr.push o if o['type'] is t
         arr
 
+    getFieldsByProp: (p) ->
+        arr = []
+        _.each @arr, (o) =>
+            arr.push o if o[p]
+        arr
+
     getPictures: () ->
-        @getObjectsWithType 'img'
+        @getFieldsByType 'img'
 
     getAdmins: () ->
-        @getObjectsWithProperty 'admin'
+        @getFieldsByProp 'admin'
 
     getSearchs: () ->
-        @getObjectsWithProperty 'search'
+        @getFieldsByProp 'search'
 
     getMandatories: () ->
-        @getObjectsWithProperty 'mandatory'
+        @getFieldsByProp 'mandatory'
 
     getAdditionals: () ->
-        @getObjectsWithProperty 'additional'
+        @getFieldsByProp 'additional'
 
     getThumbnails: () ->
-        @getObjectsWithProperty 'thumbnail'
+        @getFieldsByProp 'thumbnail'
 
     getMultivalues: () ->
         arr = []
@@ -62,28 +57,31 @@ class window.Schema
         arr
 
     getIndexes: () ->
-        @getObjectsWithProperty 'index'
+        @getFieldsByProp 'index'
 
     getMultiedits: () ->
-        @getObjectsWithProperty 'multiedit'
+        @getFieldsByProp 'multiedit'
 
     getMultilines: () ->
-        @getObjectsWithType 'multiline'
+        @getFieldsByType 'multiline'
 
     getEmails: () ->
-        @getObjectsWithType 'email'
+        @getFieldsByType 'email'
 
     getSkypes: () ->
-        @getObjectsWithType 'skype'
+        @getFieldsByType 'skype'
 
     getBookmark: () ->
-        @getObjectsWithProperty('bookmark')[0] || {}
+        @getFieldsByProp('bookmark')[0] || {}
 
     getFacets: () ->
-        @getObjectsWithType 'facet'
+        @getFieldsByType 'facet'
 
     getTuples: () ->
-        @getObjectsWithType 'tuple'
+        @getFieldsByType 'tuple'
+
+    getColorized: () ->
+        @getFieldsByProp 'colorize'
 
     getSpecials: () ->
         specials = {}
@@ -92,4 +90,8 @@ class window.Schema
         specials
 
     getClassifier: () ->
-        return @getObjectsWithProperty('classifier')[0] || []
+        return @getFieldsByProp('classifier')[0] || []
+
+    getImgKey: () ->
+
+        return @getPictures()[0]?['id']

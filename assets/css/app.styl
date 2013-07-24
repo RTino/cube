@@ -19,7 +19,7 @@
 
 lineColor         = dodgerblue
 btnColor          = dodgerblue
-headerBg          = #EE
+headerBg          = #EEE
 footerBg          = #CCC
 groupItemBg       = #EEE
 groupItemHeight   = 30px
@@ -53,7 +53,7 @@ headerHeight      = 50px
 facetWidth        = 180px
 facetPadding      = 20px
 
-paneWidth         = 304px
+paneWidth         = 345px
 paneBg            = #FFF
 paneFontSize      = 13px
 
@@ -143,6 +143,17 @@ body
             &.active
                 background    facetActiveBg
 
+.nonHoverMenu
+    background        #FFF
+    border            1px solid dodgerblue
+    ul
+        padding       0
+        margin        0
+        list-style    none
+        li
+            background      #FFF
+            margin          2px
+
 #header #search
   position          absolute
   left              200px
@@ -182,8 +193,10 @@ body
   padding           10px
   background        headerBg
   height            30px
-  a.btn
-    float           right
+  #actions
+    display         inline
+  #buttons
+    display         inline
   #extensions
     overflow        hidden
     float           left
@@ -204,11 +217,12 @@ body
       background    url('/assets/print.png') no-repeat 0 0
     &#json
       background    url('/assets/json.png') no-repeat 1px 1px
-  a#logout
+    &#logout
+      display       none
       margin-right  10px
-      background    url('/assets/logout.png') no-repeat 6px 7px
       &:hover
-        background-position     6px -31px
+        background      url('/assets/logout.png') no-repeat 6px -31px !important
+        background-size auto !important
 
 
 #index
@@ -343,7 +357,7 @@ span#columnsMenu
         border-bottom           none
 #columnOptions
     display         none
-    width           150px
+    width           250px
     position        absolute
     top             35px
     right           5px
@@ -364,12 +378,34 @@ span#columnsMenu
             position        absolute
         span.label
             position        absolute
-            margin-left     10px
+            left            10px
+            width           125px
+        span.visible
+            position        absolute
+            right           60px
+            width           40px
+            font-size       10px
+            color           #999
+            text-align      center
+            cursor          pointer
+            &.active
+              color         #000
+            &:hover
+              background-color  tableItemHoverBg
+        span.colorize
+            position        absolute
+            right           10px
+            width           50px
+            font-size       10px
+            color           #999
+            cursor          pointer
+            text-align      center
+            &.active
+              color         #000
+            &:hover
+              background-color  tableItemHoverBg
 
 #items
-  margin                0
-  padding               0
-  list-style            none
   li
     width               100%
     &.list
@@ -553,7 +589,7 @@ span.miniEtq
 .bigEtiquette
   height                30px
   top                   0
-  padding-right         10px
+  padding-right         10p
   background-repeat     no-repeat
   line-height           20px
   display               none
@@ -639,6 +675,7 @@ span.miniEtq
         height          tableRowHeight+1
         position        absolute
         top             0
+        border-left     1px solid #CCC
       &.header .th-inner.asc
         background      tableHeaderActive
         #sortArrow
@@ -647,6 +684,8 @@ span.miniEtq
         background      tableHeaderActive
         #sortArrow
             background-image    url('/assets/desc.gif')
+      &.header:first-child .th-inner
+        border-left     none
 
       &.header .th-inner span
         padding         5px 0 5px 10px
@@ -663,10 +702,35 @@ span.miniEtq
         background-image    url('/assets/desc.gif')
       &.headerSortDown .th-inner #sortArrow
         background-image    url('/assets/asc.gif')
+      &.header .th-inner .ganttHeaderContainer
+          position        relative
+          .ganttHeaderContent
+            padding       12px 10px 5px 80px
+          .ganttBtn
+            width         18px
+            height        18px
+            background    url('/assets/sprite_pageIcons.png') no-repeat 0 0 #666
+            background-color #999
+            padding       4px
+            cursor        pointer
+            margin-top    12px
+            position      absolute
+            top           -3px
+          .ganttLeftArrow
+              left                        10px
+              background-position         -16px 0
+              &.disabled
+                  background-position     -16px -24px
+          .ganttRightArrow
+              left                       35px
+              background-position         -38px 0
+              &.disabled
+                  background-position     -38px -24px
 
     td
       padding               5px 0
       padding-left          10px
+      border-right          1px solid tableBorder
       border-bottom         1px solid tableBorder
       -webkit-touch-callout none
       -webkit-user-select   none
@@ -697,6 +761,7 @@ span.miniEtq
         position        relative
         max-width       25px
 
+
       &:hover
           .hoverpic, .bigEtiquette, .etiquettes
               display   block
@@ -719,11 +784,64 @@ span.miniEtq
           font-size       13px
           label
               cursor          pointer
-
-#itemsContainer .miniPic
-    float         left
-    max-width     35px
-    max-height    35px
+    .ganttWrapper
+         position           relative
+         overflow           hidden
+        .ganttInfoL
+          position          absolute
+          top               4px
+          left              5px
+          display           none
+          color             #BBB
+          font-size         10px
+          background        #fff
+          padding           2px
+          width             23px
+          text-align        left
+        .ganttInfoC
+          position          absolute
+          top               0px
+          left              0px
+          display           none
+          background        #EEE
+          width             80px
+          height            20px
+          padding-top       4px
+          line-height       16px
+          font-size         10px
+          text-align        center
+          color             #BBB
+        .ganttInfoR
+          position          absolute
+          top               4px
+          right             5px
+          display           none
+          color             #BBB
+          font-size         10px
+          background        #fff
+          padding           2px
+          width             23px
+          text-align        right
+        .ganttItem
+            display            inline-block
+            .ganttCell
+                background-color  #999
+                border-right      1px solid #AAA
+                height            20px
+                width             39px
+                float             left
+                padding-top       4px
+                line-height       16px
+                font-size         10px
+                text-align        center
+                color             #BBB
+                &:last-child
+                  border-right    0
+                  width           40px
+            .ganttCurrent
+                background-color  #777
+            .ganttCell:hover
+                color             #FFF
 
 #print table tr td, #print table tr th
         display         table-cell
@@ -734,13 +852,12 @@ span.miniEtq
 #pane
   display             none
   position            fixed
-  height              100%
   border-left         1px solid lineColor
   width               paneWidth
   right               0
   top                 0
-  padding-left        20px
-  padding-right       35px
+  bottom              0
+  margin-top          headerHeight
   background          paneBg
   z-index             1
   img#warn
@@ -748,157 +865,9 @@ span.miniEtq
     top               441px
     right             14px
     display           none
-  #pictureContainer,
-  .pictureContainer
-    height            300px
-    width             300px
-    text-align        center
-    border            2px solid profileImgBorder
-    background        profileImgBg
-    color             profileImgFontC
-    font-weight       bold
-    font-size         20px
-    overflow          visible
-    position          absolute
-    top               headerHeight
-    left              20px
-    margin-top        15px
-    p
-      margin          0
-      line-height     300px
-      width           300px
-      position        absolute
-      top             30px
-      text-align      center
-      display         none
-    img
-      width           300px
-      position        absolute
-      top             0
-      left            0
-    input#pic
-      position        absolute
-      width           300px
-      height          300px
-      padding         0
-      opacity         0
-      z-index         1
-      top             0
-      left            0
-      -moz-transform  translate(-300px, 0pt) scale(15)
-      display         none
-    .inputPicContainer
-      position        absolute
-      width           300px
-      height          300px
-      overflow        hidden
-      top             0
-      left            0
-    .etiquettes
-      position        absolute
-      height          290px
-      z-index         2
-      top             10px
-      left            -10px
-      overflow        hidden
-    .bigEtiquette
-      display         block
-      z-index         2
-  #teamData,
-  #data
-    padding-top       0
-    overflow          auto
-    position          absolute
-    top               390px
-    bottom            70px
-    width             itemPicWidth(4)
-    &.noPicture
-      top             70px
-    &.noButtons
-      bottom          30px
-  #teamData
-    top               250px
-    bottom            20px
-    ul
-        width         100%
-    li
-      margin          0
-      padding         0
-      padding-bottom  5px
-      font-size       paneFontSize
-      overflow        hidden
-      .description
-        float         left
-        clear         both
-        p
-          float       left
-          margin      0
-          padding     0
-          font-size   paneFontSize
-      label.title
-        float         left
-        clear         both
-        font-size     paneFontSize
-        color         black
-        font-weight   bold
-        padding       10px 0 5px 0
-      .subteams
-        float         left
-        clear         both
-      ul.statistics
-        float         left
-        clear         both
-      ul.statistics li
-        border        none
-        padding       0
-        margin        0
-        height        18px
-        span
-          position    absolute
-          &.aRight
-            position      absolute
-            margin-left   150px
-            a
-              line-height 14px
   .adaptive
     min-height      20px
     margin-bottom   0
-  #itemsContainer
-    width           paneWidth - 10
-    border          1px solid groupBorder
-    overflow        auto
-    position        absolute
-    top             headerHeight
-    bottom          70px
-    left            20px
-    margin-top      15px
-    padding-right   10px
-    overflow-x      hidden
-    &.onEdit
-        bottom      300px
-    ul
-      margin        0
-      li
-        width       100%
-        height      groupItemHeight
-        background  groupItemBg
-        margin      2px
-        margin-bottom   0
-        &:last-child
-            margin-bottom   2px
-        overflow    hidden
-        padding     2px
-        img
-          float     left
-          height    35px
-          width     35px
-        .name
-          margin          0
-          margin-right    45px
-          padding-left    10px
-          line-height     groupItemHeight
-          white-space     nowrap
-          overflow        hidden
   #multipleEditFields
     position        absolute
     left            15px
@@ -1093,9 +1062,10 @@ span.miniEtq
         &:last-child
             margin        0
 
-  #buttons,
-  #multipleEditActions,
-  #groupActions
+
+#pane #buttons,
+#pane #multipleEditActions,
+#pane #groupActions
     background        footerBg
     bottom            0
     left              0
@@ -1104,37 +1074,211 @@ span.miniEtq
     position          absolute
     overflow          hidden
     height            30px
+    #btnExtensions
+        display       inline-block
 
-&#profileContainer
-  width               itemPicWidth(4)
-  ul#profile
-    padding-left      0
-    text-align        center
-    li
-      text-align      left
-  label
+#pane .data
+    padding-top       0
+    overflow          auto
     position          absolute
-  span
-    margin-left       150px
+    top               390px
+    bottom            70px
+    left              20px
+    right             20px
+    &.noPicture
+      top             40px
+      right           0
+      left            0
+      padding         20px
+      bottom          50px
+    &.noButtons
+      bottom          20px
+    &.noPicture.noButtons
+      bottom          0
+
+#pane #teamData
+    top               250px
+    bottom            20px
+    ul
+        width         100%
+    li
+      margin          0
+      padding         0
+      padding-bottom  5px
+      font-size       paneFontSize
+      overflow        hidden
+      .description
+        float         left
+        clear         both
+        p
+          float       left
+          margin      0
+          padding     0
+          font-size   paneFontSize
+      label.title
+        float         left
+        clear         both
+        font-size     paneFontSize
+        color         black
+        font-weight   bold
+        padding       10px 0 5px 0
+      .subteams
+        float         left
+        clear         both
+      ul.statistics
+        float         left
+        clear         both
+      ul.statistics li
+        border        none
+        padding       0
+        margin        0
+        height        18px
+        span
+          position    absolute
+          &.aRight
+            position      absolute
+            margin-left   150px
+            a
+              line-height 14px
+
+#pane .itemsContainer
+    border          1px solid groupBorder
+    overflow        auto
+    position        absolute
+    top             50px
+    bottom          70px
+    left            20px
+    right           20px
+    margin-top      15px
+    padding-right   10px
+    overflow-x      hidden
+    &.onEdit
+        bottom      300px
+    &.tabPane
+        bottom      20px
+    .miniPic
+        float       left
+        max-width   35px
+        max-height  35px
+
+#pane .itemsContainer ul
+    margin        0
+    li
+        width           100%
+        height          groupItemHeight
+        background      groupItemBg
+        margin          2px
+        margin-bottom   0
+        &:last-child
+            margin-bottom   2px
+        overflow        hidden
+        padding         2px
+        img
+            float       left
+            height      35px
+            width       35px
+        .name
+            margin          0
+            margin-right    45px
+            padding-left    10px
+            line-height     groupItemHeight
+            white-space     nowrap
+            overflow        hidden
+
+#pane #pictureContainer,
+#pane .pictureContainer
+    height            300px
     width             300px
-  #imgContainer
-    width             itemPicWidth()
     text-align        center
+    border            2px solid profileImgBorder
+    background        profileImgBg
+    color             profileImgFontC
+    font-weight       bold
+    font-size         20px
+    overflow          visible
+    position          absolute
+    top               50px
+    left              20px
+    margin-top        15px
+    p
+      margin          0
+      line-height     300px
+      width           300px
+      position        absolute
+      top             30px
+      text-align      center
+      display         none
+    img
+      width           300px
+      position        absolute
+      top             0
+      left            0
+    input#pic
+      position        absolute
+      width           300px
+      height          300px
+      padding         0
+      opacity         0
+      z-index         1
+      top             0
+      left            0
+      -moz-transform  translate(-300px, 0pt) scale(15)
+      display         none
+    .inputPicContainer
+      position        absolute
+      width           300px
+      height          300px
+      overflow        hidden
+      top             0
+      left            0
+    .etiquettes
+      position        absolute
+      height          290px
+      z-index         2
+      top             10px
+      left            -10px
+      overflow        hidden
+    .bigEtiquette
+      display         block
+      z-index         2
+
+
+#pane a.destroy
+    position            relative
+    float               right
+    top                 10px
+    right               10px
+    z-index             1
+
+#pane ul#tabs
+    background        headerBg
     overflow          hidden
-    border            1px solid profileImgBorder
-    margin            20px auto
-  img
-    width             itemPicWidth()
-  a.destroy
-    top              -25px
-    right             -7px
+    position          absolute
+    top               0
+    left              0
+    right             0
+    height            41px
+    li
+        clear           none
+        cursor          pointer
+        margin          0
+        margin-top      16px
+        padding         0  10px
+        height          25px
+        line-height     25px
+        background      #CCC
+    li:first-child
+        margin-left     10px
+    li.active
+        background      white
+        font-weight     bold
 
 span.editing
     display     none
 
 
 .onProfile
-    margin-right  paneWidth + 56
+    margin-right  paneWidth
 
 a
   color                 black
@@ -1144,10 +1288,6 @@ a
     width               20px
     height              20px
     background          url(/assets/destroy.png) no-repeat
-    position            relative
-    float               right
-    top                 65px
-    right               -27px
     &:hover
       background-position   0 -20px
   &.minidestroy
@@ -1174,6 +1314,16 @@ a
     text-align          center
     &:hover
       border-color      #000
+  &.inactive
+    background-color    #CCC
+    border              1px solid #999
+    cursor              default
+    color               #999
+    padding             6px 9px
+    &:hover
+        border          1px solid #999
+  &.hidden
+    display             none
 
   &#add
     background      btnColor url('/assets/icons/Add.png') no-repeat 5px 8px

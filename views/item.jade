@@ -1,12 +1,12 @@
 script(type="text/html")#item-template
   | <%
-  |   var pic = window.App.getPicKey();
-  |   var etiquettes = window.App.getItemEtiquettes(m);
+  |   var etiquettes = App.getItemEtiquettes(m);
   |   var model = m.parseSubfields();
+  |   var pic = settings.Schema.getImgKey();
   |   function addEtiquettes() {
   |       _.each(etiquettes, function(e) {
   |           if (!e) { return; };
-  |           var etq = window.App.getEtiquetteById(e);
+  |           var etq = App.getEtiquetteById(e);
   |           var label = e;
   |           var style, font;
   |           if (etq) {
@@ -25,14 +25,13 @@ script(type="text/html")#item-template
   |         addEtiquettes(); %>
   |     </div>
   |     <img class="thumbnail" src="<%= model[pic] %>">
-  |     <div class="label"><%= window.App.getThumbnailLabel(model) %></div>
+  |     <div class="label"><%= App.getThumbnailLabel(model, schema) %></div>
   | </div>
 
 script(type="text/html")#item-table-template
   | <%
-  |   var pic = window.App.getPicKey();
-  |   var schema = window.settings.Schema.get();
-  |   var etiquettes = window.App.getItemEtiquettes(m);
+  |   var pic = settings.Schema.getImgKey();
+  |   var etiquettes = App.getItemEtiquettes(m);
   |   var model = m.parseSubfields();
   |   var dimg = '/images/default-avatar.png';
   |   function fieldImg(field, model) { %>
@@ -54,28 +53,75 @@ script(type="text/html")#item-table-template
   |       <%= model[field.id] %><%
   |   };
   |   function fieldDate(field, model) { %>
-  |       <%= window.App.formatDate(model[field.id]) %><%
+  |       <%= App.formatDate(model[field.id]) %><%
   |   };
   |   function fieldNumber(field, model) { %>
-  |       <%= window.App.formatNumber(model[field.id]) %><%
+  |       <%= App.formatNumber(model[field.id]) %><%
   |   };
   |   function fieldTuple(field, model) {
   |       addRowEtiquettes(etiquettes);
   |   };
+  |   function fieldGantt(field, model) {
+  |       if (typeof model[field.start] === 'undefined' ||
+  |           typeof model[field.end] === 'undefined') { return; }
+  |       var date = new Date();
+  |       var start = Date.prototype.week(model[field.start]);
+  |       var end = Date.prototype.week(model[field.end]);
+  |       var current = Date.prototype.week(date); %>
+  |       <div class="ganttWrapper">
+  |           <div class="ganttInfoL"></div>
+  |           <div class="ganttInfoC"></div>
+  |           <div class="ganttItem"
+  |               style="margin-left: <%= ((start - current) * 40) + 120 %>px;"
+  |               data-start="<%= start %>" data-end="<%= end %>"
+  |               data-current="<%= current %>"><%
+  |               _.range(start, end + 1).forEach(function(w){
+  |                   if(w < 1){ w = 52 + w;} else if(w > 52){ w = w - 52;}
+  |                       var week = Date.prototype.getStartAndEndDateOfWeek(w, null, field.dateFormat); %>
+  |                       <div class="ganttCell <% if(current === w) {%>ganttCurrent<% } %>"
+  |                           data-notification="<%= week.start + ' - ' + week.end %>"><%= w %></div><%
+  |               }); %>
+  |           </div>
+  |           <div class="ganttInfoR"></div>
+  |       </div><%
+  |   };
+  |   function fieldClink(field, model) {
+  |       if (!model[field.id]) { return; }
+  |       var csettings     = App.getEntitySettings(field.entity);
+  |       var cdenom        = csettings.itemType;
+  |       var cschema       = new Schema(csettings.schema);
+  |       var cpic          = cschema.getImgKey();
+  |       var nitems        = model[field.id].length
+  |       cdenom = model[field.id].length === 1 ? cdenom[0] : cdenom[1]; %>
+  |       <div><%
+  |           _.each(model[field.id], function(item, i) {
+  |               if (i > 2) { return; };
+  |               var label = App.getThumbnailLabel(item, csettings.schema);
+  |               miniPic(item[cpic], label);
+  |               nitems--;
+  |           });
+  |           if (nitems) { %><span> +<%= nitems %><% } %>
+  |       </div><%
+  |   };
+  |   function miniPic(src, label) { %>
+  |       <img class="miniPic" src="<%= src %>" title="<%= label %>"/><%
+  |   }
   |   function renderField(field, model) {
   |       rf = fieldText;
   |       if (field['type'] === 'facet')  { rf = fieldFacet;  };
   |       if (field['type'] === 'date')   { rf = fieldDate;   };
-  |       if (field['type'] === 'integer'){ rf = fieldNumber;   };
-  |       if (field['type'] === 'float')  { rf = fieldNumber;   };
+  |       if (field['type'] === 'integer'){ rf = fieldNumber; };
+  |       if (field['type'] === 'float')  { rf = fieldNumber; };
   |       if (field['type'] === 'img')    { rf = fieldImg;    };
   |       if (field['type'] === 'tuple')  { rf = fieldTuple;  };
+  |       if (field['type'] === 'gantt')  { rf = fieldGantt;  };
+  |       if (field['type'] === 'clink')  { rf = fieldClink;  };
   |       rf(field, model);
   |   };
   |   function addEtiquettes() {
   |       _.each(etiquettes, function(e) {
   |           if (!e) { return; };
-  |           var etq = window.App.getEtiquetteById(e);
+  |           var etq = App.getEtiquetteById(e);
   |           var css, bg, font;
   |           var label = e;
   |           if (etq) {
@@ -95,7 +141,7 @@ script(type="text/html")#item-table-template
   |   function addRowEtiquettes(etiquettes) {
   |       _.each(etiquettes, function(e) {
   |           if (!e) { return; };
-  |           var etq = window.App.getEtiquetteById(e);
+  |           var etq = App.getEtiquetteById(e);
   |           var label = etq ? etq.label : e;
   |           var bg, font = '';
   |           if (etq) {
@@ -109,7 +155,7 @@ script(type="text/html")#item-table-template
   |   };
   |   function addMiniEtiquette(etiquettes, cls, color, model) {
   |       if (!etiquettes || !etiquettes.length) { return; };
-  |       var etq = window.App.getMiniEtiquette(etiquettes);
+  |       var etq = App.getMiniEtiquette(etiquettes);
   |       if (!etq) { return; };
   |       var imgname = etq.image.split('.')
   |       var mini = imgname[0] + '-mini.' + imgname[1];
@@ -119,9 +165,9 @@ script(type="text/html")#item-table-template
   |       </span><%
   |   };
   |   _.each(schema, function(f) { %>
-  |       <td class="<%= f.id %><% if (f.index) { %> visible<% }; %>"
-  |           title="<%= model[f.id] %>" data-type="<%= f.id %>"><%
-  |           renderField(f, model); %>
+  |       <td class="<%= f.id %><% if (f.index) { %> visible<% }; if(f.type === 'gantt'){ %> ganttChart<% } %> "
+  |           title="<%= model[f.id] %>" data-type="<%= f.type %>" >
+  |       <% renderField(f, model); %>
   |       </td><%
   |   });
   | %>

@@ -7,3 +7,4 @@ newrelic.js
 public/images
 solr/target
 solr/src/main/webapp/WEB-INF/solr/conf/cube/data/index/
+util/nagiosImporter.coffee
