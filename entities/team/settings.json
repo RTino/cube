@@ -6,5 +6,9 @@
     "separator": "/",
     "view": "list",
     "rows": 50,
-    "sort": "name:asc"
+    "sort": "name:asc",
+    "authentication": {
+        "entityField": "email",
+        "ldapField": "mail"
+    }
 }

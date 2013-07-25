@@ -2,7 +2,7 @@
 #
 # Basic configuration options for the nodejs server.
 
-module.exports = (app, express, passport) ->
+module.exports = (app, express, passport, flash, store) ->
 
     app.configure ->
 
@@ -21,7 +21,12 @@ module.exports = (app, express, passport) ->
 
         # Express session
         app.use express.cookieParser()
-        app.use express.session secret: 'keyboard cat'
+        app.use express.session
+            secret: 'cubic cat'
+            cookie:
+                maxAge: 86400000
+            store: store
+        app.use flash()
 
         # Passport authentication middleware
         app.use passport.initialize()

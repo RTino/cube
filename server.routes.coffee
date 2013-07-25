@@ -20,9 +20,11 @@ module.exports = (app, express, passport) ->
     # Authentication strategy setting
     strategy = settings.Authentication.strategy
 
-    # Passport authentication strategy is basic type even for ldap.
-    auth = passport.authenticate 'basic'
-    if !strategy or strategy is 'none' then auth = (req, res, next) -> next()
+    # Ensure authentication by checking request. Redirect to /login if not.
+    auth =  settings.Authentication.verify || (req, res, next) -> next()
+    toLogin = settings.Authentication.toLogin || (req, res, next) -> next()
+
+    check = passport.authenticate(strategy, settings.Authentication.params)
 
     # List of available entities
     entities = require "./#{settings.EntitiesFile}"
@@ -47,6 +49,8 @@ module.exports = (app, express, passport) ->
     # Servers any request about the print view, like showing items for print.
     PrintController     = require "./server/printController.coffee"
 
+    # Solr utility methods
+    SolrManager         = require './server/solrManager.coffee'
 
     # Create instances from controllers
     new EntityController    app, auth
@@ -58,16 +62,26 @@ module.exports = (app, express, passport) ->
     #### Routes
 
     # Root route
-    app.get '/',            auth,   (a...) -> root          a...
-
-    # Alive Response ({status:ok})
-    app.get '/status',              (a...) -> status        a...
+    app.get '/',            toLogin,    (a...) -> root          a...
 
     # List of available entities with settings
-    app.get '/entities',    auth,   (a...) -> listEntities  a...
+    app.get '/entities',    auth,       (a...) -> listEntities  a...
 
-    # Entity route
-    app.get '/:entity',     auth,   (a...) => toEntity  a...
+    # Alive Response ({status:ok})
+    app.get '/status',                  (a...) -> status        a...
+
+    # Render login page
+    app.get '/login',                   (a...) -> login         a...
+
+    # Receive user credentials and authenticate
+    app.post '/login',      check,      (a...) -> logged        a...
+
+    # Logs Out a user and redirects to login page
+    app.get '/logout',      auth,       (a...) -> logout        a...
+
+    # Render the cube app for a specific entity
+    app.get '/:entity',     toLogin,    (a...) => toEntity      a...
+
 
 
     #### Functionality
@@ -75,10 +89,9 @@ module.exports = (app, express, passport) ->
     # Serves request to '/'. Redirection to default host if the request
     # is coming from an old/deprectaed URL.
     root =  (req, res) ->
-        # Req is fine, get available entities and render index page.
-        getEntities (es) =>
 
-            res.render 'index', entities: es, user: req.user
+        # Req is fine, get available entities and render index page.
+        res.render 'index', entities: getEntities(), user: req.user
 
 
     # Serves an entity rendering the app with the appropriate collection. It
@@ -106,12 +119,32 @@ module.exports = (app, express, passport) ->
 
     # List of available entities
     listEntities = (req, res) ->
-        getEntities (entities) -> res.send entities
+        res.send getEntities()
 
-    # Status alive response returns a JSON { "status": "ok"} object.
+
+    # Status alive response returns a JSON { "status": "ok" } object.
     status = (req, res) ->
 
         res.send status: 'ok'
+
+    # Render login page
+    login = (req, res) ->
+
+        res.render 'login', flash: req.flash()
+
+    # Redirect authenticated user to a specifc address from the querystring
+    logged = (req, res) ->
+
+        return res.redirect req.query.redirect if req.query.redirect
+
+        res.redirect '/'
+
+    # Log Out a user and redirect to index page (usually redir to /login)
+    logout = (req, res) ->
+
+        req.logout()
+
+        res.redirect '/'
 
 
     # Render main cube backbone app
@@ -125,34 +158,67 @@ module.exports = (app, express, passport) ->
         async.parallel [
 
             (cb) =>
-                getEntities (es) =>
-                    params.entities = es
-                    cb()
+                params.entities = getEntities()
+                cb()
 
             (cb) =>
-                getJsonFile 'settings.json', name, (settings) =>
-                    params.settings = settings
-                    cb()
+                params.settings = require "./entities/#{name}/settings.json"
+                cb()
 
             ,(cb) =>
-                getJsonFile 'pane.json', name, (pdata) =>
+                getJsonFile 'pane.json', name, (pdata) ->
                     params.pdata = pdata
                     cb()
 
             ,(cb) =>
-                getJsonFile 'etiquettes.json', name, (etiquettes) =>
+                getJsonFile 'etiquettes.json', name, (etiquettes) ->
                     params.etiquettes = etiquettes
                     cb()
 
             ,(cb) =>
-                getJsonFile 'schema.json', name, (schema) =>
-                    params.schema = schema
+                params.schema = require "./entities/#{name}/schema.json"
+                cb()
+
+            ,(cb) =>
+                return cb() unless strategy is 'ldapauth' and req.user
+
+                authEntity = settings.Authentication.entity
+
+                eSettings = require "./entities/#{authEntity}/settings.json"
+
+                return cb() unless eSettings.authentication
+
+                { entityField, ldapField } = eSettings.authentication
+
+                getLinkedEntityItem authEntity, entityField, req.user[ldapField], (user) =>
+                    params.user = user
                     cb()
 
         ], () =>
 
             # Render backbonejs app
             res.render 'app', params
+
+
+    # Get an item from a specific entity, based on 1 key/value pair criteria.
+    getLinkedEntityItem = (entity, key, value, cb) =>
+
+        solrManager = new SolrManager entity
+        key = solrManager.addSuffix key
+        db = solrManager.createClient()
+
+        query = db.createQuery()
+            .q("#{key}:#{value}")
+            .start(0)
+            .rows(1000)
+
+        db.search query, (err, result) ->
+            throw err if err
+            docs = []
+            _.each result.response?.docs, (doc) ->
+                docs.push solrManager.removeSuffix doc
+            docs = docs[0] if docs.length
+            cb docs
 
 
     # Read a file and parse it as json, return a json object.
@@ -177,28 +243,15 @@ module.exports = (app, express, passport) ->
 
 
     # Get all available entities along with their settings
-    getEntities = (cb) ->
-
-        eFile = "#{__dirname}/#{settings.EntitiesFile}"
-
-        fs.readFile eFile, 'utf-8', (err, d) =>
-            throw err if err
-
-            es = []
-            entities = JSON.parse d
-
-            # Add each entitie's settings
-            async.forEach entities,
-
-                (e, cb) ->
-                    getJsonFile 'settings.json', e, (s) ->
-                        es.push s
-                        cb()
-
-                ,(err) ->
-                    throw err if err
-                    es = sortEntities es, entities
-                    return cb es
+    getEntities = () ->
+        es = []
+        _.each entities, (e) ->
+            settings = require "./entities/#{e}/settings.json"
+            schema = require "./entities/#{e}/schema.json"
+            settings.schema = schema
+            es.push settings
+        es = sortEntities es, entities
+        es
 
 
     # Sort entity names based on a predefined order
@@ -214,10 +267,9 @@ module.exports = (app, express, passport) ->
         _.each entities, (e) =>
             if orderedNames.indexOf(e.entity) is -1 then ordered.push e
 
-        return ordered
+        ordered
 
 
     # Return bool if e is in the entities array from the settings
     isEntity = (e) ->
-
         return entities.indexOf(e) isnt -1

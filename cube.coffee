@@ -2,7 +2,7 @@
 #
 # @author: Emanuel Lauria <emanuel.lauria@zalando.de>
 #
-# @date: 11/2012
+# @date: 07/2013
 
 # Cube's nodejs server init
 
@@ -12,10 +12,20 @@ require "coffee-script"
 # Main server configuration file. Please edit to your needs!
 settings        = require "./server.settings.coffee"
 
-# We all know express, don't we?
 express         = require "express"
 
 passport        = require "passport"
+
+flash           = require "connect-flash"
+
+redisStore      = require("connect-redis")(express)
+
+redis           = require "redis"
+
+db              = redis.createClient()
+
+store           = new redisStore client: db
+
 
 # Create express app
 app = module.exports.app = express()
@@ -36,10 +46,10 @@ app.coffeeDir   = settings.Paths.coffeeDir
 require("./server/passport.coffee")(passport)
 
 # Config file has express settings
-require("./server.config.coffee")(app, express, passport)
+require("./server.config.coffee")(app, express, passport, flash, store)
 
 # Main routes file for express
-require("./server.routes.coffee")(app, express, passport)
+require("./server.routes.coffee")(app, express, passport, flash)
 
 
 # Listen by default on port 3000. Change on server.settings.coffee.
