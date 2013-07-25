@@ -47,8 +47,12 @@
     script(src="/js/backbone-min.js")
     script(src="/js/backbone.queryparams.js")
 
+    != js('libs/crypt')
+    != js('libs/date')
     != js('libs/facetArray')
     != js('libs/schema')
+    != js('libs/style')
+    != js('libs/colorize')
     != js('entities/' + entity + '/code')
     != js('models/item')
     != js('models/facet')
@@ -67,6 +71,7 @@
         var schema    = !{JSON.stringify(schema)};
         var etiquettes= !{JSON.stringify(etiquettes)};
         var pdata     = !{JSON.stringify(pdata)};
+        var themes     = !{JSON.stringify(themes)};
 
     script(type="text/template")#table-template
         | <%

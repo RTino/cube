@@ -9,7 +9,7 @@ module.exports = (app, express, passport) ->
 
     #### Requirements
 
-    _           = require "underscore"
+    _           = require "lodash"
     fs          = require "fs"
     async       = require "async"
 
