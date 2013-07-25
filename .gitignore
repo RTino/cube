@@ -6,5 +6,5 @@ node_modules
 newrelic.js
 public/images
 solr/target
-solr/src/main/webapp/WEB-INF/solr/conf/cube/data/index/
+solr/src/main/webapp/WEB-INF/solr/conf/cube/conf/cube/team/index/
 util/nagiosImporter.coffee
