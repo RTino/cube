@@ -246,10 +246,10 @@ module.exports = (app, express, passport) ->
     getEntities = () ->
         es = []
         _.each entities, (e) ->
-            settings = require "./entities/#{e}/settings.json"
+            esettings = require "./entities/#{e}/settings.json"
             schema = require "./entities/#{e}/schema.json"
-            settings.schema = schema
-            es.push settings
+            esettings.schema = schema
+            es.push esettings
         es = sortEntities es, entities
         es
 
