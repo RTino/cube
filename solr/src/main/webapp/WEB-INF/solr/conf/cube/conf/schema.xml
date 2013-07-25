@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<schema name="cube core" version="1.1">
+<types>
+  <fieldtype name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
+  <fieldtype name="integer" class="solr.IntField" sortMissingLast="true" omitNorms="true"/>
+  <fieldtype name="float" class="solr.TrieFloatField" precisionStep="0" positionIncrementGap="0"/>
+  <fieldType name="string_ci" class="solr.TextField" positionIncrementGap="100">
+    <analyzer type="index">
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.ASCIIFolding"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+    <analyzer type="query">
+      <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      <filter class="solr.ASCIIFolding"/>
+      <filter class="solr.LowerCaseFilterFactory"/>
+    </analyzer>
+  </fieldType>
+</types>
+<fields>
+  <field name="id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
+  <dynamicField name="*-s" type="string_ci" indexed="true" stored="true" multiValued="false" required="false" />
+  <dynamicField name="*-sr" type="string_ci" indexed="true" stored="true" multiValued="false" required="true" />
+  <dynamicField name="*-sm" type="string" indexed="true" stored="true" multiValued="true" required="false" />
+  <dynamicField name="*-smr" type="string" indexed="true" stored="true" multiValued="true" required="true" />
+  <dynamicField name="*-i" type="integer" indexed="true" stored="true" multiValued="false" required="false" />
+  <dynamicField name="*-ir" type="integer" indexed="true" stored="true" multiValued="false" required="true" />
+  <dynamicField name="*-f" type="float" indexed="true" stored="true" multiValued="false" required="true" />
+  <dynamicField name="*-fr" type="float" indexed="true" stored="true" multiValued="false" required="true" />
+  <dynamicField name="*-sort" type="string" indexed="true" stored="true" multiValued="false" required="true" />
+</fields>
+<uniqueKey>id</uniqueKey>
+<defaultSearchField></defaultSearchField>
+<solrQueryParser defaultOperator="OR"/>
+</schema>
