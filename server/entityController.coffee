@@ -35,12 +35,11 @@ class EntityController
     module.exports = EntityController
 
     # Entity routes
-    constructor: (app, auth) ->
+    constructor: (app, auth, entities) ->
         app.get   '/:entity/schema',          auth, (a...) => @schema     a...
         app.get   '/:entity/settings',        auth, (a...) => @settings   a...
         app.get   '/:entity/collection',      auth, (a...) => @collection a...
-        app.get   '/:entity/pane.json',       auth, (a...) => @pane       a...
-        app.get   '/:entity/etiquettes.json', auth, (a...) => @etiquettes a...
+        app.get   '/:entity/pane.json',             (a...) => @pane       a...
         app.get   '/:entity/ufacets',         auth, (a...) => @ufacets    a...
         app.post  '/:entity/picture',         auth, (a...) => @picture    a...
         app.get   '/:entity/template',        auth, (a...) => @template   a...
@@ -56,10 +55,10 @@ class EntityController
     settings: (req, res) =>
         name = req.params.entity
         return res.send 404 if entities.indexOf(name) is -1
-        @getSettings name, (settings) =>
-            @getEntities () ->
-                settings.entities = entities
-                res.send settings
+        settings = require "#{__dirname}/../entities/#{name}/settings.json"
+        @getEntities () ->
+            settings.entities = entities
+            res.send settings
 
     # Return a collection based on the filter parameters.
     collection: (req, res) =>
@@ -69,7 +68,8 @@ class EntityController
             @setFacets req, query if req.query["facet.field"]
             @setFilters req, query if req.query?.fs
             @getCollection db, query, (result) =>
-                res.send @setCollectionResponse req, res, result
+                @setClinkItems name, result, (result) =>
+                    res.send @setCollectionResponse req, res, result
 
     # Returns pane.json, containing extra data for custom panes.
     pane: (req, res) ->
@@ -122,7 +122,6 @@ class EntityController
 
     # Return templates from an entity
     template: (req, res) ->
-
         res.render "../entities/#{req.params.entity}/templates"
 
     # Run query and return either CSV, JSON or XML
@@ -138,76 +137,62 @@ class EntityController
     # Return all available entities with its settings
     getEntities: (cb) =>
         es = {}
-        fs.readFile "#{__dirname}/../entities.json", (err, e) =>
-            throw err if err
-            entities = JSON.parse e
-            async.forEach entities, (name, cb) =>
-                @getSettings name, (s) =>
-                    es[name] = s
-                    cb()
-            , (err) ->
-                throw err if err
-                return cb es
+        _.each entities, (e) =>
+            settings = require "#{__dirname}/../entities/#{e}/settings.json"
+            es[name] = settings
+        cb es
 
-    # Read settings file from extension and return it as JSON object
-    getSettings: (entity, cb) =>
-        settingsFile = "#{__dirname}/../entities/#{entity}/settings.json"
-        fs.readFile settingsFile, (err, s) =>
-            throw err if err
-            cb(JSON.parse(s))
 
     # Get the sort parameter. If its not specified on QS, the default value
     # is specified in the settings file.
     getSort: (req, cb) =>
-
         name = req.params.entity
+        solrManager = new SolrManager name
+        settings = require "#{__dirname}/../entities/#{name}/settings.json"
+        sorts = {}
 
-        schema = new Schema name
+        sort = if req.query.sort then req.query.sort else settings.sort
+        _.each sort.split(','), (sort) =>
+            [ id, order ] = sort.split ':'
+            if sort.split(':').length is 3
+                [id1, id2, order] = sort.split ':'
+                id = "#{id1}:#{id2}"
+            field = solrManager.schema.getFieldById id
 
-        @getSettings name, (settings) =>
-            sorts = {}
-            sort = if req.query.sort then req.query.sort else settings.sort
-            _.each sort.split(','), (sort) =>
-                [ id, order ] = sort.split ':'
-                if sort.split(':').length is 3
-                    [id1, id2, order] = sort.split ':'
-                    id = "#{id1}:#{id2}"
-                field = schema.getFieldById id
+            # Solr can't sort multivalue fields. There is a stringified copy
+            # of each mv field with the suffix -sort appended to its id.
+            if @isMultivalue field then id = "#{id}-sort"
+            else id = solrManager.addSuffix id
 
-                # Solr can't sort multivalue fields. There is a stringified copy
-                # of each mv field with the suffix -sort appended to its id.
-                if @isMultivalue field then id = "#{id}-sort"
-                else id = solrManager.addSuffix name, id
-
-                sorts[id] = order
-            cb sorts
+            sorts[id] = order
+        cb sorts
 
     # Returns a new a solr query object ready to perfom searches on the
     # requested entity's collection.
     createQuery: (req, cb) =>
         name = req.params.entity
-        @getSettings name, (settings) =>
-            q = if req.query.q then "#{req.query.q}*" else "*:*"
-            rows =  req.query.rows or settings.rows
-            start = rows*req.query.page || 0
-            @getSort req, (sort) =>
-                solrManager = new SolrManager name
-                db = solrManager.createClient()
-                query = db.createQuery()
-                    .q(q)
-                    .sort(sort)
-                    .defType("edismax")
-                    .pf(@getSearchableFields(name))
-                    .qf(@getSearchableFields(name))
-                    .start(start)
-                    .rows(rows)
-                    .facet on: yes, missing: yes, mincount: 1
+        settings = require "#{__dirname}/../entities/#{name}/settings.json"
+        q = if req.query.q then "#{req.query.q}*" else "*:*"
+        rows =  req.query.rows or settings.rows
+        start = rows*req.query.page || 0
+        @getSort req, (sort) =>
+            solrManager = new SolrManager name
+            db = solrManager.createClient()
+            query = db.createQuery()
+                .q(q)
+                .sort(sort)
+                .defType("edismax")
+                .pf(@getSearchableFields(name))
+                .qf(@getSearchableFields(name))
+                .start(start)
+                .rows(rows)
+                .facet on: yes, missing: yes, mincount: 1
 
-                # Temporarily replacing solr-client's matchFilter method since
-                # its not meeting our requirements.
-                query.matchFilter = solrManager.customMatchFilter
+            # Temporarily replacing solr-client's matchFilter method since
+            # its not meeting our requirements.
+            query.matchFilter = solrManager.customMatchFilter
 
-                cb query, db
+            cb query, db
 
     # Set response of a collection request, depending on the format asked.
     setCollectionResponse: (req, res, result, cb) =>
@@ -216,8 +201,27 @@ class EntityController
             result = @toCSV req.params.entity, result
 
         if req.query.xml
+
+            easyxml.configure
+                singularizeChildren: yes
+                underscoreAttributes: yes
+                rootElement: 'response'
+                dateFormat: 'ISO'
+                indent: 2
+                manifest: yes
+
             res.setHeader 'Content-Type', 'text/xml'
-            result = js2xml 'root', result
+
+            # Replace tuple field character for xml compatibility
+            docs = []
+            _.each result.response.docs, (doc) ->
+                d = {}
+                _.each doc, (value, property) ->
+                    d[property.replace(':', '-')] = value
+                docs.push d
+
+
+            result = easyxml.render item: docs
 
         if req.query.json
             res.setHeader 'Content-Type', 'application/json'
@@ -228,26 +232,26 @@ class EntityController
     # response includes them.
     setFacets: (req, query) =>
         name = req.params.entity
+        solrManager = new SolrManager name
         facetFilter = req.query["facet.field"]
         facetFilter = [ facetFilter ] if typeof facetFilter is "string"
         _.each facetFilter, (f) ->
-            fieldParam = solrManager.addSuffix name, f
+            fieldParam = solrManager.addSuffix f
             query.facet field: "{!ex=_#{fieldParam}}#{fieldParam}"
 
     # Adds filter parameters to a query. i.e. facet filters or search terms.
     setFilters: (req, query) =>
+
         name = req.params.entity
+        solrManager = new SolrManager name
         fqFields = {}
         fq = req.query.fs
 
         # Handle an array of facet filters
         if typeof fq is typeof []
             _.each fq, (fq) ->
-                f = fq.split(':')
                 [ filter, value ] = fq.split ':'
-                filter = solrManager.addSuffix(name, filter)
-                # If value is empty string, use it to exclude the field
-                f = [ "-#{filter}", '["" TO *]'] if value is ''
+                filter = solrManager.addSuffix filter
 
                 fqFields[filter] = [] unless fqFields[filter]
                 fqFields[filter].push value
@@ -258,20 +262,38 @@ class EntityController
             return
 
         [ filter, value ] = fq.split(':')
-        filter = solrManager.addSuffix name, filter
-        f = [ "-#{filter}", '["" TO *]'] if value is ''
+        filter = solrManager.addSuffix filter
 
         query.matchFilter filter, [ value ]
+
+    # Gets a list of IDs and an entity and fetches all items from the
+    # entity's collection, replacing the IDs for full objects.
+    setClinkItems: (name, result, cb) =>
+        return cb result unless result.response?.docs?.length
+        solrManager = new SolrManager name
+        docs = result.response.docs
+        async.each docs, (d, _cb) =>
+            fields = solrManager.schema.getFieldsByType 'clink'
+            return _cb() unless fields.length
+            _.each fields, (field) =>
+                return _cb() unless d[field.id]
+                _solrManager = new SolrManager field.entity
+                _solrManager.getItemById "(#{d[field.id].join(' ')})", (items) =>
+                    d[field.id] =  items
+                    _cb()
+        , (err) =>
+            throw err if err
+            cb result
 
 
     # Return all fields specified as "searchable" (search: true) on the schema.
     getSearchableFields: (name) =>
-        schema = new Schema name
-        searchables = schema.getSearchables()
+        solrManager = new SolrManager name
+        searchables = solrManager.schema.getFieldsByProp 'search'
         fields = {}
         _.each searchables, (f) =>
             return fields["#{f.id}-sort"] = 1 if @isMultivalue f
-            fields[solrManager.addSuffix(name, f.id)] = 1 if f.search
+            fields[solrManager.addSuffix(f.id)] = 1 if f.search
         return fields
 
 
@@ -285,6 +307,7 @@ class EntityController
     isMultivalue: (field) =>
         return yes if field.multivalue
         return yes if field.type is 'facet' or field.type is 'tuple'
+        return yes if field.type is 'clink'
         return no
 
     # Parse an item and form a ';' separated string with its values

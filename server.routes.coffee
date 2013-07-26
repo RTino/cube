@@ -53,7 +53,7 @@ module.exports = (app, express, passport) ->
     SolrManager         = require './server/solrManager.coffee'
 
     # Create instances from controllers
-    new EntityController    app, auth
+    new EntityController    app, auth, entities
     new ItemController      app, auth
     new ExtensionController app, auth
     new PrintController     app, auth
