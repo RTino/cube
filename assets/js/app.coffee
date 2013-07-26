@@ -40,7 +40,6 @@ $ =>
             "click ul#facet>li>h4"                      : "toggleFacetNode"
             "click span#print"                          : "print"
             "click span#json"                           : "toJson"
-            "click a#logout"                            : "logOut"
             "click #entityTitle"                        : "toggleEntitiesMenu"
             "click #columnsMenu"                        : "toggleColumnsMenu"
             "click #columnOptions ul li span"           : "handleColumnsMenuClick"
@@ -63,6 +62,7 @@ $ =>
             "mouseleave table th .ganttRightArrow"      : "ganttMove"
             "mouseenter .ganttCell"                     : "ganttNotification"
             "mouseleave .ganttCell"                     : "ganttNotification"
+
 
         #### Initialize
         initialize: () =>
@@ -101,9 +101,11 @@ $ =>
 
                 @start()
 
-
         #### Start
         start: =>
+
+            # Set icon with picture and show logout btn if auth worked
+            @setUser()
 
             # Set the application's title (extension name on top left)
             @setAppTitle()
@@ -120,6 +122,9 @@ $ =>
 
             #Set Schema indexes from localStorage
             @setColumnSelection()
+
+            #Set Schema colors from localStorage
+            @setColumnColors()
 
             # Create the columns menu
             @generateColumnsMenu()
@@ -163,10 +168,27 @@ $ =>
                 # App is ready to start navigation history
                 Backbone.history.start()
 
-            , error: () =>
+            , error: (col, res, opts) =>
+                # Redirect to login page in case it got a 403
+                window.location.href = '/login' if res.status is 403
 
                 # Show error icon on controls section (top right)
                 @showError()
+
+
+        # Set user icon on controls section as a logout btn.
+        setUser: () ->
+
+            return unless window.user.id
+
+            $('#controls a#logout').css 'background', "url(#{window.user.pic}) no-repeat center center"
+            $('#controls a#logout').css 'background-size', "40px 40px"
+
+            username = "#{window.user.name} #{window.user.lastname}"
+
+            $('#controls a#logout').attr 'title', 'Sign Out user ' + username
+
+            $('#controls a#logout').css 'display', 'inline-block'
 
 
         # Settings object holds all configuration parameters
@@ -229,7 +251,7 @@ $ =>
             # Check if entity is editable and user has provided admin key
             if @isEditable() and @isAdmin()
 
-                $('a#add.btn').css 'display', 'block'
+                $('a#add.btn').css 'display', 'inline-block'
 
 
         # Save profile state
@@ -238,6 +260,7 @@ $ =>
             window.profileState =
                 additionalOpen: no
                 openTab: 'details'
+
 
         setResizeListener: () =>
             window.onresize = () =>
@@ -268,12 +291,21 @@ $ =>
         # Add Profile extension code
         addProfileExtensions: (item) =>
 
-            return unless $('#app > #extensions #details-template').length
+            if $('#actions-template', '#app > #extensions').length
 
-            template = _.template $('#app > #extensions #details-template')
-                .html()
+                actionsTemplate = _.template $('#app > #extensions #actions-template')
+                    .html()
 
-            $('#pane #extensions').append template t:item
+                $('#pane #buttons #btnExtensions').append actionsTemplate()
+
+                window.extensions?.bindActions()?
+
+            if $('#details-template', '#app > #extensions').length
+
+                detailsTemplate = _.template $('#app > #extensions #details-template')
+                    .html()
+
+                $('#pane #extensions').append detailsTemplate t:item
 
 
         # Get schema and attach it to our Settings object
@@ -350,7 +382,7 @@ $ =>
             cat = window.categories.indexOf cat
 
             # Append to category container
-            @$("li\#category-#{cat} ul", '#items').append view.render().el
+            @$("li#category-#{cat} ul", '#items').append view.render().el
 
 
         # Render all items in the given collection
@@ -385,7 +417,7 @@ $ =>
                 $('#columnOptions').show() if columnsMenuIsOpen
                 $('#columnsMenu').addClass 'active' if columnsMenuIsOpen
 
-                 # Fix gantt width (firefox issue)
+                # Fix gantt width (firefox issue)
                 @ganttWidthFix()
 
                 # Set gantt arrows
@@ -514,7 +546,9 @@ $ =>
                     @hideError()
                     cb()
 
-                error: () =>
+                error: (col, res, opts) =>
+                    # Redirect to login page in case it got a 403
+                    window.location.href = '/login' if res.status is 403
 
                     @showError()
 
@@ -545,7 +579,9 @@ $ =>
 
                         cb(col) if cb
 
-                    error: () =>
+                    error: (col, res, opts) =>
+                        # Redirect to login page in case it got a 403
+                        window.location.href = '/login' if res.status is 403
 
                         @showError()
 
@@ -580,7 +616,9 @@ $ =>
                         $('#inputSearch').val ''
                         window.App.resetAllFilters()
 
-                    error: () =>
+                    error: (col, res, opts) =>
+                        # Redirect to login page in case it got a 403
+                        window.location.href = '/login' if res.status is 403
 
                         window.App.showError()
 
@@ -610,7 +648,9 @@ $ =>
                         @hideError()
                         @navigate()
 
-                    error: () =>
+                    error: (col, res, opts) =>
+                        # Redirect to login page in case it got a 403
+                        window.location.href = '/login' if res.status is 403
 
                         @showError()
 
@@ -633,7 +673,10 @@ $ =>
                         @hideError()
                         cb() if cb
 
-                    error: () =>
+                    error: (col, res, opts) =>
+                        # Redirect to login page in case it got a 403
+                        window.location.href = '/login' if res.status is 403
+
                         @showError()
 
 
@@ -763,7 +806,7 @@ $ =>
             _.each s, (c) =>
 
                 $f = $(".field[data-title='#{c.field}']",
-                  "ul#facet li ul\##{c.cat}")
+                  "ul#facet li ul##{c.cat}")
                 $f.addClass 'active'
                 $('span.amount', $f).addClass 'active'
 
@@ -794,7 +837,7 @@ $ =>
             _.each @filterSelection.get(), (c) =>
                 $e = $("span[data-type='#{c.cat}'][data-title='#{c.field}']")
                 $f = $(".field[data-title='#{c.field}']",
-                      "ul#facet li ul\##{c.cat}")
+                      "ul#facet li ul##{c.cat}")
                 nf.push cat: c.cat, field: c.field if $f.length or $e.length
 
             # Set filterSelection with the new selection (remaining filters)
@@ -1012,8 +1055,7 @@ $ =>
 
             @navigate()
 
-        # Show a customazible view on the right pane for a selected facet. This
-        # could be understood as a detailed pane for a selected facet.
+
         showPaneView: () =>
 
             # profileViews and groupViews have preference over pane views
@@ -1045,6 +1087,10 @@ $ =>
             # Catch this in your extension code!
             @trigger 'profileClosed'
 
+
+        paneClosed: () =>
+
+            @trigger 'paneClosed'
 
         # Destroy all item views, unbinding and removing html elements
         removeItemViews: () ->
@@ -1174,18 +1220,22 @@ $ =>
 
         # Check if admin key is present in QS
         isAdmin: () =>
-            return yes if window.settings.editable is true
-            qs = window.location.search.split('?')[1]
-            new RegExp('admin=').test qs
+            return yes if window.settings.unrestricted
+            return no unless window.settings.admins
+            return yes if window.settings.admins.indexOf(window.user.email) isnt -1
+            no
 
-        # Check if the entity is editable
+        # Check if the entity is editable at all
         isEditable: () =>
             return no if window.settings.editable is false
             yes
 
+        # Check if the profile view is editable at all
         isProfEditable: () =>
             return no unless @isEditable()
-            return yes if @isAdmin() or window.settings.Schema.getAdditionals().length
+            return yes if @isAdmin()
+            return no unless window.settings.Schema.getAdditionals().length
+            return yes if window.user.email is window.profileView.model.get('email')
             no
 
         # Set browsers URL to point to the current application state
@@ -1386,11 +1436,6 @@ $ =>
             window.open url, '_blank'
 
 
-        # Logs a user out by redirecting him to logout:logout@thisdomain
-        logOut: () =>
-            logoutUrl = "//logout:logout@#{window.location.host}"
-            window.location = logoutUrl
-
         # Hide facets container on the left
         disableFacets: () ->
 
@@ -1420,9 +1465,7 @@ $ =>
 
             entity = $(e.currentTarget).attr 'id'
 
-            adminKey = if @isAdmin() then "?admin=yes" else ''
-
-            window.location = "/#{entity}/#{adminKey}"
+            window.location = "/#{entity}/"
 
 
         # Create the columns menu that allows a user to choose visible colums
@@ -1525,10 +1568,16 @@ $ =>
 
 
         # Show/hide a column from the table
-        toggleColumnVisibility: (id, state) =>
+        toggleColumnVisibility: (id) =>
             id = id.replace(new RegExp(':', 'g'), '\\\\:')
             $th =  $("table ##{id}").toggle()
             $td =  $("table .#{id}").toggle()
+
+
+        showColumn: (id) =>
+            id = id.replace(new RegExp(':', 'g'), '\\\\:')
+            $th =  $("table ##{id}").show()
+            $td =  $("table .#{id}").show()
 
 
         # Set the title for the window
@@ -1632,8 +1681,6 @@ $ =>
 
         # Set column selection from localStorage
         setColumnColors: () =>
-
-            entity = window.settings.entity
 
             ls = window.localStorage[entity]
             return unless ls
@@ -1795,23 +1842,15 @@ $ =>
 
 
         # Get the thumbnail label used in thumbnail views
-        getThumbnailLabel: (m) =>
+        getThumbnailLabel: (model, schema) =>
 
-            thumbnails = window.settings.Schema.getThumbnails()
+            schema = new Schema schema
 
             label = []
 
-            _.each thumbnails, (f) =>  label.push m[f.id]
+            _.each schema.getThumbnails(), (f) =>  label.push model[f.id]
 
             label.join ' '
-
-
-        # Gets the key name for the img fields, useful for templates.
-        getPicKey: () =>
-
-            pictures = window.settings.Schema.getPictures()
-
-            return pictures[0]['id'] if pictures[0]
 
 
         # Checks if id is a valid tuple field
@@ -1865,6 +1904,7 @@ $ =>
                     if item.colorize? and item.colorize == true
                         column = item.id.replace(new RegExp(':', 'g'), '\\:')
                         colorize.set({selector: "td.#{column}", mixWith: {r: 255, g: 255, b: 255}}).select().apply()
+
 
         # Handle Gantt movement
         ganttMove: (e) =>
@@ -2058,6 +2098,7 @@ $ =>
             _.each window.entities, (e) ->
                 return entity = e if e.entity is id
             entity
+
 
         # Keep an array of the selected facet fields
         # TODO Use a backbone collection for this

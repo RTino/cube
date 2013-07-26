@@ -30,7 +30,7 @@ class @Facets extends Backbone.Collection
         _.each res.facet_counts?.facet_fields, (fields, name) =>
             name = name.split('-')[0]
             f = window.settings.Schema.getFieldById name
-            facetFields.push @createFacet(name, f, fields)
+            facetFields.push @createFacet(name, f, fields) unless f.facetHidden
         facetFields
 
     # Create a facet category like 'team', 'group', 'role', etc. Composed of a

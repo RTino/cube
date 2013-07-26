@@ -12,8 +12,6 @@ $ ->
 
         name = settings.entity
 
-        adminKey = if isAdmin() then "?admin=yes" else ''
-
         template = _.template $('#list-item').html()
 
         $('section#content ul').append template
@@ -31,7 +29,7 @@ $ ->
             $("section#content ul li##{name} p#amount").html "(#{l})"
 
             $("section#content ul li##{name}").click () ->
-                window.location = "/#{name}/#{adminKey}#qs/?"
+                window.location = "/#{name}/"
 
     # File upload plugin
     $('input#import').fileupload dataType: 'json', done: ($e, data) ->
