@@ -8,13 +8,13 @@ script(type="text/template")#group-template
   |   var tabTitle = window.settings.itemType[1];
   |   tabTitle = tabTitle[0].toUpperCase() + tabTitle.slice(1);
   |   if (schema.getPictures().length) {
-  |     pic = schema.getPictures()[0]['id'];
+  |       pic = schema.getPictures()[0]['id'];
   |   };
   |   if (schema.getEmails().length) {
-  |     emailKey = schema.getEmails()[0]['id'];
+  |       emailKey = schema.getEmails()[0]['id'];
   |   };
   |   if (schema.getSkypes().length) {
-  |     skypeKey = schema.getSkypes()[0]['id'];
+  |       skypeKey = schema.getSkypes()[0]['id'];
   |   };
   |   function renderField(field, value) {
   |       rf = fieldText;
