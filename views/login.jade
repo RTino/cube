@@ -7,7 +7,7 @@ html
     #header.outer
       header.inner
         #mainTitle
-          h1#title 
+          h1#title
             a(href="http://zalando.github.com/cube", target="_blank") Cube
           span#subtitle Zalando's management tool
     section#content
@@ -15,16 +15,27 @@ html
         #form
           label Please provide your credentials
           form(action="/login", method="post")#login
-              input(type="text", name="username", value="username")#uname
-              input(type="password", name="password", value="password")#pword
+              input(type="text", name="username", placeholder="Your username (e.g. 'jdoe')", required, autofocus)#uname
+              input(type="password", name="password", placeholder="Your password", required)#pword
+              a(href='http://techblog.zalando.net/2013/06/zalando-platform-account/')#help Need a platform account?
               a#submit.btn Log In
 
 script(src="/js/jquery.min.js")
 
 script(type="text/javascript)
+
+  var flash = !{JSON.stringify(flash)};
+
   $(function() {
 
+    var target = '';
+
+    if (flash.target && flash.target.length) {
+        var target = flash.target[0];
+    }
+
     $('#submit').click(function() {
+      $('form').attr('action', '/login?redirect='+target);
       $('form').submit();
     });
 
@@ -35,14 +46,8 @@ script(type="text/javascript)
       }
     });
 
-    $('input')
-      .focus(function() {
-        $(this).val('');
-      })
-      .blur(function() {
-        var el = $(this);
-        if (el.val() === '') {
-          el.val(el.attr('name'));
-        }
-      });
+    if (flash['error'] && flash.error[0] === 'Invalid username/password') {
+      $('input').css('border-color', 'red');
+    }
+
   });

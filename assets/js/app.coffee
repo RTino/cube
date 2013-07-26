@@ -235,7 +235,9 @@ $ =>
         # Save profile state
         setProfileState: () =>
 
-            window.additionalOpen = no
+            window.profileState =
+                additionalOpen: no
+                openTab: 'details'
 
         setResizeListener: () =>
             window.onresize = () =>
