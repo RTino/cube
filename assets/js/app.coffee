@@ -179,7 +179,7 @@ $ =>
         # Set user icon on controls section as a logout btn.
         setUser: () ->
 
-            return unless window.user.id
+            return unless window.user.pic and window.user.name
 
             $('#controls a#logout').css 'background', "url(#{window.user.pic}) no-repeat center center"
             $('#controls a#logout').css 'background-size', "40px 40px"

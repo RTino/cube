@@ -21,8 +21,19 @@ module.exports = (app, express, passport) ->
     strategy = settings.Authentication.strategy
 
     # Ensure authentication by checking request. Redirect to /login if not.
-    auth =  settings.Authentication.verify || (req, res, next) -> next()
-    toLogin = settings.Authentication.toLogin || (req, res, next) -> next()
+    auth =  settings.Authentication.verify || (req, res, next) ->
+        return next() unless settings.Authentication.strategy
+        return next() if settings.Authentication.strategy is 'none'
+        return next() if req.isAuthenticated()
+        res.statusCode = 403
+        res.send 'Unauthorized'
+
+    toLogin = settings.Authentication.toLogin || (req, res, next) ->
+        return next() unless settings.Authentication.strategy
+        return next() if settings.Authentication.strategy is 'none'
+        return next() if req.isAuthenticated()
+        req.flash 'target', req.url
+        res.redirect '/login'
 
     check = passport.authenticate(strategy, settings.Authentication.params)
 
