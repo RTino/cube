@@ -37,7 +37,7 @@ $ =>
             @col.url = @commonURL(0, window.opener.collection.total)
 
             # Show profile view if appropriate
-            @showProfile id[0] if id.length is 1 and id[0]
+            return @showProfile id[0] if id.length is 1 and id[0]
 
             # Fetch collection
             @col.fetch
@@ -60,6 +60,8 @@ $ =>
 
         # Show a profile view instead of a list view
         showProfile: (id) =>
+
+            console.log 'showProfile'
 
             item = window.opener.collection.get id
 
