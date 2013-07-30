@@ -67,8 +67,8 @@ $ ->
                 f = window.settings.Schema.getFieldById id.split('_')[0]
 
                 return unless !f.type or f.type is "text" or
-                    f.type is "email" or  f.type is "multiline" or
-                    f.type is "skype"
+                    f.type is "email" or f.type is "multiline" or
+                    f.type is "skype" or f.type is "link"
 
                 val = $.trim $i.val()
 
