@@ -96,7 +96,6 @@ module.exports = (app, express, passport) ->
     app.get '/:entity',     toLogin,    (a...) => toEntity      a...
 
 
-
     #### Functionality
 
     # Serves request to '/'. Redirection to default host if the request

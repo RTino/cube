@@ -1625,6 +1625,7 @@ $ =>
             $('#footer').css 'left', w + 21
             $('#innerIndex').width w - 10
 
+            $('#content').trigger 'left'
 
         # Save column selection on local storage
         saveColumnSelection: () =>
