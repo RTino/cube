@@ -196,6 +196,7 @@ class EntityController
 
     # Set response of a collection request, depending on the format asked.
     setCollectionResponse: (req, res, result, cb) =>
+
         if req.query.csv
             res.setHeader 'Content-Type', 'text/plain; charset=utf8'
             result = @toCSV req.params.entity, result
@@ -219,7 +220,6 @@ class EntityController
                 _.each doc, (value, property) ->
                     d[property.replace(':', '-')] = value
                 docs.push d
-
 
             result = easyxml.render item: docs
 
@@ -255,10 +255,8 @@ class EntityController
 
                 fqFields[filter] = [] unless fqFields[filter]
                 fqFields[filter].push value
-
             _.each fqFields, (fields, f) ->
                 query.matchFilter f, fields
-
             return
 
         [ filter, value ] = fq.split(':')

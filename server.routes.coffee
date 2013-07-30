@@ -20,7 +20,7 @@ module.exports = (app, express, passport) ->
     # Authentication strategy setting
     strategy = settings.Authentication.strategy
 
-    # Ensure authentication by checking request. Redirect to /login if not.
+    # Ensure authentication by checking request. Return 403 if not.
     auth =  settings.Authentication.verify || (req, res, next) ->
         return next() unless settings.Authentication.strategy
         return next() if settings.Authentication.strategy is 'none'
@@ -28,6 +28,7 @@ module.exports = (app, express, passport) ->
         res.statusCode = 403
         res.send 'Unauthorized'
 
+    # Ensure authentication by checking request. Redirect to /login if not.
     toLogin = settings.Authentication.toLogin || (req, res, next) ->
         return next() unless settings.Authentication.strategy
         return next() if settings.Authentication.strategy is 'none'
@@ -35,6 +36,7 @@ module.exports = (app, express, passport) ->
         req.flash 'target', req.url
         res.redirect '/login'
 
+    # Apply strategy when posting credentials
     check = passport.authenticate(strategy, settings.Authentication.params)
 
     # List of available entities
@@ -270,17 +272,13 @@ module.exports = (app, express, passport) ->
 
     # Sort entity names based on a predefined order
     sortEntities = (entities, orderedNames) =>
-
         ordered = []
-
         _.each orderedNames, (name) =>
             _.each entities, (e) =>
                 if e.entity is name
                     ordered.push e
-
         _.each entities, (e) =>
             if orderedNames.indexOf(e.entity) is -1 then ordered.push e
-
         ordered
 
 
