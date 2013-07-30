@@ -430,18 +430,6 @@ class ItemController
         yes
 
 
-    # Add a month field that acts like a facet
-    setMonthFacetField: (name, item) =>
-        schema = new Schema name
-        _.each schema.getFieldsByType('date'), (f) =>
-            return unless item[f.id]
-            d = new Date(item[f.id]).getMonth()
-            monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
-            d = monthNames[d]
-            item["#{f.id}_month"] = [ d ]
-
-
     # Check if id is in list
     isAdmin: (id, list) =>
         return yes unless list

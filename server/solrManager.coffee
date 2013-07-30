@@ -84,6 +84,10 @@ class SolrManager
             # -sort suffix should not be modified
             return newObj[k] = v if /-sort$/.test k
 
+            # avoid adding suffixes to month and year facet fields
+            return newObj[k] = v if /_month-sm$/.test k
+            return newObj[k] = v if /_year-sm$/.test k
+
             # Add suffix to the key
             ks = @addSuffix k
 
@@ -142,7 +146,7 @@ class SolrManager
 
     # Replaces matchFilter method on solr-client until we find a better way
     # to do this.
-    customMatchFilter: (field,values) ->
+    customMatchFilter: (field, values) ->
         options = []
         tag = "{!tag=_#{field}}"
         fq = "fq=#{tag}("
@@ -205,6 +209,26 @@ class SolrManager
                 docs.push @removeSuffix doc
             cb docs
 
+    # Add a month field that acts like a facet
+    addMonthFacetFields: (item) =>
+        _.each @schema.getFieldsByType('date'), (f) =>
+            return unless item[f.id] and f.facet is 'month'
+            d = new Date(item[f.id]).getMonth()
+            monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+            d = monthNames[d]
+            item["_#{f.id}_month-sm"] = [ d ]
+        item
+
+    # Add a year field that acts like a facet
+    addYearFacetFields: (item) =>
+        _.each @schema.getFieldsByType('date'), (f) =>
+            return unless item[f.id] and f.facet is 'year'
+            year = []
+            d = new Date(item[f.id]).getFullYear()
+            year.push d
+            item["_#{f.id}_year-sm"] = year
+        item
 
     # Add a document to the solr collection
     addItems: (items, cb) =>
@@ -212,9 +236,10 @@ class SolrManager
         @createClient() unless @client
 
         docs = []
-
         _.each [].concat(items), (item) =>
             item = @addSortFields item
+            item = @addMonthFacetFields item
+            item = @addYearFacetFields item
             item = @addObjSuffix item
             item['_version_'] = new Date().toISOString()
             docs.push item
