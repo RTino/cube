@@ -28,8 +28,7 @@
       "id": "startDate",
       "label": "Start date",
       "mandatory": true,
-      "type": "date",
-      "facet": "month"
+      "type": "date"
     }, {
       "id": "team",
       "label": "Team",
@@ -91,8 +90,7 @@
       "id": "bday",
       "label": "Birthday",
       "additional": true,
-      "type": "date",
-      "facet": "year"
+      "type": "date"
     }, {
       "id": "about",
       "label": "About Me",

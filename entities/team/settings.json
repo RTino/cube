@@ -6,6 +6,5 @@
     "separator": "/",
     "view": "list",
     "rows": 50,
-    "unrestricted": true,
     "sort": "name:asc"
 }
