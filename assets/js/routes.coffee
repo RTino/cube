@@ -121,7 +121,10 @@ $ ->
                             if _fs.length
                                 $('span#reset').show()
                             cb() if cb
-                error: () =>
+                error: (col, res, opts) =>
+                    # Redirect to login page in case it got a 403
+                    window.location.href = '/login' if res.status is 403
+
                     window.App.showError()
 
 

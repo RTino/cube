@@ -55,7 +55,9 @@ ServerSettings = ->
     EntitiesFile: 'entities.json'
 
 
-    #### Entity creation defaults
+    #### Entity creation defaults.
+    # Modify only if you know what you're doing.
+    # This is not the place to configure your entity. Check entities/ dir.
 
 
     # Default application settings

@@ -32,31 +32,36 @@ $ =>
 
             profile = @getParameterByName('profile')
 
-            col = new window.opener.Collection
-            col.url = @commonURL(0, window.opener.collection.total)
+            @col = new window.opener.Collection
+            @col.search = window.opener.collection.search
+            @col.url = @commonURL(0, window.opener.collection.total)
 
             # Show profile view if appropriate
-            @showProfile id[0] if id.length is 1 and id[0]
+            return @showProfile id[0] if id.length is 1 and id[0]
 
             # Fetch collection
-            col.fetch success: () =>
+            @col.fetch
+                data: window.opener.App.getFilterQS()
+                success: () =>
 
-                @addTable()
+                    @addTable()
 
-                # Add all items if theres more than 1
-                if id.length > 1 then return _.each id, (i) =>
-                    return unless i
-                    @addOneList col.get i
+                    # Add all items if theres more than 1
+                    if id.length > 1 then return _.each id, (i) =>
+                        return unless i
+                        @addOneList @col.get i
 
-                col.each (m) =>
-                    @addOneList m
+                    @col.each (m) =>
+                        @addOneList m
 
-                # Append jquery's tablesorter
-                @addTablesorter()
+                    # Append jquery's tablesorter
+                    @addTablesorter()
 
 
         # Show a profile view instead of a list view
         showProfile: (id) =>
+
+            console.log 'showProfile'
 
             item = window.opener.collection.get id
 
@@ -140,11 +145,14 @@ $ =>
             fs.push "rows=#{rows}" if rows isnt undefined
             fs.push "sort=#{window.opener.collection.sort}"
 
+            fs.push "q=#{window.opener.collection.search}" if window.opener.collection.search
+
             _.each window.opener.settings.Schema.getFacets(), (field) ->
 
                 fs.push 'facet.field=' + field.id
 
             url += '?' + fs.join '&' if fs.length
+
             url
 
 

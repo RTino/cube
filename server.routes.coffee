@@ -5,7 +5,7 @@
 # @author: Emanuel Lauria <emanuel.lauria@zalando.de>
 ####
 
-module.exports = (app, express, passport) ->
+module.exports = (app, express, passport, flash) ->
 
     #### Requirements
 
@@ -20,9 +20,24 @@ module.exports = (app, express, passport) ->
     # Authentication strategy setting
     strategy = settings.Authentication.strategy
 
-    # Passport authentication strategy is basic type even for ldap.
-    auth = passport.authenticate 'basic'
-    if !strategy or strategy is 'none' then auth = (req, res, next) -> next()
+    # Ensure authentication by checking request. Return 403 if not.
+    auth =  settings.Authentication.verify || (req, res, next) ->
+        return next() unless settings.Authentication.strategy
+        return next() if settings.Authentication.strategy is 'none'
+        return next() if req.isAuthenticated()
+        res.statusCode = 403
+        res.send 'Unauthorized'
+
+    # Ensure authentication by checking request. Redirect to /login if not.
+    toLogin = settings.Authentication.toLogin || (req, res, next) ->
+        return next() unless settings.Authentication.strategy
+        return next() if settings.Authentication.strategy is 'none'
+        return next() if req.isAuthenticated()
+        req.flash 'target', req.url
+        res.redirect '/login'
+
+    # Apply strategy when posting credentials
+    check = passport.authenticate(strategy, settings.Authentication.params)
 
     # List of available entities
     entities = require "./#{settings.EntitiesFile}"
@@ -49,7 +64,7 @@ module.exports = (app, express, passport) ->
 
 
     # Create instances from controllers
-    new EntityController    app, auth
+    new EntityController    app, auth, entities
     new ItemController      app, auth
     new ExtensionController app, auth
     new PrintController     app, auth
@@ -68,7 +83,6 @@ module.exports = (app, express, passport) ->
 
     # Entity route
     app.get '/:entity',     auth,   (a...) => toEntity  a...
-
 
     #### Functionality
 
@@ -119,7 +133,10 @@ module.exports = (app, express, passport) ->
 
         name = req.params.entity
 
-        params =  entity: name, entities: [], themes: themes
+        user = {}
+        user = mail: req.user?.mail
+
+        params =  entity: name, entities: [], themes: themes, user: user
 
         # Read all configuration files from filesystem
         async.parallel [
@@ -165,17 +182,6 @@ module.exports = (app, express, passport) ->
             cb JSON.parse data
 
 
-    # Return templates from an entity
-    getTemplates = (req, res, cb) ->
-
-        entity = req.params.entity
-        file = "#{__dirname}/entities/#{entity}/templates"
-
-        res.render file, (err, html) =>
-            throw err if err
-            cb templates: html
-
-
     # Get all available entities along with their settings
     getEntities = (cb) ->
 
@@ -203,18 +209,14 @@ module.exports = (app, express, passport) ->
 
     # Sort entity names based on a predefined order
     sortEntities = (entities, orderedNames) =>
-
         ordered = []
-
         _.each orderedNames, (name) =>
             _.each entities, (e) =>
                 if e.entity is name
                     ordered.push e
-
         _.each entities, (e) =>
             if orderedNames.indexOf(e.entity) is -1 then ordered.push e
-
-        return ordered
+        ordered
 
 
     # Return bool if e is in the entities array from the settings

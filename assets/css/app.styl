@@ -214,7 +214,7 @@ body
       &.active
         background-position     0 0
     &#print
-      background    url('/assets/print.png') no-repeat 0 0
+      background    url('/assets/print.png') no-repeat 1px 1px
     &#json
       background    url('/assets/json.png') no-repeat 1px 1px
     &#logout
@@ -676,6 +676,7 @@ span.miniEtq
         position        absolute
         top             0
         border-left     1px solid #CCC
+        border-bottom   1px solid #CCC
       &.header .th-inner.asc
         background      tableHeaderActive
         #sortArrow
@@ -1086,7 +1087,7 @@ span.miniEtq
     left              20px
     right             20px
     &.noPicture
-      top             40px
+      top             42px
       right           0
       left            0
       padding         20px
@@ -1244,34 +1245,42 @@ span.miniEtq
 
 
 #pane a.destroy
-    position            relative
+    position            absolute
     float               right
     top                 10px
     right               10px
     z-index             1
 
+#pane #tabsContainer
+    background          headerBg
+    overflow            hidden
+    width               100%
+    height              41px
+    border-bottom       1px solid #CCC
+
 #pane ul#tabs
-    background        headerBg
-    overflow          hidden
-    position          absolute
-    top               0
-    left              0
-    right             0
-    height            41px
+    position            absolute
+    z-index             1
     li
         clear           none
         cursor          pointer
         margin          0
         margin-top      16px
+        margin-left     5px
         padding         0  10px
-        height          25px
+        height          24px
         line-height     25px
         background      #CCC
+        top             1px
     li:first-child
         margin-left     10px
     li.active
+        border          1px solid #CCC
         background      white
         font-weight     bold
+        padding-bottom  1px
+        border-bottom   none
+        top             0
 
 span.editing
     display     none

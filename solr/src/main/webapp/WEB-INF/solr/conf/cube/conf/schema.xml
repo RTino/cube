@@ -19,6 +19,7 @@
 </types>
 <fields>
   <field name="id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
+  <field name="_version_" type="string" indexed="true" stored="true" multiValued="false" required="false" />
   <dynamicField name="*-s" type="string_ci" indexed="true" stored="true" multiValued="false" required="false" />
   <dynamicField name="*-sr" type="string_ci" indexed="true" stored="true" multiValued="false" required="true" />
   <dynamicField name="*-sm" type="string" indexed="true" stored="true" multiValued="true" required="false" />

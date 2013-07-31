@@ -32,7 +32,6 @@ $ ->
             # Show pane. .show() fails on some browsers.
             $('#pane').css('display', 'block')
 
-
         #### Set Model properties
         # Set values on a model for text, date and picture fields, and allow
         # unsetting empty properties if required.
@@ -68,8 +67,8 @@ $ ->
                 f = window.settings.Schema.getFieldById id.split('_')[0]
 
                 return unless !f.type or f.type is "text" or
-                    f.type is "email" or  f.type is "multiline" or
-                    f.type is "skype"
+                    f.type is "email" or f.type is "multiline" or
+                    f.type is "skype" or f.type is "link"
 
                 val = $.trim $i.val()
 
@@ -151,7 +150,7 @@ $ ->
         # Set a model's picture field from the picture HTML element.
         setModelPicFields: (m, unset) =>
 
-            picFields = window.settings.Schema.getPictures()
+            picFields = settings.Schema.getPictures()
 
             _.each picFields, (pf) ->
 
@@ -238,6 +237,7 @@ $ ->
                     return m.unset(tid, silent:yes)
 
                 m.set(p, silent: yes) if pval1.length or pval2.length
+
 
         # Propperly removes a pane view by unbinding all events, keybindings
         # and resetting css clases before removing the actual html element.
@@ -569,6 +569,8 @@ $ ->
             "click a#delete"                : "clear"
             "click a.destroy"               : "close"
             "click label.additional"        : "showAdditionalFields"
+            "click ul#tabs li"              : "onTab"
+            "click a.clinkLink"             : "onTab"
             #"mouseover span.scroll"         : "onScroll"
             #"mouseout span.scroll"          : "onMouseOut"
             #"mouseover .text-container"     : "onTextContainer"
@@ -577,6 +579,8 @@ $ ->
             "keyup .tupleField:last-child"  : "addTupleField"
             "focus .tupleField"             : "removeEmptyTupleFields"
             "keypress"                      : "save"
+            "focus :input"                  : "unsetKeybindings"
+            "focusout :input"               : "setKeybindings"
 
 
         # Initialize profile view by destroying previous views, binding to
@@ -699,7 +703,7 @@ $ ->
         # Saves a new item or updates an older item if data is valid
         save: (e) =>
 
-            if e.charCode or e.charCode is 0 then return unless e.which is 13
+            if e?.charCode or e?.charCode is 0 then return unless e?.which is 13
 
             return unless @formIsValid()
 
@@ -721,7 +725,10 @@ $ ->
                     @app.hideError()
                     @app.navigate()
                 ,
-                error: () =>
+                error: (col, res, opts) =>
+                    # Redirect to login page in case it got a 403
+                    window.location.href = '/login' if res.status is 403
+
                     @app.showError()
         , 1000, true)
 
@@ -735,7 +742,10 @@ $ ->
 
             @setModel @model, unset
 
-            @model.save {}, wait: yes, error: () ->
+            @model.save {}, wait: yes, error: (col, res, opts) ->
+                # Redirect to login page in case it got a 403
+                window.location.href = '/login' if res.status is 403
+
                 window.App.showError()
 
             @app.navigate()
@@ -748,9 +758,7 @@ $ ->
 
             $('span#arrow', '#pane li').toggleClass('active')
 
-            return window.additionalOpen = yes if window.additionalOpen is no
-
-            window.additionalOpen = no
+            window.profileState.additionalOpen = !window.profileState.additionalOpen
 
 
         # Add class mandatory to respective fields
@@ -780,6 +788,23 @@ $ ->
 
                 h = $("textarea##{m.id}", '#pane').prop 'scrollHeight'
                 $("textarea##{m.id}", '#pane').height h
+
+
+        # Click handler for profile Tabs
+        onTab: (e) =>
+            $e = $(e.currentTarget)
+            @openTab $e.attr('id')
+
+
+        # Show a selected tab
+        openTab: (id) =>
+            $tab = $("ul#tabs li##{id}")
+            $("#tabs li.active").removeClass 'active'
+            $tab.addClass 'active'
+            $('.tabPane').hide()
+            window.profileState.openTab = id
+            return $('#profileTab').show() if id is 'details'
+            $("#clink-#{id}").show()
 
 
     #### Group view
@@ -840,7 +865,7 @@ $ ->
         # 5. Unset arrow key movement bindings
         multipleEdit: () =>
 
-            $('#itemsContainer').addClass 'onEdit'
+            $('.itemsContainer').addClass 'onEdit'
             $('#multipleEditFields, #multipleEditActions').show()
             $('#groupActions').hide()
 
@@ -887,7 +912,7 @@ $ ->
         closeEdit: () =>
 
             $('input', '#multipleEditFields').val ''
-            $('#itemsContainer').removeClass 'onEdit'
+            $('.itemsContainer').removeClass 'onEdit'
             $('#multipleEditFields, #multipleEditActions').hide()
             $('#groupActions').show()
 
@@ -1017,6 +1042,11 @@ $ ->
         render: () =>
             @$el.html @template @field
             @
+
+        close: () =>
+            super
+            @app.paneClosed()
+
 
         destroy: () =>
             window.paneView = null

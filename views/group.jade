@@ -5,14 +5,16 @@ script(type="text/template")#group-template
   |   var skypeKey = '';
   |   var emails = [];
   |   var skypes = [];
+  |   var tabTitle = window.settings.itemType[1];
+  |   tabTitle = tabTitle[0].toUpperCase() + tabTitle.slice(1);
   |   if (schema.getPictures().length) {
-  |     pic = schema.getPictures()[0]['id'];
+  |       pic = schema.getPictures()[0]['id'];
   |   };
   |   if (schema.getEmails().length) {
-  |     emailKey = schema.getEmails()[0]['id'];
+  |       emailKey = schema.getEmails()[0]['id'];
   |   };
   |   if (schema.getSkypes().length) {
-  |     skypeKey = schema.getSkypes()[0]['id'];
+  |       skypeKey = schema.getSkypes()[0]['id'];
   |   };
   |   function renderField(field, value) {
   |       rf = fieldText;
@@ -62,7 +64,7 @@ script(type="text/template")#group-template
   |       m.each(function(i) {
   |           var e = i.get(emailKey);
   |           var s = i.get(skypeKey);
-  |           var l = window.App.getThumbnailLabel(i.parseSubfields());
+  |           var l = window.App.getThumbnailLabel(i.parseSubfields(), window.schema);
   |           if (e) { emails.push(i.get(emailKey)); };
   |           if (s) { skypes.push(i.get(skypeKey)); }; %>
   |           <li id="<%= i.get('id') %>"><%
@@ -79,7 +81,12 @@ script(type="text/template")#group-template
   |   };
   | %>
   | <a class="destroy"></a>
-  | <div id="itemsContainer">
+  | <div id="tabsContainer">
+  |     <ul id="tabs">
+  |         <li id="details" class="active"><%= tabTitle %></li>
+  |     </ul>
+  | </div>
+  | <div class="itemsContainer">
   |     <ul><% genItemsList(m) %></ul>
   | </div>
   | <div id="multipleEditFields">
