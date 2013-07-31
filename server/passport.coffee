@@ -2,7 +2,7 @@
 #
 # Passport module initialization
 
-_               = require 'underscore'
+_               = require 'lodash'
 bcrypt          = require 'bcrypt'
 
 passportHttp    = require('passport-http')

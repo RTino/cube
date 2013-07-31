@@ -8,7 +8,7 @@
 
 # Requirements
 #
-_ = require 'underscore'
+_ = require 'lodash'
 
 
 class Schema

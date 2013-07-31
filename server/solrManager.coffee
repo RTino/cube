@@ -9,7 +9,7 @@
 # Requirements
 
 # Underscore js library
-_     = require 'underscore'
+_     = require 'lodash'
 
 # Solr Nodejs Client library
 solr  = require 'solr-client'

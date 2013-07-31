@@ -10,7 +10,7 @@
 # Requirements
 
 async = require 'async'
-_     = require 'underscore'
+_     = require 'lodash'
 
 Schema      = require './schema.coffee'
 SolrManager = require './solrManager.coffee'

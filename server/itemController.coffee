@@ -9,7 +9,7 @@
 # Requirements
 
 fs    = require 'fs'
-_     = require 'underscore'
+_     = require 'lodash'
 async = require 'async'
 im    = require "imagemagick"
 mime  = require "mime-magic"

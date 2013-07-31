@@ -9,7 +9,7 @@
 fs      = require 'fs'
 async   = require 'async'
 easyxml = require 'easyxml'
-_       = require 'underscore'
+_       = require 'lodash'
 im      = require "imagemagick"
 
 # Facet Manager. distincts() gets a list of unique facet values.
