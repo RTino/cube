@@ -398,6 +398,110 @@ class ItemController
                     cb target_file
 
 
+    # Get the value of a property from one specific item
+    prop: (req, res) =>
+
+        entity  = req.params.entity
+        item    = req.params.item
+        prop    = req.params.property
+
+        solrManager = new SolrManager entity
+
+        solrManager.getItemById item, (items) ->
+            return res.send [] unless items.length
+            res.send items[0][prop]
+
+
+    # Set or insert a value on a property from an item
+    putValue: (req, res) =>
+
+        entity  = req.params.entity
+        item    = req.params.item
+        prop    = req.params.property
+        value   = req.params.value
+
+        Verify  = require("../entities/#{entity}/code.coffee").Verify
+
+        unless Verify
+            res.statusCode = 403
+            return res.send "Not allowed"
+
+        # Check if its allowed to make this change
+        verify = new Verify req
+
+        verify.isAllowed (allowed) =>
+
+            unless allowed
+                res.statusCode = 403
+                return res.send "Not allowed"
+
+            solrManager = new SolrManager entity
+
+            solrManager.getItemById item, (items) =>
+                return res.send [] unless items.length
+
+                item = items[0]
+
+                item[prop] = [] unless item[prop]
+
+                if typeof item[prop] is typeof []
+                    item[prop].push value if item[prop].indexOf(value) is -1
+                    return solrManager.addItems item, (item) =>
+                        res.send item
+
+                item[prop] = value
+                solrManager.addItems item, (item) =>
+                    res.send item
+
+
+    # Delete a value from an item
+    delValue: (req, res) =>
+
+        entity  = req.params.entity
+        item    = req.params.item
+        prop    = req.params.property
+        value   = req.params.value
+
+        Verify  = require("../entities/#{entity}/code.coffee").Verify
+
+        unless Verify
+            res.statusCode = 403
+            return res.send "Not allowed"
+
+        # Check if its allowed to make this change
+        verify = new Verify req
+
+
+        verify.isAllowed (allowed) =>
+
+            if not allowed
+                res.statusCode = 403
+                return res.send "Not allowed"
+
+            solrManager = new SolrManager entity
+
+            solrManager.getItemById item, (items) =>
+                return res.send [] unless items.length
+
+                item = items[0]
+
+                return res.send [] unless item[prop]
+
+                if value
+
+                    index = item[prop].indexOf value
+
+                    return res.send [] if index is -1
+
+                    item[prop].splice index, 1
+                    return solrManager.addItems item, (_item) =>
+                        res.send _item
+
+                delete item[prop]
+                solrManager.addItems item, (_item) =>
+                    res.send _item
+
+
     # Transform a list of items into a list of ids, which is what it actually
     # gets stored in the DB for cube link fields.
     resetClinkFields: (schema, item) =>

@@ -5,7 +5,7 @@
 # @author: Emanuel Lauria <emanuel.lauria@zalando.de>
 ####
 
-module.exports = (app, express, passport) ->
+module.exports = (app, express, passport, flash) ->
 
     #### Requirements
 
@@ -244,17 +244,6 @@ module.exports = (app, express, passport) ->
         fs.readFile f, "utf8", (err, data) =>
             return cb({}) if err
             cb JSON.parse data
-
-
-    # Return templates from an entity
-    getTemplates = (req, res, cb) ->
-
-        entity = req.params.entity
-        file = "#{__dirname}/entities/#{entity}/templates"
-
-        res.render file, (err, html) =>
-            throw err if err
-            cb templates: html
 
 
     # Get all available entities along with their settings

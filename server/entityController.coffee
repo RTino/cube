@@ -8,7 +8,7 @@
 
 fs      = require 'fs'
 async   = require 'async'
-js2xml  = require "data2xml"
+easyxml = require 'easyxml'
 _       = require 'underscore'
 im      = require "imagemagick"
 
@@ -74,16 +74,6 @@ class EntityController
     # Returns pane.json, containing extra data for custom panes.
     pane: (req, res) ->
         file = "#{__dirname}/../entities/#{req.params.entity}/pane.json"
-        res.setHeader 'Content-Type', 'application/json'
-        fs.readFile file, "utf8", (err, data) =>
-            return res.send {} if err
-            res.send data
-
-
-    # Returns an array of etiquettes available. Each etiquette defines an ID,
-    # a Label, Bacgrkound color, Text color and a background image.
-    etiquettes: (req, res) ->
-        file = "#{__dirname}/../entities/#{req.params.entity}/etiquettes.json"
         res.setHeader 'Content-Type', 'application/json'
         fs.readFile file, "utf8", (err, data) =>
             return res.send {} if err
