@@ -1,6 +1,6 @@
 {
     "name":"Cube",
-    "version":"0.6.2",
+    "version":"0.7.0",
     "description":"Zalando's versatile crud management tool",
     "homepage": "http://cubeapp.io",
     "author":"Emanuel Lauria <emanuel.lauria@zalando.de>",
@@ -27,6 +27,9 @@
         "coffee-script":">= 1.6.2",
         "connect": "2.7.3",
         "connect-assets":">= 2.4.1",
+        "connect-flash": ">= 0.1.1",
+        "connect-redis": ">= 1.4.5",
+        "redis": ">= 0.8.4",
         "cron": ">= 1.0.1",
         "data2xml": ">= 0.8.0",
         "express":">= 3.1.0",
@@ -41,7 +44,8 @@
         "passport-ldapauth": ">= 0.0.6",
         "request": ">= 2.21.0",
         "solr-client": ">= 0.2.6",
-        "stylus":">= 0.32.1"
+        "stylus":">= 0.32.1",
+        "easyxml": ">= 0.0.4"
     },
     "devDependencies":{
         "chai": "*",
