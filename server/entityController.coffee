@@ -6,11 +6,12 @@
 
 # Requirements
 
+_       = require 'lodash'
+im      = require "imagemagick"
+os      = require "os"
 fs      = require 'fs'
 async   = require 'async'
 easyxml = require 'easyxml'
-_       = require 'lodash'
-im      = require "imagemagick"
 
 # Facet Manager. distincts() gets a list of unique facet values.
 FacetManager = require './facetManager.coffee'
@@ -46,30 +47,31 @@ class EntityController
 
     # Return appropriate schema for each entity
     schema: (req, res) ->
-        name = req.params.entity
-        return res.send 404 if entities.indexOf(name) is -1
-        schema = require "#{__dirname}/../entities/#{name}/schema.json"
+        entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+        schema = require "#{__direname}/../entities/#{entity}/schema.json"
         res.send schema
 
     # Return appropriate settings for each entity
     settings: (req, res) =>
-        name = req.params.entity
-        return res.send 404 if entities.indexOf(name) is -1
-        settings = require "#{__dirname}/../entities/#{name}/settings.json"
+        entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+        settings = require "#{__dirname}/../entities/#{entity}/settings.json"
         @getEntities () ->
             settings.entities = entities
             res.send settings
 
     # Return a collection based on the filter parameters.
     collection: (req, res) =>
-        name = req.params.entity
-        return res.send 404 unless @isEntity(name)
+        entity = req.params.entity
+        return res.send 404 unless @isEntity(entity)
         @createQuery req, (query, db) =>
             @setFacets req, query if req.query["facet.field"]
             @setFilters req, query if req.query?.fs
             @getCollection db, query, (result) =>
-                @setClinkItems name, result, (result) =>
-                    res.send @setCollectionResponse req, res, result
+                @setClinkItems entity, result, (result) =>
+                    @setCollectionResponse req, res, result, (result) =>
+                        res.send result
 
     # Returns pane.json, containing extra data for custom panes.
     pane: (req, res) ->
@@ -88,10 +90,10 @@ class EntityController
     # move to storage location. Respond with an array of properties from the
     # uploaded image. Useful for backbone.
     picture: (req, res) =>
-        name = req.params.entity
+        entity = req.params.entity
         upload_id = req.files.picture.path
         target_filename = upload_id + '.jpg'
-        target_path= "public/images/#{name}/archive/"
+        target_path= "public/images/#{entity}/archive/"
         target_file = target_path + target_filename
         tmp_file = 'public/images/tmp/' + target_filename
         url_file = "/images/tmp/" + target_filename
@@ -129,16 +131,16 @@ class EntityController
         es = {}
         _.each entities, (e) =>
             settings = require "#{__dirname}/../entities/#{e}/settings.json"
-            es[name] = settings
+            es[entity] = settings
         cb es
 
 
     # Get the sort parameter. If its not specified on QS, the default value
     # is specified in the settings file.
     getSort: (req, cb) =>
-        name = req.params.entity
-        solrManager = new SolrManager name
-        settings = require "#{__dirname}/../entities/#{name}/settings.json"
+        entity = req.params.entity
+        solrManager = new SolrManager entity
+        settings = require "#{__dirname}/../entities/#{entity}/settings.json"
         sorts = {}
 
         sort = if req.query.sort then req.query.sort else settings.sort
@@ -160,20 +162,20 @@ class EntityController
     # Returns a new a solr query object ready to perfom searches on the
     # requested entity's collection.
     createQuery: (req, cb) =>
-        name = req.params.entity
-        settings = require "#{__dirname}/../entities/#{name}/settings.json"
+        entity = req.params.entity
+        settings = require "#{__dirname}/../entities/#{entity}/settings.json"
         q = if req.query.q then "#{req.query.q}*" else "*:*"
         rows =  req.query.rows or settings.rows
         start = rows*req.query.page || 0
         @getSort req, (sort) =>
-            solrManager = new SolrManager name
+            solrManager = new SolrManager entity
             db = solrManager.createClient()
             query = db.createQuery()
                 .q(q)
                 .sort(sort)
                 .defType("edismax")
-                .pf(@getSearchableFields(name))
-                .qf(@getSearchableFields(name))
+                .pf(@getSearchableFields(entity))
+                .qf(@getSearchableFields(entity))
                 .start(start)
                 .rows(rows)
                 .facet on: yes, missing: yes, mincount: 1
@@ -186,43 +188,52 @@ class EntityController
 
     # Set response of a collection request, depending on the format asked.
     setCollectionResponse: (req, res, result, cb) =>
+        return @responseJson res, result, cb if req.query.json
+        return @responseXml res, result, cb if req.query.xml
+        return @responseCSV req.params.entity, res, result, cb if req.query.csv
+        cb result
 
-        if req.query.csv
-            res.setHeader 'Content-Type', 'text/plain; charset=utf8'
-            result = @toCSV req.params.entity, result
 
-        if req.query.xml
+    responseJson: (res, result, cb) =>
+        res.setHeader 'Content-Type', 'application/json'
+        result = result.response?.docs
+        cb result
 
-            easyxml.configure
-                singularizeChildren: yes
-                underscoreAttributes: yes
-                rootElement: 'response'
-                dateFormat: 'ISO'
-                indent: 2
-                manifest: yes
 
-            res.setHeader 'Content-Type', 'text/xml'
+    responseCSV: (entity, res, result, cb) =>
+        res.setHeader 'Content-Type', 'text/plain; charset=utf8'
+        @toCSV entity, result, (csv) =>
+            cb csv
 
-            # Replace tuple field character for xml compatibility
-            docs = []
-            _.each result.response.docs, (doc) ->
-                d = {}
-                _.each doc, (value, property) ->
-                    d[property.replace(':', '-')] = value
-                docs.push d
 
-            result = easyxml.render item: docs
+    responseXml: (res, result, cb) =>
 
-        if req.query.json
-            res.setHeader 'Content-Type', 'application/json'
-            result = result.response?.docs
-        result
+        easyxml.configure
+            singularizeChildren: yes
+            underscoreAttributes: yes
+            rootElement: 'response'
+            dateFormat: 'ISO'
+            indent: 2
+            manifest: yes
+
+        res.setHeader 'Content-Type', 'text/xml'
+
+        # Replace tuple field character for xml compatibility
+        docs = []
+        _.each result.response.docs, (doc) ->
+            d = {}
+            _.each doc, (value, property) ->
+                d[property.replace(':', '-')] = value
+            docs.push d
+        result = easyxml.render item: docs
+        cb result
+
 
     # Adds fields that are of facet type to the query so that the faceted
     # response includes them.
     setFacets: (req, query) =>
-        name = req.params.entity
-        solrManager = new SolrManager name
+        entity = req.params.entity
+        solrManager = new SolrManager entity
         facetFilter = req.query["facet.field"]
         facetFilter = [ facetFilter ] if typeof facetFilter is "string"
         _.each facetFilter, (f) ->
@@ -232,8 +243,8 @@ class EntityController
     # Adds filter parameters to a query. i.e. facet filters or search terms.
     setFilters: (req, query) =>
 
-        name = req.params.entity
-        solrManager = new SolrManager name
+        entity = req.params.entity
+        solrManager = new SolrManager entity
         fqFields = {}
         fq = req.query.fs
 
@@ -256,9 +267,9 @@ class EntityController
 
     # Gets a list of IDs and an entity and fetches all items from the
     # entity's collection, replacing the IDs for full objects.
-    setClinkItems: (name, result, cb) =>
+    setClinkItems: (entity, result, cb) =>
         return cb result unless result.response?.docs?.length
-        solrManager = new SolrManager name
+        solrManager = new SolrManager entity
         docs = result.response.docs
         async.each docs, (d, _cb) =>
             fields = solrManager.schema.getFieldsByType 'clink'
@@ -275,8 +286,8 @@ class EntityController
 
 
     # Return all fields specified as "searchable" (search: true) on the schema.
-    getSearchableFields: (name) =>
-        solrManager = new SolrManager name
+    getSearchableFields: (entity) =>
+        solrManager = new SolrManager entity
         searchables = solrManager.schema.getFieldsByProp 'search'
         fields = {}
         _.each searchables, (f) =>
@@ -286,8 +297,8 @@ class EntityController
 
 
     # Checks if the requested resource is one of the available entities
-    isEntity: (name) =>
-        return yes unless entities.indexOf(name) is -1
+    isEntity: (entity) =>
+        return yes unless entities.indexOf(entity) is -1
         return no
 
     # Checks if the requested field is multivalue. Facet and tuple fields are
@@ -298,22 +309,25 @@ class EntityController
         return yes if field.type is 'clink'
         return no
 
-    # Parse an item and form a ';' separated string with its values
-    toCSV: (name, res) ->
-        schema = require "../entities/#{name}/schema.json"
-        output = []
-        fields = []
+    # Converts a json array into a csv file
+    toCSV: (entity, res, cb) ->
+
+        str = ''
+        del = ','
         headers = []
+
+        schema = require "../entities/#{entity}/schema.json"
 
         _.each schema, (f) ->
             headers.push f.id
-            fields.push f.id
-        output.push headers.join ';'
 
-        _.each res.response?.docs, (doc) ->
-            line = []
-            _.each fields, (f) ->
-                line.push doc[f]
-            output.push line.join ';'
+        str += headers.join del
 
-        return output.join '\n'
+        _.each res.response?.docs, (item) ->
+            line = ''
+            _.each headers, (header) ->
+                line += del if line
+                line += JSON.stringify item[header] if item[header]
+            line = line.replace /\\"/g, '""'
+            str += os.EOL + line
+        cb str

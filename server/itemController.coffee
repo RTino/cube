@@ -58,8 +58,8 @@ class ItemController
     # Get an item or an array of items from IDs
     get: (req, res) =>
 
-        name = req.params.entity
-        solrManager = new SolrManager name
+        entity = req.params.entity
+        solrManager = new SolrManager entity
         id = req.params.id.split('|')
 
         # Return just 1 item
@@ -69,7 +69,7 @@ class ItemController
         # Return an array of items
         docs = []
         async.forEach id, (id, cb) =>
-            solrManager.getItemById name, id, (item) ->
+            solrManager.getItemById id, (item) ->
                 docs.push item[0]
                 cb()
         , (err) ->
@@ -80,8 +80,8 @@ class ItemController
     # Create a new item
     post: (req, res) =>
 
-        name = req.params.entity
-        solrManager = new SolrManager name
+        entity = req.params.entity
+        solrManager = new SolrManager entity
         schema = solrManager.schema
         id = @generateId()
         picKey = schema.getFieldsByType('img')[0]?.id
@@ -141,12 +141,12 @@ class ItemController
                 # Get pic url
                 tmp_pic = "#{__dirname}/../public/#{item[picKey]}"
                 target_file = "#{id}.jpg"
-                target_path = "#{__dirname}/../public/images/#{name}/#{target_file}"
+                target_path = "#{__dirname}/../public/images/#{entity}/#{target_file}"
 
                 # Move the picture to its final place and send item object back
                 fs.rename tmp_pic, target_path, (err) =>
                     return cb err if err
-                    item[picKey] = "/images/#{name}/#{target_file}" unless err
+                    item[picKey] = "/images/#{entity}/#{target_file}" unless err
                     solrManager.addItems item, (item) =>
                         response = item[0]
                         return cb()
@@ -160,9 +160,9 @@ class ItemController
     # Update an item
     put: (req, res) =>
 
-        name = req.params.entity
-        eSettings = require "../entities/#{name}/settings.json"
-        solrManager = new SolrManager name
+        entity = req.params.entity
+        eSettings = require "../entities/#{entity}/settings.json"
+        solrManager = new SolrManager entity
         schema = solrManager.schema
         picKey = schema.getFieldsByType('img')[0]?.id
         item = null
@@ -250,7 +250,7 @@ class ItemController
                 return cb() if response
 
                 # Update picture field and add items to db
-                @updatePic item.id, name, req.body[picKey], item[picKey], (path) =>
+                @updatePic item.id, entity, req.body[picKey], item[picKey], (path) =>
                     req.body[picKey] = path
                     solrManager.addItems req.body, (item) =>
                         response = item
@@ -265,9 +265,9 @@ class ItemController
 
     # Remove item and its picture (if it has).
     delete: (req, res) =>
-        name = req.params.entity
+        entity = req.params.entity
         id = req.params.id
-        solrManager = new SolrManager name
+        solrManager = new SolrManager entity
         schema = solrManager.schema
         picKey = schema.getFieldsByType('img')[0]?.id
 
@@ -384,10 +384,10 @@ class ItemController
 
 
     # Update picture removing old picture and renaming new one.
-    updatePic: (id, name, bodyPic, itemPic, cb) =>
+    updatePic: (id, entity, bodyPic, itemPic, cb) =>
         tmp_pic = "#{__dirname}/../public/#{bodyPic}"
         rnd = bodyPic.slice(21, 24)
-        target_file = "/images/#{name}/#{id}_#{rnd}.jpg"
+        target_file = "/images/#{entity}/#{id}_#{rnd}.jpg"
         target_path = "#{__dirname}/../public/#{target_file}"
 
         fs.stat tmp_pic, (err, stat) ->
