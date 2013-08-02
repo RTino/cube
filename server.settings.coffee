@@ -53,9 +53,13 @@ ServerSettings = ->
     #            return next() if req.isAuthenticated()
     #            req.flash 'target', req.url
     #            res.redirect '/login'
-    #   entity:  "team"
+    #   entity:
+    #       name: ''                # name of the entity that contains profiles
+    #       useridField: ''         # name of field to match (i.e. mail)
+    #       ldapField: ''           # name of field on ldap user to match to.
     #
     # Avoid any authentication by setting strategy to 'none'
+
 
     Authentication:
         strategy: 'none'

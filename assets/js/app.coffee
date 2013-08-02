@@ -190,7 +190,7 @@ $ =>
 
             $('#controls a#logout').attr 'title', 'Sign Out user ' + username
 
-            $('#controls a#logout').css 'display', 'inline-block'
+            $('#controls a#logout').css 'display', 'inline-block' if username
 
 
         # Settings object holds all configuration parameters
@@ -1222,11 +1222,17 @@ $ =>
 
         # Check if admin key is present in QS
         isAdmin: () =>
-            return yes if window.settings.unrestricted
-            return no unless window.settings.admins
 
-            uid = window.user.mail or window.user.email or window.user.id
-            return yes if window.settings.admins.indexOf(uid) isnt -1
+            return yes if window.settings.unrestricted
+
+            uid = window.user.email or window.user.mail
+
+            return yes unless uid
+
+            return yes unless window.settings.admins and window.settings.admins.length
+
+            return yes unless window.settings.admins.indexOf(uid) is -1
+
             no
 
         # Check if the entity is editable at all
