@@ -179,12 +179,14 @@ $ =>
         # Set user icon on controls section as a logout btn.
         setUser: () ->
 
-            return unless window.user.pic and window.user.name
+            if window.user.pic
+                $('#controls a#logout')
+                    .css 'background', "url(#{window.user.pic}) no-repeat center center"
+                $('#controls a#logout').css 'background-size', "40px 40px"
 
-            $('#controls a#logout').css 'background', "url(#{window.user.pic}) no-repeat center center"
-            $('#controls a#logout').css 'background-size', "40px 40px"
-
-            username = "#{window.user.name} #{window.user.lastname}"
+            username = window.user.mail
+            if window.user.name and window.user.lastname
+                username = "#{window.user.name} #{window.user.lastname}"
 
             $('#controls a#logout').attr 'title', 'Sign Out user ' + username
 
@@ -1222,7 +1224,9 @@ $ =>
         isAdmin: () =>
             return yes if window.settings.unrestricted
             return no unless window.settings.admins
-            return yes if window.settings.admins.indexOf(window.user.email) isnt -1
+
+            uid = window.user.mail or window.user.email or window.user.id
+            return yes if window.settings.admins.indexOf(uid) isnt -1
             no
 
         # Check if the entity is editable at all

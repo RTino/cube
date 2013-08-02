@@ -195,17 +195,18 @@ module.exports = (app, express, passport, flash) ->
                 cb()
 
             ,(cb) =>
+
                 return cb() unless strategy is 'ldapauth' and req.user
 
-                authEntity = settings.Authentication.entity
+                authParams = settings.Authentication.entity
 
-                eSettings = require "./entities/#{authEntity}/settings.json"
+                return cb() unless authParams
 
-                return cb() unless eSettings.authentication
+                { name, useridField, ldapField } = authParams
 
-                { entityField, ldapField } = eSettings.authentication
+                return cb() unless name and useridField and ldapField
 
-                getLinkedEntityItem authEntity, entityField, req.user[ldapField], (user) =>
+                getLinkedEntityItem name, useridField, req.user[ldapField], (user) =>
                     params.user = user
                     cb()
 
