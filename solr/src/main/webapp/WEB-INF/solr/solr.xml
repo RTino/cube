@@ -2,5 +2,6 @@
 <solr sharedLib="lib" persistent="true">
   <cores adminPath="/admin/cores">
       <core name="team" instanceDir="conf/cube/" dataDir="conf/cube/team"/>
+      <core name="world" instanceDir="conf/cube/" dataDir="conf/cube/world"/>
   </cores>
 </solr>

@@ -1,0 +1,73 @@
+[
+    {
+      "id": "flag",
+      "label": "Flag",
+      "index": true,
+      "type": "img"
+    },
+    {
+      "id": "name",
+      "label": "Name",
+      "mandatory": true,
+      "index": true,
+      "search": true,
+      "thumbnail": true
+    },
+    {
+      "id": "capital",
+      "label": "Capital",
+      "index": true
+    },
+    {
+      "id": "continent",
+      "label": "Continent",
+      "type": "facet",
+      "index": true,
+      "classifier": ["North America"]
+    },
+    {
+      "id": "population",
+      "label": "Population",
+      "index": true
+    },
+    {
+      "id": "populationRange",
+      "label": "Population",
+      "index": false,
+      "hidden": true,
+      "type": "facet",
+      "order": [ "< 10k", "10k - 100k", "100k - 500k", "500k - 1m", "1m - 10m", "10m - 50m", "50m - 100m", "100m - 500m", "500m - 1b" ]
+    },
+    {
+      "id": "areaInSqKm",
+      "label": "Area km2",
+      "index": true
+    },
+    {
+      "id": "areaRange",
+      "label": "Area km2",
+      "index": false,
+      "hidden": true,
+      "type": "facet",
+      "order": ["< 1k", "1k - 10k", "10k - 100k", "100k - 1m", "1m - 5m", "5m - 10m", "> 10m" ]
+    },
+    {
+      "id": "languages",
+      "label": "Languages",
+      "index": true,
+      "type": "facet",
+      "collapse": true
+    },
+    {
+      "id": "currency",
+      "label": "Currency",
+      "type": "facet",
+      "index": true,
+      "collapse": true
+    },
+    {
+      "id": "geonameId",
+      "label": "GeoName ID",
+      "hidden": true
+    }
+]

@@ -1,0 +1,11 @@
+{
+    "entity": "world",
+    "title": "The World",
+    "description": "Geonames.org countries database imported into a cube",
+    "itemType": [ "country", "countries" ],
+    "separator": "/",
+    "view": "list",
+    "rows": 50,
+    "sort": "name:asc",
+    "editable": false
+}
