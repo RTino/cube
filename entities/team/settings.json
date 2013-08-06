@@ -6,5 +6,6 @@
     "separator": "/",
     "view": "list",
     "rows": 50,
-    "sort": "name:asc"
+    "sort": "name:asc",
+    "editable": false
 }
