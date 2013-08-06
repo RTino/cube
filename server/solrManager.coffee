@@ -245,8 +245,8 @@ class SolrManager
             docs.push item
 
         @client.add docs, (err, result) =>
-            throw err if err
+            return cb err, result if err
             items = []
             _.each docs, (doc) =>
                 items.push @removeSuffix doc
-            cb items
+            cb null, items

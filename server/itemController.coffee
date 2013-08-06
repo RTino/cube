@@ -121,7 +121,8 @@ class ItemController
                             delete item[fid] if item[fid].length is 0
                             docs.push item
 
-                        solrManager.addItems docs, (docs) =>
+                        solrManager.addItems docs, (err, docs) =>
+                            throw err if err
                             _cb()
 
                 , (err, result) =>
@@ -133,8 +134,9 @@ class ItemController
             , (cb) =>
                 return cb() if item[picKey]
 
-                solrManager.addItems item, (item) =>
-                    response = item[0]
+                solrManager.addItems item, (err, item) =>
+                    throw err if err
+                    response = item.pop()
                     cb()
 
             , (cb) =>
@@ -149,8 +151,9 @@ class ItemController
                 fs.rename tmp_pic, target_path, (err) =>
                     return cb err if err
                     item[picKey] = "/images/#{entity}/#{target_file}" unless err
-                    solrManager.addItems item, (item) =>
-                        response = item[0]
+                    solrManager.addItems item, (err, item) =>
+                        throw err if err
+                        response = item.pop()
                         return cb()
 
         ], (err, result) =>
@@ -221,7 +224,8 @@ class ItemController
                             delete item[fid] if item[fid].length is 0
                             docs.push item
 
-                        solrManager.addItems docs, (docs) =>
+                        solrManager.addItems docs, (err, docs) =>
+                            throw err if err
                             _cb()
 
                 , (err, result) =>
@@ -251,7 +255,8 @@ class ItemController
 
                 response = item
 
-                solrManager.addItems req.body, (item) =>
+                solrManager.addItems req.body, (err, item) =>
+                    throw err if err
                     cb()
 
             , (cb) =>
@@ -260,7 +265,8 @@ class ItemController
                 # Update picture field and add items to db
                 @updatePic item.id, entity, req.body[picKey], item[picKey], (path) =>
                     req.body[picKey] = path
-                    solrManager.addItems req.body, (item) =>
+                    solrManager.addItems req.body, (err, item) =>
+                        throw err if err
                         response = item
                         cb()
 
@@ -338,11 +344,13 @@ class ItemController
 
                 if typeof item[prop] is typeof []
                     item[prop].push value if item[prop].indexOf(value) is -1
-                    return solrManager.addItems item, (item) =>
+                    return solrManager.addItems item, (err, item) =>
+                        throw err if err
                         res.send item
 
                 item[prop] = value
-                solrManager.addItems item, (item) =>
+                solrManager.addItems item, (err, item) =>
+                    throw err if err
                     res.send item
 
 
@@ -387,12 +395,14 @@ class ItemController
                     return res.send [] if index is -1
 
                     item[prop].splice index, 1
-                    return solrManager.addItems item, (_item) =>
+                    return solrManager.addItems item, (err, _item) =>
+                        throw err if err
                         res.send _item
 
                 delete item[prop]
-                solrManager.addItems item, (_item) =>
-                    res.send _item
+                solrManager.addItems item, (err, item) =>
+                    throw err if err
+                    res.send item
 
 
     # Update picture removing old picture and renaming new one.
@@ -460,11 +470,13 @@ class ItemController
 
                 if typeof item[prop] is typeof []
                     item[prop].push value if item[prop].indexOf(value) is -1
-                    return solrManager.addItems item, (item) =>
+                    return solrManager.addItems item, (err, item) =>
+                        throw err if err
                         res.send item
 
                 item[prop] = value
-                solrManager.addItems item, (item) =>
+                solrManager.addItems item, (err, item) =>
+                    throw err if err
                     res.send item
 
 
@@ -509,11 +521,13 @@ class ItemController
                     return res.send [] if index is -1
 
                     item[prop].splice index, 1
-                    return solrManager.addItems item, (_item) =>
+                    return solrManager.addItems item, (err, _item) =>
+                        throw err if err
                         res.send _item
 
                 delete item[prop]
-                solrManager.addItems item, (_item) =>
+                solrManager.addItems item, (err, _item) =>
+                    throw err if err
                     res.send _item
 
 
