@@ -49,7 +49,7 @@ class EntityController
     schema: (req, res) ->
         entity = req.params.entity
         return res.send 404 if entities.indexOf(entity) is -1
-        schema = require "#{__direname}/../entities/#{entity}/schema.json"
+        schema = require "#{__dirname}/../entities/#{entity}/schema.json"
         res.send schema
 
     # Return appropriate settings for each entity
@@ -75,7 +75,9 @@ class EntityController
 
     # Returns pane.json, containing extra data for custom panes.
     pane: (req, res) ->
-        file = "#{__dirname}/../entities/#{req.params.entity}/pane.json"
+        entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+        file = "#{__dirname}/../entities/#{entity}/pane.json"
         res.setHeader 'Content-Type', 'application/json'
         fs.readFile file, "utf8", (err, data) =>
             return res.send {} if err
@@ -83,6 +85,8 @@ class EntityController
 
     # Get unique values from all the facet fields. Useful for autocomplete.
     ufacets: (req, res) =>
+        entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
         facetManager.distincts req.params.entity, (d) =>
             res.send d
 
@@ -114,7 +118,9 @@ class EntityController
 
     # Return templates from an entity
     template: (req, res) ->
-        res.render "../entities/#{req.params.entity}/templates"
+        entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+        res.render "../entities/#{entity}/templates"
 
     # Run query and return either CSV, JSON or XML
     getCollection: (db, query, cb) =>
@@ -131,7 +137,7 @@ class EntityController
         es = {}
         _.each entities, (e) =>
             settings = require "#{__dirname}/../entities/#{e}/settings.json"
-            es[entity] = settings
+            es[e] = settings
         cb es
 
 
