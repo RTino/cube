@@ -184,7 +184,7 @@ class SolrManager
             .rows(1000)
 
         client.search query, (err, result) =>
-            return cb err, docs if err
+            return cb err, result if err
             docs = []
             _.each result.response?.docs, (doc) =>
                 docs.push @removeSuffix doc
@@ -203,11 +203,11 @@ class SolrManager
             .rows(1000)
 
         client.search query, (err, result) =>
-            throw err if err
+            return cb err, result if err
             docs = []
             _.each result.response?.docs, (doc) =>
                 docs.push @removeSuffix doc
-            cb docs
+            cb null, docs
 
     # Add a month field that acts like a facet
     addMonthFacetFields: (item) =>
