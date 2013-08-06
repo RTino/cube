@@ -63,13 +63,15 @@ class ItemController
         id = req.params.id.split('|')
 
         # Return just 1 item
-        if id.length is 1 then return solrManager.getItemById id[0], (docs) ->
+        if id.length is 1 then return solrManager.getItemById id[0], (err, docs) ->
+            throw err if err
             res.send docs
 
         # Return an array of items
         docs = []
         async.forEach id, (id, cb) =>
-            solrManager.getItemById id, (item) ->
+            solrManager.getItemById id, (err, item) ->
+                throw err if err
                 docs.push item[0]
                 cb()
         , (err) ->
@@ -175,11 +177,18 @@ class ItemController
 
             (cb) =>
                 # Get item from the id on the querystring
-                solrManager.getItemById req.params.id, (result) =>
-                    item = result[0]
+                solrManager.getItemById req.params.id, (err, result) =>
+                    throw err if err
+                    if result.length is 1
+                        item = result.pop()
+                        return cb()
+                    res.statusCode = 404
+                    response = "Item to update doesn't exist"
                     cb()
 
             , (cb) =>
+                return cb() if response
+
                 # Detect concurrency issues and respond 409 in case.
                 if !@isVersionValid item, req.body
                     res.statusCode = 409
@@ -188,7 +197,6 @@ class ItemController
                 cb()
 
             , (cb) =>
-
                 # Remove this item's token values from all other items.
                 return cb() if response
 
@@ -271,7 +279,8 @@ class ItemController
         schema = solrManager.schema
         picKey = schema.getFieldsByType('img')[0]?.id
 
-        solrManager.getItemById id, (docs) =>
+        solrManager.getItemById id, (err, docs) =>
+            throw err if err
             _.each docs, (item) ->
                 solrManager.client.deleteByID id, (err, result) ->
                     throw err if err
@@ -288,7 +297,8 @@ class ItemController
         item    = req.params.item
         prop    = req.params.property
         solrManager = new SolrManager entity
-        solrManager.getItemById item, (items) ->
+        solrManager.getItemById item, (err, items) ->
+            throw err if err
             return res.send [] unless items.length
             res.send items[0][prop]
 
@@ -318,7 +328,8 @@ class ItemController
 
             solrManager = new SolrManager entity
 
-            solrManager.getItemById item, (items) =>
+            solrManager.getItemById item, (err, items) =>
+                throw err if err
                 return res.send [] unless items.length
 
                 item = items[0]
@@ -361,7 +372,8 @@ class ItemController
 
             solrManager = new SolrManager entity
 
-            solrManager.getItemById item, (items) =>
+            solrManager.getItemById item, (err, items) =>
+                throw err if err
                 return res.send [] unless items.length
 
                 item = items[0]
@@ -407,7 +419,8 @@ class ItemController
 
         solrManager = new SolrManager entity
 
-        solrManager.getItemById item, (items) ->
+        solrManager.getItemById item, (err, items) ->
+            throw err if err
             return res.send [] unless items.length
             res.send items[0][prop]
 
@@ -437,7 +450,8 @@ class ItemController
 
             solrManager = new SolrManager entity
 
-            solrManager.getItemById item, (items) =>
+            solrManager.getItemById item, (err, items) =>
+                throw err if err
                 return res.send [] unless items.length
 
                 item = items[0]
@@ -480,7 +494,8 @@ class ItemController
 
             solrManager = new SolrManager entity
 
-            solrManager.getItemById item, (items) =>
+            solrManager.getItemById item, (err, items) =>
+                throw err if err
                 return res.send [] unless items.length
 
                 item = items[0]
@@ -536,6 +551,5 @@ class ItemController
 
     # Check if id is in list
     isAdmin: (id, list) =>
-        return yes unless list
         return yes if list.indexOf(id) isnt -1
         no

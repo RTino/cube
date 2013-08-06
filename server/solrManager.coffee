@@ -184,11 +184,11 @@ class SolrManager
             .rows(1000)
 
         client.search query, (err, result) =>
-            throw err if err
+            return cb err, docs if err
             docs = []
             _.each result.response?.docs, (doc) =>
                 docs.push @removeSuffix doc
-            cb docs
+            cb null, docs
 
     # Get all documents from Solr that match a value
     getItemsByProp: (key, value, cb) =>

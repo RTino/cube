@@ -283,7 +283,8 @@ class EntityController
             _.each fields, (field) =>
                 return _cb() unless d[field.id]
                 _solrManager = new SolrManager field.entity
-                _solrManager.getItemById "(#{d[field.id].join(' ')})", (items) =>
+                _solrManager.getItemById "(#{d[field.id].join(' ')})", (err, items) =>
+                    throw err if err
                     d[field.id] =  items
                     _cb()
         , (err) =>
