@@ -1,4 +1,4 @@
-# SERVER DATABASE
+# BASE IMPORTER
 # --------------------------------------------------------------------------
 # Base Importer class.
 
@@ -42,7 +42,7 @@ class BaseImporter
             @onError "Importer 'transform' must be a function."
             throw "You must pass the settings to the importer constructor!"
 
-        solrManager = new (require "../solrManager.coffee")(options.entity)
+        solrManager = new (require "solrManager.coffee")(options.entity)
         solrClient = solrManager.createClient()
 
 
@@ -101,7 +101,6 @@ class BaseImporter
 
     # Process each transformed item.
     processItem: =>
-        if @settings.
 
 
     # INTERNAL HELPERS
