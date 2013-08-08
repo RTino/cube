@@ -255,7 +255,7 @@ class ItemController
 
                 response = item
 
-                solrManager.addItems req.body, (err, item) =>
+                solrManager.addItems item, (err, item) =>
                     throw err if err
                     cb()
 
@@ -265,7 +265,7 @@ class ItemController
                 # Update picture field and add items to db
                 @updatePic item.id, entity, req.body[picKey], item[picKey], (path) =>
                     req.body[picKey] = path
-                    solrManager.addItems req.body, (err, item) =>
+                    solrManager.addItems item, (err, item) =>
                         throw err if err
                         response = item
                         cb()
