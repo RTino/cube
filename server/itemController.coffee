@@ -116,7 +116,7 @@ class ItemController
                     solrManager.getItemsByProp fid, v, (items) =>
                         docs = []
                         _.each items, (item, __cb) =>
-                            return if item.id is item.id
+                            return if item.id is req.body.id
                             item[fid] = _.without item[fid], v
                             delete item[fid] if item[fid].length is 0
                             docs.push item
