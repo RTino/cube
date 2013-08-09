@@ -239,7 +239,9 @@ class ItemController
 
                 # Update all fields if user is admin
                 if @isAdmin req.user.mail, eSettings.admins
-                    item = req.body
+                    _.each solrManager.schema.fields, (field) ->
+                        return if field.id is picKey
+                        item[field.id] = req.body[field.id]
                     return cb()
 
                 # If the user isnt admin, only update additional fields

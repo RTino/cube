@@ -111,6 +111,8 @@ class SolrManager
 
         _.each item, (v, k) =>
 
+            return unless item[k]
+
             field = @schema.getFieldById k
 
             return unless @isMultivalue field
