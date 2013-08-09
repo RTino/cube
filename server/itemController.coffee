@@ -224,7 +224,7 @@ class ItemController
 
                     return _cb() unless v
 
-                    solrManager.getItemsByProp fid, v, (items) =>
+                    solrManager.getItemsByProp fid, v, (err, items) =>
                         docs = []
                         _.each items, (item, __cb) =>
                             return if item.id is req.body.id
