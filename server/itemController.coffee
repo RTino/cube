@@ -62,21 +62,10 @@ class ItemController
         solrManager = new SolrManager entity
         id = req.params.id.split('|')
 
-        # Return just 1 item
-        if id.length is 1 then return solrManager.getItemById id[0], (err, docs) ->
+        solrManager.getItemById id, (err, items) ->
             throw err if err
-            res.send docs
-
-        # Return an array of items
-        docs = []
-        async.forEach id, (id, cb) =>
-            solrManager.getItemById id, (err, item) ->
-                throw err if err
-                docs.push item[0]
-                cb()
-        , (err) ->
-            throw err if err
-            return res.send docs
+            items = items.pop() if items.length is 1
+            res.send items
 
 
     # Create a new item
@@ -85,8 +74,16 @@ class ItemController
         entity = req.params.entity
         solrManager = new SolrManager entity
         schema = solrManager.schema
+        eSettings = require "../entities/#{entity}/settings.json"
         id = @generateId()
         picKey = schema.getFieldsByType('img')[0]?.id
+
+        auth = settings.Authentication
+        if auth?.strategy? isnt 'none' and
+            eSettings.admins?.length and
+            !@isAdmin req.user.mail, eSettings.admins
+                res.setHeaders 403
+                return res.send 'Unauthorized'
 
         # Cube link fields need to be a list of IDs to be saved
         @resetClinkFields schema, req.body
@@ -216,7 +213,7 @@ class ItemController
 
                     return _cb() unless v
 
-                    solrManager.getItemsByProp fid, v, (items) =>
+                    solrManager.getItemsByProp fid, v, (err, items) =>
                         docs = []
                         _.each items, (item, __cb) =>
                             return if item.id is req.body.id
@@ -235,18 +232,19 @@ class ItemController
             , (cb) =>
                 return cb() if response
 
-                return cb() unless req.user
-
-                # Update all fields if user is admin
-                if @isAdmin req.user.mail, eSettings.admins
-                    _.each solrManager.schema.fields, (field) ->
-                        return if field.id is picKey
-                        item[field.id] = req.body[field.id]
-                    return cb()
-
-                # If the user isnt admin, only update additional fields
+                # Update additional information fields. No privilege required.
                 _.each solrManager.schema.getFieldsByProp('additional'), (field) =>
                     item[field.id] = req.body[field.id] if req.body[field.id]
+
+                auth = settings.Authentication
+                if auth?.strategy? isnt 'none' and eSettings.admins?.length
+                    return cb() unless @isAdmin req.user.mail, eSettings.admins
+
+                # Update all fields
+                _.each solrManager.schema.fields, (field) ->
+                    return if field.id is picKey
+                    item[field.id] = req.body[field.id]
+
                 cb()
 
             , (cb) =>
