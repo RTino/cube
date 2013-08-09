@@ -62,21 +62,10 @@ class ItemController
         solrManager = new SolrManager entity
         id = req.params.id.split('|')
 
-        # Return just 1 item
-        if id.length is 1 then return solrManager.getItemById id[0], (err, docs) ->
+        solrManager.getItemById id, (err, items) ->
             throw err if err
-            res.send docs
-
-        # Return an array of items
-        docs = []
-        async.forEach id, (id, cb) =>
-            solrManager.getItemById id, (err, item) ->
-                throw err if err
-                docs.push item[0]
-                cb()
-        , (err) ->
-            throw err if err
-            return res.send docs
+            items = items.pop() if items.length is 1
+            res.send items
 
 
     # Create a new item
