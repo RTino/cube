@@ -6,6 +6,12 @@ html
 
 script(type="text/javascript)
 
-  window.location = '/login?continue=' + window.location.href;
+  var qs = '';
+
+  if (window.location.hash) {
+    qs = '?continue=' + window.location.href;
+  }
+
+  window.location = '/login' + qs;
 
 
