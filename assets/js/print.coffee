@@ -126,14 +126,6 @@ $ =>
                         window.opener.settings.ListSort = sort
 
 
-        # Check of admin in QS
-        isAdmin: () =>
-
-            qs = window.location.search.split('?')[1]
-
-            new RegExp('admin=').test qs
-
-
         # Form a URL with the basic prefix (i.e. /collection) and appends all
         # filter parameters on the querystring.
         commonURL: (page, rows) =>
