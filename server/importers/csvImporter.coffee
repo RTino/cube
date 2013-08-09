@@ -10,11 +10,15 @@ class CsvImporter extends BaseImporter
     # IMPLEMENTATION
     # ----------------------------------------------------------------------
 
-    # Wipe the entity data from the Solr database.
-    wipe: =>
-        console.warn "Wipe data from Solr..."
+    # Fetch the CSV file from the specified URL.
+    fetch: (callback) =>
+        if not @options.uri
+            err = "CSV file or URL was not specified."
+            return callback err, null
+
+        if @options.uri
 
 
 # EXPORTS
 # --------------------------------------------------------------------------
-module.exports = exports = CsvImporter
+module.exports = exports = new CsvImporter()

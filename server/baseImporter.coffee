@@ -18,8 +18,10 @@ class BaseImporter
     # IMPLEMENTATION
     # ----------------------------------------------------------------------
 
-    # The data URI and its raw/processed values will be set on each importer.
-    dataUri: null
+    # Options are passed on the constructor.
+    options: null
+
+    # The raw and processed values will be set on each importer.
     rawData: null
     processedData: null
 
@@ -39,8 +41,10 @@ class BaseImporter
     # Constructor must receive options (settings).
     constructor: (options) ->
         if not options? or options is ""
-            @onError "Importer 'transform' must be a function."
+            @error "Importer 'transform' must be a function."
             throw "You must pass the settings to the importer constructor!"
+
+        @options = options
 
         solrManager = new (require "solrManager.coffee")(options.entity)
         solrClient = solrManager.createClient()
@@ -50,9 +54,9 @@ class BaseImporter
     # ----------------------------------------------------------------------
 
     # Start the importer.
-    start: =>
+    run: =>
         if not @transform? or not lodash.isFunction @transform
-            @onError "Importer 'transform' must be a function."
+            @error "Importer 'transform' must be a function."
             return
 
         if @preRun?
@@ -63,7 +67,7 @@ class BaseImporter
     # Callback to the `preRun` method.
     preRunCallback: (err, data) =>
         if err?
-            @onError err if @onError?
+            @error err
             return
 
         @fetch @fetchCallback
@@ -71,7 +75,7 @@ class BaseImporter
     # Callback for the `fetch` method.
     fetchCallback: (err, data) =>
         if err?
-            @onError err if @onError?
+            @error err
             return
 
         # If data was passed, set it as the `rawData`.
@@ -83,7 +87,7 @@ class BaseImporter
     # Callback for the `transform` method.
     transformCallback: (err, data) =>
         if err?
-            @onError err if @onError?
+            @error err
             return
 
         # If import type is full, wipe contents before proceeding.
@@ -101,6 +105,10 @@ class BaseImporter
 
     # Process each transformed item.
     processItem: =>
+        
+    # On error log to the console and check for custom error actions.
+    error: (err) =>
+        @onError err if @onError?
 
 
     # INTERNAL HELPERS

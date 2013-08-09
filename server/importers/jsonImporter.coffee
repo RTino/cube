@@ -17,4 +17,4 @@ class JsonImporter extends BaseImporter
 
 # EXPORTS
 # --------------------------------------------------------------------------
-module.exports = exports = JsonImporter
+module.exports = exports = new JsonImporter()
