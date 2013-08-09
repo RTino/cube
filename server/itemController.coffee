@@ -116,7 +116,7 @@ class ItemController
                     solrManager.getItemsByProp fid, v, (items) =>
                         docs = []
                         _.each items, (item, __cb) =>
-                            return if item.id is item.id
+                            return if item.id is req.body.id
                             item[fid] = _.without item[fid], v
                             delete item[fid] if item[fid].length is 0
                             docs.push item
@@ -239,7 +239,9 @@ class ItemController
 
                 # Update all fields if user is admin
                 if @isAdmin req.user.mail, eSettings.admins
-                    item = req.body
+                    _.each solrManager.schema.fields, (field) ->
+                        return if field.id is picKey
+                        item[field.id] = req.body[field.id]
                     return cb()
 
                 # If the user isnt admin, only update additional fields
@@ -255,7 +257,7 @@ class ItemController
 
                 response = item
 
-                solrManager.addItems req.body, (err, item) =>
+                solrManager.addItems item, (err, item) =>
                     throw err if err
                     cb()
 
@@ -264,8 +266,8 @@ class ItemController
 
                 # Update picture field and add items to db
                 @updatePic item.id, entity, req.body[picKey], item[picKey], (path) =>
-                    req.body[picKey] = path
-                    solrManager.addItems req.body, (err, item) =>
+                    item[picKey] = path
+                    solrManager.addItems item, (err, item) =>
                         throw err if err
                         response = item
                         cb()

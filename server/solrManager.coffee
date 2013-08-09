@@ -76,26 +76,21 @@ class SolrManager
         # Object to return with suffixes appended.
         newObj = {}
 
-        _.each obj, (v, k) =>
+        for k,v of obj
+            do (k, v) =>
 
-            # id is a reserved static field in solr, needs no suffix.
-            return newObj[k] = v if k is 'id' or k is '_version_'
+                # id is a reserved static field in solr, needs no suffix.
+                return newObj[k] = v if k is 'id' or k is '_version_'
 
-            # -sort suffix should not be modified
-            return newObj[k] = v if /-sort$/.test k
+                # -sort suffix should not be modified
+                return newObj[k] = v if /-sort$/.test k
 
-            # avoid adding suffixes to month and year facet fields
-            return newObj[k] = v if /_month-sm$/.test k
-            return newObj[k] = v if /_year-sm$/.test k
+                # avoid adding suffixes to month and year facet fields
+                return newObj[k] = v if /_month-sm$/.test k
+                return newObj[k] = v if /_year-sm$/.test k
 
-            # Add suffix to the key
-            ks = @addSuffix k
-
-            # Get field from Schema with all properties
-            f = @schema.getFieldById k
-
-            # Set value to new object
-            newObj[ks] = v
+                # Set value to new object
+                newObj[@addSuffix(k)] = v
 
         newObj
 
@@ -115,6 +110,8 @@ class SolrManager
     addSortFields: (item) =>
 
         _.each item, (v, k) =>
+
+            return unless item[k]
 
             field = @schema.getFieldById k
 
@@ -178,8 +175,10 @@ class SolrManager
     getItemById: (id, cb) =>
         client = @createClient()
 
+        id = id.join(' OR ') if id instanceof Array
+
         query = client.createQuery()
-            .q("id:#{id}")
+            .q("id:(#{id})")
             .start(0)
             .rows(1000)
 
@@ -211,7 +210,12 @@ class SolrManager
 
     # Add a month field that acts like a facet
     addMonthFacetFields: (item) =>
-        _.each @schema.getFieldsByType('date'), (f) =>
+        dateFields = @schema.getFieldsByType('date')
+        dateTimeFields = @schema.getFieldsByType('datetime')
+
+        fields = dateFields.concat(dateTimeFields)
+
+        _.each fields, (f) =>
             return unless item[f.id] and f.facet is 'month'
             d = new Date(item[f.id]).getMonth()
             monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -222,7 +226,12 @@ class SolrManager
 
     # Add a year field that acts like a facet
     addYearFacetFields: (item) =>
-        _.each @schema.getFieldsByType('date'), (f) =>
+        dateFields = @schema.getFieldsByType('date')
+        dateTimeFields = @schema.getFieldsByType('datetime')
+
+        fields = dateFields.concat(dateTimeFields)
+
+        _.each fields, (f) =>
             return unless item[f.id] and f.facet is 'year'
             year = []
             d = new Date(item[f.id]).getFullYear()
