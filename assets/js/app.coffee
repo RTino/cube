@@ -1158,8 +1158,14 @@ $ =>
         navigateURL: () =>
             page = window.collection.page
             rows = window.collection.rows
-            sort = window.collection.sort
-            nav = ["page=#{page}&rows=#{rows}&sort=#{sort}"]
+            sort = "&sort=#{window.collection.sort}"
+
+            if window.collection.display?
+                display = "&display=#{window.collection.display}"
+            else
+                display = ''
+
+            nav = ["#{page}#{rows}#{sort}#{display}"]
             id = ''
             fs = ''
             search = ''
@@ -1513,11 +1519,15 @@ $ =>
         # Resize facet index
         resizeIndex: (event, ui) =>
 
+            return unless $('#index').is(':visible')
+
             w = window.App.getIndexWidth()
 
             $('#content').css 'left', w + 21
             $('#footer').css 'left', w + 21
             $('#innerIndex').width w - 10
+
+            $('#content').trigger 'left'
 
 
         # Save column selection on local storage
