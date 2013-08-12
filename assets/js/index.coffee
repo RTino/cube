@@ -36,17 +36,3 @@ $ ->
 
     $('input#import').bind 'fileuploaddone', (e, data) ->
         document.location.reload yes
-
-    # Show extension add button if user is admin
-    $('a.btn#add').css('display', 'block') if isAdmin()
-
-    # Show input field to upload CSV/Json and import into a new extension.
-    $('input#import').css('display', 'block') if isAdmin()
-
-
-# Check if admin key is present in QS
-isAdmin = () =>
-
-    qs = window.location.search.split('?')[1]
-
-    new RegExp('admin=').test qs

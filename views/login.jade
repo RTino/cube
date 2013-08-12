@@ -30,12 +30,16 @@ script(type="text/javascript)
 
     var target = '';
 
+    var redirect = window.location.search + window.location.hash;
+    redirect = redirect.split('?continue=')[1];
+
     if (flash.target && flash.target.length) {
         var target = flash.target[0];
     }
 
+    $('form').attr('action', '/login?continue='+redirect);
+
     $('#submit').click(function() {
-      $('form').attr('action', '/login?redirect='+target);
       $('form').submit();
     });
 

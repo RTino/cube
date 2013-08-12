@@ -33,8 +33,7 @@ module.exports = (app, express, passport, flash) ->
         return next() unless settings.Authentication.strategy
         return next() if settings.Authentication.strategy is 'none'
         return next() if req.isAuthenticated()
-        req.flash 'target', req.url
-        res.redirect '/login'
+        res.render 'continue'
 
     # Apply strategy when posting credentials
     check = passport.authenticate(strategy, settings.Authentication.params)
@@ -139,17 +138,20 @@ module.exports = (app, express, passport, flash) ->
 
         res.send status: 'ok'
 
+
     # Render login page
     login = (req, res) ->
 
         res.render 'login', flash: req.flash()
 
+
     # Redirect authenticated user to a specifc address from the querystring
     logged = (req, res) ->
 
-        return res.redirect req.query.redirect if req.query.redirect
+        return res.redirect req.query.continue if req.query.continue
 
         res.redirect '/'
+
 
     # Log Out a user and redirect to index page (usually redir to /login)
     logout = (req, res) ->
@@ -239,9 +241,7 @@ module.exports = (app, express, passport, flash) ->
 
     # Read a file and parse it as json, return a json object.
     getJsonFile = (file, entity, cb) =>
-
         f = "#{__dirname}/entities/#{entity}/#{file}"
-
         fs.readFile f, "utf8", (err, data) =>
             return cb({}) if err
             cb JSON.parse data
