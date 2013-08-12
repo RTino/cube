@@ -12,7 +12,6 @@ class BaseImporter
 
     # These will be set in the constructor.
     entity = null
-    settings = null
     solrClient = null
 
     # IMPLEMENTATION
@@ -35,30 +34,25 @@ class BaseImporter
     postRun: null
 
 
-    # CONSTRUCTOR
-    # ----------------------------------------------------------------------
-
-    # Constructor must receive options (settings).
-    constructor: (options) ->
-        if not options? or options is ""
-            @error "Importer 'transform' must be a function."
-            throw "You must pass the settings to the importer constructor!"
-
-        @options = options
-
-        solrManager = new (require "solrManager.coffee")(options.entity)
-        solrClient = solrManager.createClient()
-
-
     # METHODS
     # ----------------------------------------------------------------------
 
-    # Start the importer.
+    # Start the importer. An `options` object must be passed, and the
+    # method `transform` must be set on the importer class.
     run: =>
-        if not @transform? or not lodash.isFunction @transform
-            @error "Importer 'transform' must be a function."
-            return
+        if not @options? or @options is ""
+            return @error "Importer options must be set before running!"
 
+        if not @transform? or not lodash.isFunction @transform
+            return @error "Importer 'transform' must be a function."
+
+        @options = options
+
+        # Set the SolrManager to use the passed entity.
+        solrManager = new (require "solrManager.coffee")(@entity)
+        solrClient = solrManager.createClient()
+
+        # Check if a `preRun` is set on the importer.
         if @preRun?
             @preRun @preRunCallback
         else
@@ -67,16 +61,14 @@ class BaseImporter
     # Callback to the `preRun` method.
     preRunCallback: (err, data) =>
         if err?
-            @error err
-            return
+            return @error err
 
         @fetch @fetchCallback
 
     # Callback for the `fetch` method.
     fetchCallback: (err, data) =>
         if err?
-            @error err
-            return
+            return @error err
 
         # If data was passed, set it as the `rawData`.
         @rawData = data if data?
@@ -87,11 +79,10 @@ class BaseImporter
     # Callback for the `transform` method.
     transformCallback: (err, data) =>
         if err?
-            @error err
-            return
+            return @error err
 
         # If import type is full, wipe contents before proceeding.
-        @wipe() if @settings.type is "full"
+        @wipe() if @options.type is "full"
 
         # If data was passed, set it as the `processedData`.
         @processedData = data if data?
@@ -105,6 +96,7 @@ class BaseImporter
 
     # Process each transformed item.
     processItem: =>
+
         
     # On error log to the console and check for custom error actions.
     error: (err) =>
