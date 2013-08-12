@@ -1156,8 +1156,8 @@ $ =>
 
         # Form QS from current application state
         navigateURL: () =>
-            page = window.collection.page
-            rows = window.collection.rows
+            page = "page=#{window.collection.page}"
+            rows = "&rows=#{window.collection.rows}"
             sort = "&sort=#{window.collection.sort}"
 
             if window.collection.display?
@@ -1165,7 +1165,7 @@ $ =>
             else
                 display = ''
 
-            nav = ["#{page}#{rows}#{sort}#{display}"]
+            nav = [page + rows + sort + display]
             id = ''
             fs = ''
             search = ''
