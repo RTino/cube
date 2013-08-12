@@ -9,6 +9,7 @@ class @Item extends Backbone.Model
     initialize: () =>
         @bind 'sync', window.App.updateFacets, window.App
 
+
     #### URLRoot
     # Returns the base url part for a given entity
     urlRoot: () =>
@@ -62,3 +63,13 @@ class @Item extends Backbone.Model
         _.each window.settings.Schema.getThumbnails(), (l) =>
             t.push @get l.id
         return t.join ' '
+
+
+    # An item's label is a concatenation of strings from its properties.
+    # Fields on the schema that have the 'thumbnail' property will be used
+    # to generate this string.
+    getLabel: () ->
+        label = []
+        _.each window.settings.Schema.getThumbnails(), (f) =>
+            label.push @[f.id]
+        label.join ' '

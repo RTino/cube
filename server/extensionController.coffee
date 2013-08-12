@@ -8,7 +8,7 @@
 ###
 
 fs      = require 'fs'
-_       = require 'underscore'
+_       = require 'lodash'
 mime    = require 'mime-magic'
 http    = require "http"
 async   = require "async"

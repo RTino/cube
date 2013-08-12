@@ -8,7 +8,7 @@
 
 # Requirements
 #
-_ = require 'underscore'
+_ = require 'lodash'
 
 
 class Schema
@@ -17,7 +17,8 @@ class Schema
 
     # Initialize with schema from entity
     constructor: (@name) ->
-        @fields = require "../entities/#{@name}/schema.json"
+
+        @fields = require "../entities/#{@name}/schema.json" if @name
 
     # Get just one field from a field ID
     getFieldById: (id) =>
@@ -25,6 +26,18 @@ class Schema
         _.each @fields, (f) =>
             field = f if f.id is id
         field
+
+    getFieldsByType: (type) =>
+        fields = []
+        _.each @fields, (f) =>
+            fields.push f if f.type is type
+        fields
+
+    getFieldsByProp: (prop) =>
+        fields = []
+        _.each @fields, (f) =>
+            fields.push f if f[prop]
+        fields
 
     # Get all fields that have a specific property
     getFieldsWithProperty: (property) =>

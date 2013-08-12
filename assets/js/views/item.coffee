@@ -192,3 +192,5 @@ $ ->
             super
 
             @$el.addClass 'selectable'
+
+            @$el.addClass 'active' if window.App.itemSelection.get @model.get('id')

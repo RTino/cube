@@ -1,0 +1,17 @@
+!!! 5
+html
+  head
+    title Cube authenticating...
+  body
+
+script(type="text/javascript)
+
+  var qs = '';
+
+  if (window.location.hash) {
+    qs = '?continue=' + window.location.href;
+  }
+
+  window.location = '/login' + qs;
+
+

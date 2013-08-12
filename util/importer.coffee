@@ -35,7 +35,7 @@ dbSettings =
 
 require "coffee-script"
 
-_       = require "underscore"
+_       = require "lodash"
 fs      = require "fs"
 async   = require "async"
 request = require "request"

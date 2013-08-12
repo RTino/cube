@@ -9,7 +9,7 @@
 # Requirements
 
 # Underscore js library
-_     = require 'underscore'
+_     = require 'lodash'
 
 # Solr Nodejs Client library
 solr  = require 'solr-client'
@@ -25,6 +25,8 @@ class SolrManager
 
 
     constructor: (@name) ->
+
+        @schema = new Schema @name if @name
 
 
     # Create a Solr instance with propper database connection
@@ -49,15 +51,13 @@ class SolrManager
     # Dynamic schemas in solr require a suffix that specifies the type of field
     # to create. Fields in the DB will be stored with the suffix, but the
     # front-end should not know about it.
-    addSuffix: (name, p) =>
-
-        schema = new Schema name
+    addSuffix: (p) =>
 
         # id field doesn't have a suffix, its not a dynamic field.
         return p if p is "id" or p is undefined
 
         # Get field information from the schema
-        f = schema.getFieldById p
+        f = @schema.getFieldById p
 
         # Add suffix
         sf = "-s"                               # String with analytics field
@@ -71,61 +71,33 @@ class SolrManager
 
 
     # Adds suffixes to all keys of an Object
-    addObjSuffix: (name, obj) =>
+    addObjSuffix: (obj) =>
 
         # Object to return with suffixes appended.
         newObj = {}
 
-        schema = new Schema name
+        for k,v of obj
+            do (k, v) =>
 
-        _.each obj, (v, k) =>
+                # id is a reserved static field in solr, needs no suffix.
+                return newObj[k] = v if k is 'id' or k is '_version_'
 
-            # id is a reserved static field in solr, needs no suffix.
-            return newObj[k] = v if k is 'id'
+                # -sort suffix should not be modified
+                return newObj[k] = v if /-sort$/.test k
 
-            # Add suffix to the key
-            ks = @addSuffix name, k
+                # avoid adding suffixes to month and year facet fields
+                return newObj[k] = v if /_month-sm$/.test k
+                return newObj[k] = v if /_year-sm$/.test k
 
-            # Get field from Schema with all properties
-            f = schema.getFieldById k
-
-            # Set value to new object
-            newObj[ks] = v
-
-            # Multivalue fields should have a stringified copy in another field
-            @setMultivalueField newObj, f, v, k, ks if @isMultivalue f
+                # Set value to new object
+                newObj[@addSuffix(k)] = v
 
         newObj
 
-
-    # If the field is a multivalue field and contains subcategories (bar/foo)
-    # it has to be splitted into (bar, bar/foo) for solr to return the correct
-    # facet results and be able to render the correct tree structure.
-    setMultivalueField: (newObj, f, v, k, ks) ->
-
-        newObj[ks] = []
-
-        # If the value is a comma separated list, make it an array.
-        v = v.toString().split(',') if typeof v isnt typeof []
-
-        _.each v, (value) ->
-
-            # Push the original value
-            newObj[ks].push value
-
-            # Get the parent category and add it to the list of values
-            if value.indexOf('/') isnt -1
-                parent = value.split('/')[0]
-                newObj[ks].push parent if value.indexOf(parent) is -1
-
-        # A sort field needs to be added for every multivalue field
-        @addSortField newObj, f, v, k, ks
-
-        newObj
 
     # Form a hierarchy array from a string like main/node1/node2.
     # result: [ "main", "main/node1", "main/node1/node2" ]
-    formHierarchyArray: (str, sep) ->
+    formHierarchyArray: (str, sep) =>
         h = []
         sep = '/' unless sep
         _.each str.split(sep), (v, i) ->
@@ -135,11 +107,22 @@ class SolrManager
     # Solr is not able to sort multivalue fields or fields with analyzers.
     # To be able to do it, a stringified copy of the multivalue field has
     # to be stored in a simple 'string' type field, and use it for sort.
-    addSortField: (newObj, f, v, k, ks) ->
+    addSortFields: (item) =>
 
-        newObj["#{k}-sort"] = newObj[ks].sort().join(' ')
+        _.each item, (v, k) =>
+
+            return unless item[k]
+
+            field = @schema.getFieldById k
+
+            return unless @isMultivalue field
+
+            item["#{k}-sort"] = item[k].sort().join ' '
+
+        item
 
 
+    # Remove suffix added to store in solr, like -s, -sr or -sm, etc.
     removeSuffix: (obj) ->
         newObj = {}
         _.each obj, (v, k) ->
@@ -154,18 +137,22 @@ class SolrManager
     isMultivalue: (field) =>
         return yes if field.multivalue
         return yes if field.type is 'facet' or field.type is 'tuple'
+        return yes if field.type is 'clink'
         return no
+
 
     # Replaces matchFilter method on solr-client until we find a better way
     # to do this.
-    customMatchFilter: (field,values) ->
+    customMatchFilter: (field, values) ->
         options = []
         tag = "{!tag=_#{field}}"
         fq = "fq=#{tag}("
 
-        value = encodeURIComponent values.pop()
+        value = values.pop()
 
-        op = "#{field}%3A\"#{value}\""
+        op = "#{field}%3A\"#{encodeURIComponent(value)}\""
+
+        op = "#{field}%3A[*%20TO%20*]" if value is '[* TO *]'
 
         # A string 'null' as a value is a not set property. In other words,
         # filtering by 'null' returns all items without the property.
@@ -182,3 +169,93 @@ class SolrManager
         fq += ')'
 
         @parameters.push(fq)
+
+
+    # Get a document from Solr based on its ID
+    getItemById: (id, cb) =>
+        client = @createClient()
+
+        id = id.join(' OR ') if id instanceof Array
+
+        query = client.createQuery()
+            .q("id:(#{id})")
+            .start(0)
+            .rows(1000)
+
+        client.search query, (err, result) =>
+            return cb err, result if err
+            docs = []
+            _.each result.response?.docs, (doc) =>
+                docs.push @removeSuffix doc
+            cb null, docs
+
+    # Get all documents from Solr that match a value
+    getItemsByProp: (key, value, cb) =>
+
+        key = @addSuffix key
+
+        client = @createClient()
+
+        query = client.createQuery()
+            .q("#{key}:#{value}")
+            .start(0)
+            .rows(1000)
+
+        client.search query, (err, result) =>
+            return cb err, result if err
+            docs = []
+            _.each result.response?.docs, (doc) =>
+                docs.push @removeSuffix doc
+            cb null, docs
+
+    # Add a month field that acts like a facet
+    addMonthFacetFields: (item) =>
+        dateFields = @schema.getFieldsByType('date')
+        dateTimeFields = @schema.getFieldsByType('datetime')
+
+        fields = dateFields.concat(dateTimeFields)
+
+        _.each fields, (f) =>
+            return unless item[f.id] and f.facet is 'month'
+            d = new Date(item[f.id]).getMonth()
+            monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+            d = monthNames[d]
+            item["_#{f.id}_month-sm"] = [ d ]
+        item
+
+    # Add a year field that acts like a facet
+    addYearFacetFields: (item) =>
+        dateFields = @schema.getFieldsByType('date')
+        dateTimeFields = @schema.getFieldsByType('datetime')
+
+        fields = dateFields.concat(dateTimeFields)
+
+        _.each fields, (f) =>
+            return unless item[f.id] and f.facet is 'year'
+            year = []
+            d = new Date(item[f.id]).getFullYear()
+            year.push d
+            item["_#{f.id}_year-sm"] = year
+        item
+
+    # Add a document to the solr collection
+    addItems: (items, cb) =>
+
+        @createClient() unless @client
+
+        docs = []
+        _.each [].concat(items), (item) =>
+            item = @addSortFields item
+            item = @addMonthFacetFields item
+            item = @addYearFacetFields item
+            item = @addObjSuffix item
+            item['_version_'] = new Date().toISOString()
+            docs.push item
+
+        @client.add docs, (err, result) =>
+            return cb err, result if err
+            items = []
+            _.each docs, (doc) =>
+                items.push @removeSuffix doc
+            cb null, items

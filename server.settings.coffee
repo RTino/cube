@@ -12,6 +12,10 @@ ServerSettings = ->
 
             port: 3000
 
+        production:
+
+            port: 34225
+
     #### Authentication settings
     # Available authentication mechanisms are basic and ldap.
     # Basic authentication is Basic HTTP Authentication strategy that
@@ -21,8 +25,14 @@ ServerSettings = ->
     # Authentication:
     #   strategy: 'basic'
     #
-    # LDAP authentication is also Basic HTTP Authentication strategy but
-    # binds to an LDAP server to authorize the user. Exmaple:
+    # LDAP authentication accepts an options object where you can specify your
+    # ldap settings. A params (parameters) object allows you to specify
+    # passportjs options. A verify call is used to check API points, which
+    # normally in case of not authenticated request it responds with a 403.
+    # On the other hand a toLogin call is used for client end points and
+    # redirects to the login page when required. Entity property allows you
+    # to specify an entity where the profiles of your users are stored. Usually
+    # the 'team' entity is used for that.
     #
     # Authentication:
     #   strategy: 'ldap'
@@ -32,10 +42,27 @@ ServerSettings = ->
     #            adminPassword   : 'mypassword'
     #            searchBase      : 'ou=users,o=example.com'
     #            searchFilter    : '(uid={{username}})'
+    #   params:
+    #            failureRedirect : '/login'
+    #            failureFlash    : yes
+    #   verify: (req, res, next) ->
+    #            return next() if req.isAuthenticated()
+    #            res.statusCode = 403
+    #            res.send 'unauthorized'
+    #   toLogin: (req, res, next) ->
+    #            return next() if req.isAuthenticated()
+    #            req.flash 'target', req.url
+    #            res.redirect '/login'
+    #   entity:
+    #       name: ''                # name of the entity that contains profiles
+    #       useridField: ''         # name of field to match (i.e. mail)
+    #       ldapField: ''           # name of field on ldap user to match to.
     #
     # Avoid any authentication by setting strategy to 'none'
+
+
     Authentication:
-            strategy: 'none'                    # 'none', 'basic' or 'ldap'
+        strategy: 'none'
 
 
     #### Nodejs Paths
@@ -55,7 +82,9 @@ ServerSettings = ->
     EntitiesFile: 'entities.json'
 
 
-    #### Entity creation defaults
+    #### Entity creation defaults.
+    # Modify only if you know what you're doing.
+    # This is not the place to configure your entity. Check entities/ dir.
 
 
     # Default application settings

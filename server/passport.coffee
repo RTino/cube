@@ -2,11 +2,14 @@
 #
 # Passport module initialization
 
-_               = require 'underscore'
+_               = require 'lodash'
 bcrypt          = require 'bcrypt'
 
 passportHttp    = require('passport-http')
 BasicStrategy   = passportHttp.BasicStrategy
+
+passportLdap    = require('passport-ldapauth')
+LdapStrategy    = passportLdap.Strategy
 
 LdapAuth        = require 'ldapauth'
 
@@ -45,8 +48,9 @@ ldapStrategy = new BasicStrategy {}, (uname, pword, cb) ->
 
 # List of avialble auth strategies
 strategies =
-    basic: basicStrategy
-    ldap: ldapStrategy
+    basic: ldapStrategy
+    #basic: basicStrategy
+    ldapauth: new LdapStrategy server: authSettings.options
 
 
 module.exports = (passport) ->

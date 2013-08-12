@@ -30,31 +30,39 @@ $ =>
         el: $('#app')
 
         events:
-            "keyup #inputSearch"            : "onSearchInput"
-            "click a#add.btn"               : "addNewItem"
-            "click ul#facet ul li .field"   : "handleFacetClick"
-            "click span#reset a"            : "resetAllFilters"
-            "click span#view"               : "toggleViewMode"
-            "click ul#facet li ul span.fold": "toggleFacetSubfields"
-            "click ul#facet>li>span.fold"   : "toggleFacetNode"
-            "click ul#facet>li>h4"          : "toggleFacetNode"
-            "click span#print"              : "print"
-            "click span#json"               : "toJson"
-            "click a#logout"                : "logOut"
-            "click #entityTitle"            : "toggleEntitiesMenu"
-            "click #columnsMenu"            : "toggleColumnsMenu"
-            "click #columnOptions ul li"    : "toggleColumnVisibility"
-            "click #entities ul li"         : "redirectToEntity"
-            "click span#pageL"              : "previousPage"
-            "click span#pageR"              : "nextPage"
-            "click span#jumpToFirst"        : "jumpToFirst"
-            "click span#jumpToLast"         : "jumpToLast"
-            "click #footer li"              : "jumpToPage"
-            "click table .th-inner"         : "sortTable"
-            "mouseenter #columnsMenu"       : "overColumnsMenu"
-            "mouseenter .th-inner"          : "showColumnsBtn"
-            "mouseleave .th-inner"          : "hideColumnsBtn"
-            "click"                         : "documentClick"
+            "keyup #inputSearch"                        : "onSearchInput"
+            "click a#add.btn"                           : "addNewItem"
+            "click ul#facet ul li .field"               : "handleFacetClick"
+            "click span#reset a"                        : "resetAllFilters"
+            "click span#view"                           : "toggleViewMode"
+            "click ul#facet li ul span.fold"            : "toggleFacetSubfields"
+            "click ul#facet>li>span.fold"               : "toggleFacetNode"
+            "click ul#facet>li>h4"                      : "toggleFacetNode"
+            "click span#print"                          : "print"
+            "click span#json"                           : "toJson"
+            "click #entityTitle"                        : "toggleEntitiesMenu"
+            "click #columnsMenu"                        : "toggleColumnsMenu"
+            "click #columnOptions ul li span"           : "handleColumnsMenuClick"
+            "click #entities ul li"                     : "redirectToEntity"
+            "click span#pageL"                          : "previousPage"
+            "click span#pageR"                          : "nextPage"
+            "click span#jumpToFirst"                    : "jumpToFirst"
+            "click span#jumpToLast"                     : "jumpToLast"
+            "click #footer li"                          : "jumpToPage"
+            "click table th .sort"                      : "sortTable"
+            "mouseenter #columnsMenu"                   : "overColumnsMenu"
+            "mouseenter .th-inner"                      : "showColumnsBtn"
+            "mouseleave .th-inner"                      : "hideColumnsBtn"
+            "click"                                     : "documentClick"
+            "mousedown table th .ganttLeftArrow"        : "ganttMove"
+            "mousedown table th .ganttRightArrow"       : "ganttMove"
+            "mouseup table th .ganttLeftArrow"          : "ganttMove"
+            "mouseup table th .ganttRightArrow"         : "ganttMove"
+            "mouseleave table th .ganttLeftArrow"       : "ganttMove"
+            "mouseleave table th .ganttRightArrow"      : "ganttMove"
+            "mouseenter .ganttCell"                     : "ganttNotification"
+            "mouseleave .ganttCell"                     : "ganttNotification"
+
 
         #### Initialize
         initialize: () =>
@@ -70,6 +78,9 @@ $ =>
 
             # Set the schema ffor the entity
             @createSchema()
+
+            # Create style object
+            @style = new window.Style
 
             #### Collections bindings
 
@@ -90,9 +101,11 @@ $ =>
 
                 @start()
 
-
         #### Start
         start: =>
+
+            # Set icon with picture and show logout btn if auth worked
+            @setUser()
 
             # Set the application's title (extension name on top left)
             @setAppTitle()
@@ -109,6 +122,9 @@ $ =>
 
             #Set Schema indexes from localStorage
             @setColumnSelection()
+
+            #Set Schema colors from localStorage
+            @setColumnColors()
 
             # Create the columns menu
             @generateColumnsMenu()
@@ -133,6 +149,9 @@ $ =>
             # Listen for arrow keys to move between items
             @setMoveKeybindings()
 
+            # Set listener for resize event
+            @setResizeListener()
+
 
         # Facet collection init
         initFacets: () =>
@@ -149,10 +168,29 @@ $ =>
                 # App is ready to start navigation history
                 Backbone.history.start()
 
-            , error: () =>
+            , error: (col, res, opts) =>
+                # Redirect to login page in case it got a 403
+                window.location.href = '/login' if res.status is 403
 
                 # Show error icon on controls section (top right)
                 @showError()
+
+
+        # Set user icon on controls section as a logout btn.
+        setUser: () ->
+
+            if window.user.pic
+                $('#controls a#logout')
+                    .css 'background', "url(#{window.user.pic}) no-repeat center center"
+                $('#controls a#logout').css 'background-size', "40px 40px"
+
+            username = window.user.mail
+            if window.user.name and window.user.lastname
+                username = "#{window.user.name} #{window.user.lastname}"
+
+            $('#controls a#logout').attr 'title', 'Sign Out user ' + username
+
+            $('#controls a#logout').css 'display', 'inline-block' if username
 
 
         # Settings object holds all configuration parameters
@@ -215,13 +253,20 @@ $ =>
             # Check if entity is editable and user has provided admin key
             if @isEditable() and @isAdmin()
 
-                $('a#add.btn').css 'display', 'block'
+                $('a#add.btn').css 'display', 'inline-block'
 
 
         # Save profile state
         setProfileState: () =>
 
-            window.additionalOpen = no
+            window.profileState =
+                additionalOpen: no
+                openTab: 'details'
+
+
+        setResizeListener: () =>
+            window.onresize = () =>
+                @ganttInfoInit()
 
 
         # Get extesion HTML/JS code and append it to current dom.
@@ -248,12 +293,21 @@ $ =>
         # Add Profile extension code
         addProfileExtensions: (item) =>
 
-            return unless $('#app > #extensions #details-template').length
+            if $('#actions-template', '#app > #extensions').length
 
-            template = _.template $('#app > #extensions #details-template')
-                .html()
+                actionsTemplate = _.template $('#app > #extensions #actions-template')
+                    .html()
 
-            $('#pane #extensions').append template t:item
+                $('#pane #buttons #btnExtensions').append actionsTemplate()
+
+                window.extensions?.bindActions()?
+
+            if $('#details-template', '#app > #extensions').length
+
+                detailsTemplate = _.template $('#app > #extensions #details-template')
+                    .html()
+
+                $('#pane #extensions').append detailsTemplate t:item
 
 
         # Get schema and attach it to our Settings object
@@ -330,7 +384,7 @@ $ =>
             cat = window.categories.indexOf cat
 
             # Append to category container
-            @$("li\#category-#{cat} ul", '#items').append view.render().el
+            @$("li#category-#{cat} ul", '#items').append view.render().el
 
 
         # Render all items in the given collection
@@ -364,6 +418,18 @@ $ =>
                 # Show columns menu if it was active before
                 $('#columnOptions').show() if columnsMenuIsOpen
                 $('#columnsMenu').addClass 'active' if columnsMenuIsOpen
+
+                # Fix gantt width (firefox issue)
+                @ganttWidthFix()
+
+                # Set gantt arrows
+                @ganttInfoInit()
+
+                # Apply content style from schema
+                @style.apply()
+
+                #Add Color to columns
+                @colorize()
 
                 cb() if cb
 
@@ -482,7 +548,9 @@ $ =>
                     @hideError()
                     cb()
 
-                error: () =>
+                error: (col, res, opts) =>
+                    # Redirect to login page in case it got a 403
+                    window.location.href = '/login' if res.status is 403
 
                     @showError()
 
@@ -513,7 +581,9 @@ $ =>
 
                         cb(col) if cb
 
-                    error: () =>
+                    error: (col, res, opts) =>
+                        # Redirect to login page in case it got a 403
+                        window.location.href = '/login' if res.status is 403
 
                         @showError()
 
@@ -548,7 +618,9 @@ $ =>
                         $('#inputSearch').val ''
                         window.App.resetAllFilters()
 
-                    error: () =>
+                    error: (col, res, opts) =>
+                        # Redirect to login page in case it got a 403
+                        window.location.href = '/login' if res.status is 403
 
                         window.App.showError()
 
@@ -578,7 +650,9 @@ $ =>
                         @hideError()
                         @navigate()
 
-                    error: () =>
+                    error: (col, res, opts) =>
+                        # Redirect to login page in case it got a 403
+                        window.location.href = '/login' if res.status is 403
 
                         @showError()
 
@@ -601,7 +675,10 @@ $ =>
                         @hideError()
                         cb() if cb
 
-                    error: () =>
+                    error: (col, res, opts) =>
+                        # Redirect to login page in case it got a 403
+                        window.location.href = '/login' if res.status is 403
+
                         @showError()
 
 
@@ -672,10 +749,17 @@ $ =>
             if total > rows
                 $('#content').removeClass 'noPages'
                 $('#footer').html template()
+
+                # Apply content style from schema
+                @style.apply()
+
                 return $('#footer').show()
 
             $('#content').addClass 'noPages'
             $('#footer').hide()
+
+            # Apply content style from schema
+            @style.apply()
 
         # Handle a click on a facet field. Add facet to selection, filter
         # with new selection and activate field
@@ -724,7 +808,7 @@ $ =>
             _.each s, (c) =>
 
                 $f = $(".field[data-title='#{c.field}']",
-                  "ul#facet li ul\##{c.cat}")
+                  "ul#facet li ul##{c.cat}")
                 $f.addClass 'active'
                 $('span.amount', $f).addClass 'active'
 
@@ -755,7 +839,7 @@ $ =>
             _.each @filterSelection.get(), (c) =>
                 $e = $("span[data-type='#{c.cat}'][data-title='#{c.field}']")
                 $f = $(".field[data-title='#{c.field}']",
-                      "ul#facet li ul\##{c.cat}")
+                      "ul#facet li ul##{c.cat}")
                 nf.push cat: c.cat, field: c.field if $f.length or $e.length
 
             # Set filterSelection with the new selection (remaining filters)
@@ -973,8 +1057,7 @@ $ =>
 
             @navigate()
 
-        # Show a customazible view on the right pane for a selected facet. This
-        # could be understood as a detailed pane for a selected facet.
+
         showPaneView: () =>
 
             # profileViews and groupViews have preference over pane views
@@ -1006,6 +1089,10 @@ $ =>
             # Catch this in your extension code!
             @trigger 'profileClosed'
 
+
+        paneClosed: () =>
+
+            @trigger 'paneClosed'
 
         # Destroy all item views, unbinding and removing html elements
         removeItemViews: () ->
@@ -1135,18 +1222,30 @@ $ =>
 
         # Check if admin key is present in QS
         isAdmin: () =>
-            return yes if window.settings.editable is true
-            qs = window.location.search.split('?')[1]
-            new RegExp('admin=').test qs
 
-        # Check if the entity is editable
+            return yes if window.settings.unrestricted
+
+            uid = window.user.email or window.user.mail
+
+            return yes unless uid
+
+            return yes unless window.settings.admins and window.settings.admins.length
+
+            return yes unless window.settings.admins.indexOf(uid) is -1
+
+            no
+
+        # Check if the entity is editable at all
         isEditable: () =>
             return no if window.settings.editable is false
             yes
 
+        # Check if the profile view is editable at all
         isProfEditable: () =>
             return no unless @isEditable()
-            return yes if @isAdmin() or window.settings.Schema.getAdditionals().length
+            return yes if @isAdmin()
+            return no unless window.settings.Schema.getAdditionals().length
+            return yes if window.user.email is window.profileView.model.get('email')
             no
 
         # Set browsers URL to point to the current application state
@@ -1353,11 +1452,6 @@ $ =>
             window.open url, '_blank'
 
 
-        # Logs a user out by redirecting him to logout:logout@thisdomain
-        logOut: () =>
-            logoutUrl = "//logout:logout@#{window.location.host}"
-            window.location = logoutUrl
-
         # Hide facets container on the left
         disableFacets: () ->
 
@@ -1387,9 +1481,7 @@ $ =>
 
             entity = $(e.currentTarget).attr 'id'
 
-            adminKey = if @isAdmin() then "?admin=yes" else ''
-
-            window.location = "/#{entity}/#{adminKey}"
+            window.location = "/#{entity}/"
 
 
         # Create the columns menu that allows a user to choose visible colums
@@ -1455,29 +1547,53 @@ $ =>
             $('#columnsMenu').toggleClass 'active'
 
 
-        # Show/hide a column from the table
-        toggleColumnVisibility: (e) ->
-
+        # Change visibility or background color of table columns
+        handleColumnsMenuClick: (e) ->
             e.stopPropagation()
 
-            $e = $(e.currentTarget)
-            id = $e.attr 'id'
+            conf =
+                visible:
+                    schemaFiled: 'index'
+                    save:        @saveColumnSelection
+                    action:      @toggleColumnVisibility
+                colorize:
+                    schemaFiled: 'colorize'
+                    save:        @saveColumnColors
+                    action:      @colorize
 
-            if $e.hasClass 'active'
-                _.each window.settings.Schema.get(), (f) =>
-                    if f.id is id then f.index = false
-                $e.removeClass 'active'
-                @saveColumnSelection()
-                return @addAll window.collection
+            $e = $(e.currentTarget)
+            id = $e.parents('li').attr('id')
+            cl = $(e.currentTarget).attr('class').replace('active', '').trim()
+
+            return if cl == 'label'
+
+            state = if $e.hasClass 'active' then false else true
 
             _.each window.settings.Schema.get(), (f) =>
-                if f.id is id then f.index = true
+                if f.id is id then f[conf[cl].schemaFiled] = state
 
-            $e.addClass 'active'
+            if state then $e.addClass 'active' else $e.removeClass 'active'
 
-            @saveColumnSelection()
+            conf[cl].save()
+            conf[cl].action(id, state)
 
-            @addAll window.collection
+            @style.apply()
+
+            #fix for problem with table header
+            @addAll window.collection if cl == 'visible'
+
+
+        # Show/hide a column from the table
+        toggleColumnVisibility: (id) =>
+            id = id.replace(new RegExp(':', 'g'), '\\\\:')
+            $th =  $("table ##{id}").toggle()
+            $td =  $("table .#{id}").toggle()
+
+
+        showColumn: (id) =>
+            id = id.replace(new RegExp(':', 'g'), '\\\\:')
+            $th =  $("table ##{id}").show()
+            $td =  $("table .#{id}").show()
 
 
         # Set the title for the window
@@ -1547,7 +1663,7 @@ $ =>
             window.localStorage[entity] = JSON.stringify ls
 
 
-        # Set column selection from localStorage
+         # Set column selection from localStorage
         setColumnSelection: () =>
 
             entity = window.settings.entity
@@ -1562,10 +1678,43 @@ $ =>
             _.each window.settings.Schema.getIndexes(), (i) ->
                 i.index = no
 
-            _.each columns, (c) ->
-                window.settings.Schema.getField c, (f) ->
-                    f.index = yes
+            _.each columns, (cid) ->
+                f = window.settings.Schema.getFieldById cid
+                f.index = yes
 
+        # Save column color on local storage
+        saveColumnColors: () =>
+
+            entity = window.settings.entity
+
+            ls = window.localStorage[entity]
+            ls = if ls then JSON.parse ls else {}
+
+            colorize = []
+            _.each window.settings.Schema.getColorized(), (s) ->
+                colorize.push s.id
+
+            ls.colorize = {} unless ls.colorize
+            ls.colorize = colorize
+
+            window.localStorage[entity] = JSON.stringify ls
+
+        # Set column selection from localStorage
+        setColumnColors: () =>
+
+            ls = window.localStorage[entity]
+            return unless ls
+
+            ls = JSON.parse ls
+            colorize = ls.colorize
+            return unless ls.colorize
+
+            _.each window.settings.Schema.getColorized(), (i) ->
+                i.colorize = no
+
+            _.each colorize, (cid) ->
+                f = window.settings.Schema.getFieldById cid
+                f.colorize = yes
 
         # Save width of facet index
         saveFacetWidth: (event, ui) =>
@@ -1713,23 +1862,15 @@ $ =>
 
 
         # Get the thumbnail label used in thumbnail views
-        getThumbnailLabel: (m) =>
+        getThumbnailLabel: (model, schema) =>
 
-            thumbnails = window.settings.Schema.getThumbnails()
+            schema = new Schema schema
 
             label = []
 
-            _.each thumbnails, (f) =>  label.push m[f.id]
+            _.each schema.getThumbnails(), (f) =>  label.push model[f.id]
 
             label.join ' '
-
-
-        # Gets the key name for the img fields, useful for templates.
-        getPicKey: () =>
-
-            pictures = window.settings.Schema.getPictures()
-
-            return pictures[0]['id'] if pictures[0]
 
 
         # Checks if id is a valid tuple field
@@ -1765,6 +1906,218 @@ $ =>
         isTablet: () =>
 
             return navigator.userAgent.match(/iPad|Android/i) isnt null
+
+        # Colorize table columns
+        colorize: (column = null, active = true) =>
+
+            colorize = new window.Colorize
+
+            if column?
+                column = column.replace(new RegExp(':', 'g'), '\\:')
+
+                return  $("td.#{column}").css 'background-color', '' unless active
+
+                colorize.set({selector: "td.#{column}", mixWith: {r: 255, g: 255, b: 255}}).select().apply()
+            else
+                _.each window.settings.Schema.get(), (item) =>
+
+                    if item.colorize? and item.colorize == true
+                        column = item.id.replace(new RegExp(':', 'g'), '\\:')
+                        colorize.set({selector: "td.#{column}", mixWith: {r: 255, g: 255, b: 255}}).select().apply()
+
+
+        # Handle Gantt movement
+        ganttMove: (e) =>
+
+            field = $(e.currentTarget).parents('th')
+
+            direction = $(e.currentTarget).attr('data-direction')
+
+            event = e.type
+
+            if event == 'mousedown'
+
+                @ganttEvent = setInterval ( => @ganttMoveTo direction, field ), 100
+
+            else
+
+                window.clearInterval @ganttEvent
+
+
+        # Move Gantt chart in left/right direction
+        ganttMoveTo: (direction, field) =>
+
+            configuration =
+                left:
+                    limit: 0
+                    arrow: field.find '.ganttLeftArrow'
+                    step: 40
+                    week: -1
+                right:
+                    limit: 40
+                    arrow: field.find '.ganttRightArrow'
+                    step: -40
+                    week: 1
+
+            settings = configuration[direction]
+
+            items = $(".#{field.attr('id')} .ganttItem")
+
+            ganttBtn = field.find('.ganttBtn')
+
+            arrow = settings.arrow
+
+            position = @ganttPosition(field)
+
+            if position[direction] == settings.limit + (-1 * settings.step)
+
+                arrow.css {'background-color': '#CCC', 'cursor': 'default'}
+
+            else if position[direction] == settings.limit
+
+                return
+
+            else
+
+                ganttBtn.css {'background-color': '#999', 'cursor': 'pointer'}
+
+            @ganttChangeWeek(settings.week, field)
+
+            items.each (key, item) =>
+
+                item = $(item)
+
+                itemPosition = item.css('margin-left').replace('px', '')
+
+                item.css('margin-left', "#{parseInt(itemPosition, 10) + settings.step}px")
+
+                @ganttInfo item
+
+        # Show/Hide notification relative to Gantt Cell
+        ganttNotification: (e) =>
+
+            type = e.type
+
+            item = $(e.currentTarget)
+
+            fieldId = item.parents('td').attr('class').split(' ')[0]
+
+            header = $("##{fieldId}").find('.ganttHeaderContent')
+
+            header.empty()
+
+            header.append(item.attr('data-notification')) if type != 'mouseleave'
+
+        # Show/Hide Gantt info
+        ganttInfo: (item) =>
+
+            info =
+                left:     false
+                centar:   false
+                right:    false
+
+            chartCell = item.parent()
+
+            lInfo = chartCell.find('.ganttInfoL')
+
+            cInfo = chartCell.find('.ganttInfoC')
+
+            rInfo = chartCell.find('.ganttInfoR')
+
+            visible = Math.floor chartCell.width() / 40
+
+            start = parseInt item.attr('data-start'), 10
+
+            end = parseInt item.attr('data-end'), 10
+
+            current = parseInt item.attr('data-current'), 10
+
+            info.left = true if start + 3 < current && current <= end + 3
+
+            info.right = true if end + 3 >= current + visible and current + visible >= start + 3
+
+            info.center = true if current + visible < start + 3 || current > end + 3
+
+            if current < end + 3 then cInfo.css('left' , chartCell.width() - 80) else cInfo.css('left' , 0)
+
+            if current < end + 3 then cInfo.css('left' , chartCell.width() - 80) else cInfo.css('left' , 0)
+
+            if current < end + 3 then cInfo.css('left' , chartCell.width() - 80) else cInfo.css('left' , 0)
+
+            start = if start < 1 then "&lt; #{start + 52}" else "&lt; #{start}"
+
+            end = if end > 52 then "#{end - 52} &gt;" else "#{end} &gt;"
+
+            lInfo.html(start)
+
+            cInfo.html("#{start} #{end}")
+
+            rInfo.html(end)
+
+            if info.left then lInfo.show() else lInfo.hide()
+
+            if info.center then cInfo.show() else cInfo.hide()
+
+            if info.right then rInfo.show() else rInfo.hide()
+
+
+        # Show/Hide info for all Gantt intems
+        ganttInfoInit: () =>
+            $('.ganttItem').each (key, item) =>
+                @ganttInfo $(item)
+
+
+        # Chnage week
+        ganttChangeWeek: (step, field) =>
+
+            items = $(".#{field.attr('id')} .ganttItem")
+
+            current = parseInt items.attr('data-current'), 10
+
+            items.attr('data-current', current + step)
+
+
+        # Calculate poistion of Gantt chart
+        ganttPosition: (field) =>
+
+            position =
+                left:     0
+                right:    0
+                maxWidth: 0
+
+            items = $(".#{field.attr('id')} .ganttItem")
+
+            items.each (key, item) =>
+
+                left = parseInt $(item).css('margin-left').replace('px', ''), 10
+
+                width = $(item).find('.ganttCell').length  * 40
+
+                right = left + width
+
+                position.left = left if left < position.left
+
+                position.right = right if right > position.right
+
+            position.maxWidth = position.right - position.left
+
+            position
+
+
+        # Set width of Gantt items to be == to item with largest width
+        ganttWidthFix: () =>
+            $('th[data-type="gantt"]').each (key, field) =>
+                field = $(field)
+                position = @ganttPosition field
+                $(".#{field.attr('id')} .ganttItem").css 'width', position.maxWidth
+
+
+        # Looks for an entity in the entities list and returns its settings
+        getEntitySettings: (id) =>
+            entity = {}
+            _.each window.entities, (e) ->
+                return entity = e if e.entity is id
+            entity
 
 
         # Keep an array of the selected facet fields

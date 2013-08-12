@@ -6,7 +6,7 @@ class @Facets extends Backbone.Collection
     model: window.Facet,
 
     # URL from QS
-    # This collection needs to get the querystring parameters that will be 
+    # This collection needs to get the querystring parameters that will be
     # passed to solr.
     url: () =>
         window.App.commonURL()
@@ -29,8 +29,8 @@ class @Facets extends Backbone.Collection
 
         _.each res.facet_counts?.facet_fields, (fields, name) =>
             name = name.split('-')[0]
-            window.settings.Schema.getField name, (f) =>
-                facetFields.push @createFacet(name, f, fields)
+            f = window.settings.Schema.getFieldById name
+            facetFields.push @createFacet(name, f, fields) unless f.facetHidden
         facetFields
 
     # Create a facet category like 'team', 'group', 'role', etc. Composed of a

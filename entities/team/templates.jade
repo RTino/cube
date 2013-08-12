@@ -24,7 +24,7 @@ script(type="text/template")#pane-template
   |       bM.setDate(bM.getDate() - 30);
   |       window.collection.each(function(m) {
   |           startDate = new Date(m.get("startDate"));
-  |           if (startDate >= bM) { newbies += 1; }; 
+  |           if (startDate >= bM) { newbies += 1; };
   |       });
   |       return newbies;
   |   }

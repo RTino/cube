@@ -1,32 +1,32 @@
 #header.outer
-  header.inner
-    #mainTitle
-      h1#title 
-        a(href="http://cubeapp.io", target="_blank") Cube
-      span#subtitle Zalando's management tool
+    header.inner
+        #mainTitle
+            h1#title
+                a(href="http://cubeapp.io", target="_blank") Cube
+            span#subtitle Zalando's management tool
 #list
-  section#content
-    #addWrapper
-      a(title="Add Extension").btn#add Add
-      input(type="file", name="import", data-url="/extension/test")#import
-    .wrapper
-      h2 Choose a Cube
-      ul
+    section#content
+        #addWrapper
+            a(title="Add Extension").btn#add Add
+            input(type="file", name="import", data-url="/extension/test")#import
+        .wrapper
+            h2 Choose a Cube
+            ul
 
-script(src="/js/jquery-1.9.1.min.js")
-script(src="/js/jquery-ui-1.9.2.custom.min.js")
+script(src="/js/jquery.min.js")
+script(src="/js/jquery-ui.min.js")
 script(src="/js/jquery.fileupload.js")
-script(src="/js/underscore-1.4.4.js")
+script(src="/js/lodash.js")
 
 != js('index')
 
-script(type="text/javascript)
-  var entities= !{JSON.stringify(entities)};
+script(type="text/javascript")
+    var entities= !{JSON.stringify(entities)};
 
 script(type="text/html")#list-item
-  | <li id="<%= entity %>">
-  |   <img src="<%= icon %>"/>
-  |   <label><%= title %></label>
-  |   <p id="amount"></p>
-  |   <p id="desc"><%= desc %></p>
-  | </li>
+    | <li id="<%= entity %>">
+    |     <img src="<%= icon %>"/>
+    |     <label><%= title %></label>
+    |     <p id="amount"></p>
+    |     <p id="desc"><%= desc %></p>
+    | </li>

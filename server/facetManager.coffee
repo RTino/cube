@@ -10,11 +10,13 @@
 # Requirements
 
 async = require 'async'
-_     = require 'underscore'
+_     = require 'lodash'
 
+Schema      = require './schema.coffee'
 SolrManager = require './solrManager.coffee'
 
 class FacetManager
+
     module.exports = FacetManager
 
     constructor: () ->
@@ -23,7 +25,10 @@ class FacetManager
     # your schema.
     distincts: (name, cb) =>
         d = {}
-        async.forEach @getFacetsFromSchema(name), (f, cb) =>
+
+        schema = new Schema name
+
+        async.forEach schema.getFieldsByType('facet'), (f, cb) =>
             @fields name, f.id, (data) ->
                 d[f.id] = data
                 cb()
@@ -33,28 +38,21 @@ class FacetManager
 
     # Return all values for each facet
     fields: (name, field, cb) =>
+
         solrManager = new SolrManager name
+
         client = solrManager.createClient()
 
         query = client.createQuery()
             .q('*:*')
             .start(0)
             .rows(0)
-            .facet on: yes, field: solrManager.addSuffix(name, field)
+            .facet on: yes, field: solrManager.addSuffix field
 
         fields = []
         client.search query, (err, result) =>
             throw err if err
             ff = result?.facet_counts?.facet_fields
-            _.each ff[solrManager.addSuffix(name, field)], (f) ->
+            _.each ff[solrManager.addSuffix field], (f) ->
                 fields.push(f) if typeof f is "string"
             cb fields
-
-    # Returns all facet type fields on your schema
-    getFacetsFromSchema: (name) =>
-        schema = require "../entities/#{name}/schema.json"
-        a = []
-        _.each schema, (o) =>
-            a.push o if o.type is 'facet'
-        a
-

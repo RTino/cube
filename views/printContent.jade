@@ -2,9 +2,9 @@
   h3 Nothing to print
 
   script(src="/js/json2.js")
-  script(src="/js/jquery-1.9.1.min.js")
+  script(src="/js/jquery.min.js")
 
-  script(src="/js/underscore-1.4.4.js")
+  script(src="/js/lodash.js")
   script(src="/js/backbone-min.js")
 
   script(src="/js/jquery.tablesorter.min.js")
@@ -34,20 +34,21 @@
     |   <% }); %>
 
   script(type="text/template")#table-template
-    |   <li class="list">
+    | <li class="list">
     |     <div id="tableContainer" class="print">
-    |       <div class="header-background"></div>
-    |       <div class="fixed-table-container-inner print">
-    |         <table><thead><tr>
-    |           <% _.each(window.opener.settings.Schema.getIndexes(), function(header) {
-    |             %><th class="header <%= header.id %>"><div class="th-inner">
-    |             <span>
-    |             <%= header.label %>
-    |             </span><span id="sortArrow"></span></div></th><%
-    |           }); %>
-    |         </tr></thead><tbody></tbody></table>
-    |       </div></div>
-    |   </li>
+    |         <div class="header-background"></div>
+    |         <div class="fixed-table-container-inner print">
+    |             <table><thead><tr>
+    |                 <% _.each(window.opener.settings.Schema.getIndexes(), function(header) {
+    |                     %><th class="header <%= header.id %>"><div class="th-inner">
+    |                         <span>
+    |                             <%= header.label %>
+    |                         </span><span id="sortArrow"></span></div></th><%
+    |                 }); %>
+    |             </tr></thead><tbody></tbody></table>
+    |         </div>
+    |     </div>
+    | </li>
 
   script(type="text/template")#details-print-template
     | <% 
