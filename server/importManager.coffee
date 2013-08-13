@@ -36,9 +36,11 @@ class ImportManager
             # Get importer options and schedule.
             importer.options = i.options
             importer.entity = entity
-            schedule = i.options.schedule
+            importer.schema = require "../entities/#{entity}{/schema.json"
 
             # Set schedule and interval.
+            schedule = i.options.schedule
+
             if not schedule?
                 expresser.logger.warn "ImportManager", "parseImports", "Skipping: schedule was not set for importer."
             else if schedule < 5
