@@ -7,6 +7,7 @@ class BaseImporter
     # Required modules.
     fs = require "fs"
     lodash = require "lodash"
+    moment = require "moment"
     solr = require "solr-client"
     solrManager = null
 
@@ -14,10 +15,11 @@ class BaseImporter
     entity = null
     solrClient = null
 
-    # IMPLEMENTATION
+
+    # PROPERTIES
     # ----------------------------------------------------------------------
 
-    # Options are passed on the constructor.
+    # Options must be set manually before calling `run`.
     options: null
 
     # The raw and processed values will be set on each importer.
@@ -32,6 +34,11 @@ class BaseImporter
     transform: null
     # Runs after import is done.
     postRun: null
+
+    # These are session related properties to track job status.
+    startTime: null
+    endTime: null
+    lastSync: null
 
 
     # METHODS
@@ -51,6 +58,9 @@ class BaseImporter
         # Set the SolrManager to use the passed entity.
         solrManager = new (require "solrManager.coffee")(@entity)
         solrClient = solrManager.createClient()
+
+        # Set start time.
+        @startTime = moment()
 
         # Check if a `preRun` is set on the importer.
         if @preRun?
@@ -81,8 +91,8 @@ class BaseImporter
         if err?
             return @error err
 
-        # If import type is full, wipe contents before proceeding.
-        @wipe() if @options.type is "full"
+        # If import mode is full, wipe contents before proceeding.
+        @wipe() if @options.mode is "full"
 
         # If data was passed, set it as the `processedData`.
         @processedData = data if data?
