@@ -8,7 +8,7 @@ script(type="text/javascript)
 
   var qs = '';
 
-  if (window.location.hash) {
+  if (window.location.pathname || window.location.hash) {
     qs = '?continue=' + window.location.href;
   }
 

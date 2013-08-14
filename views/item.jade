@@ -55,6 +55,9 @@ script(type="text/html")#item-table-template
   |   function fieldDate(field, model) { %>
   |       <%= App.formatDate(model[field.id]) %><%
   |   };
+  |   function fieldDateTime(field, model) { %>
+  |       <%= App.formatDateTime(model[field.id]) %><%
+  |   };
   |   function fieldNumber(field, model) { %>
   |       <%= App.formatNumber(model[field.id]) %><%
   |   };
@@ -108,14 +111,15 @@ script(type="text/html")#item-table-template
   |   }
   |   function renderField(field, model) {
   |       rf = fieldText;
-  |       if (field['type'] === 'facet')  { rf = fieldFacet;  };
-  |       if (field['type'] === 'date')   { rf = fieldDate;   };
-  |       if (field['type'] === 'integer'){ rf = fieldNumber; };
-  |       if (field['type'] === 'float')  { rf = fieldNumber; };
-  |       if (field['type'] === 'img')    { rf = fieldImg;    };
-  |       if (field['type'] === 'tuple')  { rf = fieldTuple;  };
-  |       if (field['type'] === 'gantt')  { rf = fieldGantt;  };
-  |       if (field['type'] === 'clink')  { rf = fieldClink;  };
+  |       if (field['type'] === 'facet')   { rf = fieldFacet;  };
+  |       if (field['type'] === 'date')    { rf = fieldDate;   };
+  |       if (field['type'] === 'datetime'){ rf = fieldDateTime;};
+  |       if (field['type'] === 'integer') { rf = fieldNumber; };
+  |       if (field['type'] === 'float')   { rf = fieldNumber; };
+  |       if (field['type'] === 'img')     { rf = fieldImg;    };
+  |       if (field['type'] === 'tuple')   { rf = fieldTuple;  };
+  |       if (field['type'] === 'gantt')   { rf = fieldGantt;  };
+  |       if (field['type'] === 'clink')   { rf = fieldClink;  };
   |       rf(field, model);
   |   };
   |   function addEtiquettes() {
@@ -166,7 +170,7 @@ script(type="text/html")#item-table-template
   |   };
   |   _.each(schema, function(f) { %>
   |       <td class="<%= f.id %><% if (f.index) { %> visible<% }; if(f.type === 'gantt'){ %> ganttChart<% } %> "
-  |           title="<%= model[f.id] %>" data-type="<%= f.type %>" >
+  |           data-type="<%= f.type %>" >
   |       <% renderField(f, model); %>
   |       </td><%
   |   });

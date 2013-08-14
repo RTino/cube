@@ -45,6 +45,8 @@ $ ->
 
             @setModelDateFields m, unset
 
+            @setModelDateTimeFields m, unset
+
             @setModelPicFields m, unset
 
             @setModelFacetFields m, unset
@@ -134,6 +136,22 @@ $ ->
         setModelDateFields: (m, unset) =>
 
             _.each $('input[data-type="date"]', '#pane'), (i) ->
+
+                id = $(i).attr 'id'
+
+                dateValue = new Date $(i).val()
+
+                o = {}
+                o[id] = dateValue
+
+                return m.set o, silent: yes unless isNaN dateValue
+
+                m.unset id, silent: yes if unset
+
+        # Sets a model's date fields. Stored as javascript ISO date strings.
+        setModelDateTimeFields: (m, unset) =>
+
+            _.each $('input[data-type="datetime"]', '#pane'), (i) ->
 
                 id = $(i).attr 'id'
 
@@ -454,6 +472,20 @@ $ ->
                 dateFormat      : "d M yy"
 
 
+        # Attach datetimepicker plugin to a given input field
+        setDateTimePicker: ($e) ->
+            $e.datetimepicker
+                controlType: 'select',
+                changeYear      : true
+                changeMonth     : true
+                constrainInput  : true
+                showButtonPanel : true
+                showOtherMonths : true
+                yearRange       : "c-70"
+                dateFormat      : "d M yy"
+                timeFormat      : 'HH:mm'
+
+
         # Attach keybinding handlers like close on ESC and arrow keys.
         setKeybindings: () =>
 
@@ -669,7 +701,7 @@ $ ->
             $('a.link', $a).hide()
 
             # Enable picture field
-            $('input#pic', '#pane')
+            $('input.pic', '#pane')
                 .addClass('editing')
                 .removeAttr('disabled')
             $('#pictureContainer p', '#pane').show()
@@ -679,15 +711,16 @@ $ ->
             $('span#arrow', '#pane li').addClass('active')
 
             # Make invisible picture input field clickable
-            $('#pane input#pic').show()
+            $('#pane input.pic').show()
 
             # Highlight mandatory fields
             @setMandatoryLabels() if @app.isAdmin()
 
             # Set useful jquery plugins
             @setAutoComplete $('input.autocomplete')
-            @setFileupload $('input#pic')
+            @setFileupload $('input.pic')
             @setDatePicker $('input[data-type="date"]')
+            @setDateTimePicker $('input[data-type="datetime"]')
 
             # Unset keybindings to avoid closing profile on arrow-keys.
             @app.unsetMoveKeybindings()
@@ -871,6 +904,7 @@ $ ->
 
             @setAutoComplete $('input.autocomplete')
             @setDatePicker $('input[data-type="date"]')
+            @setDateTimePicker $('input[data-type="datetime"]')
             @app.unsetMoveKeybindings()
 
 

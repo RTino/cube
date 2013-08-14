@@ -18,6 +18,9 @@ script(type="text/template")#details-template
   |       if (field['type'] === 'date') { rf = fieldDate;
   |           model[field.id] = App.formatDate(model[field.id]);
   |       };
+  |       if (field['type'] === 'datetime') { rf = fieldDateTime;
+  |           model[field.id] = App.formatDateTime(model[field.id]);
+  |       };
   |       if (field['type'] === 'dropdown')   { rf = fieldDropdown; };
   |       if (field['type'] === 'multiline')  { rf = fieldMultiline; };
   |       if (field['type'] === 'skype')      { rf = fieldSkype; };
@@ -114,6 +117,14 @@ script(type="text/template")#details-template
   |           <div class="mask"><%= model[field.id] %></div>
   |           <input type="text" id="<%= field.id %>" class="hidden"
   |               value="<%= model[field.id] %>" data-type="date" readonly="readonly"/>
+  |       </li><%
+  |   };
+  |   function fieldDateTime(field, model) { %>
+  |       <li>
+  |           <label for="<%= field.id %>" ><%= field.label %></label>
+  |           <div class="mask"><%= model[field.id] %></div>
+  |           <input type="text" id="<%= field.id %>" class="hidden"
+  |               value="<%= model[field.id] %>" data-type="datetime" readonly="readonly"/>
   |       </li><%
   |   };
   |   function fieldSkype(field, model) {
@@ -235,7 +246,7 @@ script(type="text/template")#details-template
   |         }; %>
   |         <div class="inputPicContainer">
   |             <input type="file" name="picture" data-url="/picture"
-  |                 id="pic" disabled="disabled" data-type="img"/>
+  |                 id="<%= pic %>" class="pic" disabled="disabled" data-type="img"/>
   |         </div>
   |         <img id="picture" src="<%= m[pic] %>"/>
   |     </div><%

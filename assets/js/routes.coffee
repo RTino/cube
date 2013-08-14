@@ -13,9 +13,10 @@ $ ->
         # Route to the appropriate state based on the Querystring parameters.
         getRoute: (qs, params) =>
 
-            @setSort params.sort if params.sort
-            @setRows params.rows if params.rows
-            @setPage params.page if params.page
+            @setSort    params.sort    if params.sort
+            @setRows    params.rows    if params.rows
+            @setPage    params.page    if params.page
+            @setDisplay params.display if params.display
 
             # This is a fix. Sometimes the parameters come as a string,
             # instead of as an array, defined by '|' as the splitting char.
@@ -48,6 +49,8 @@ $ ->
                 @setId params.id if params.id
                 window.App.navigate replace:yes
                 @trigger 'route'
+
+            @display params.display
 
 
         #### Route to initial state
@@ -159,6 +162,10 @@ $ ->
             window.collection.page = p
 
 
+        setDisplay: (d) =>
+            window.collection.display = d or null
+
+
         # Check if the item is still in the items collection
         isItemInCol: (id) =>
             return yes if window.collection.get id
@@ -195,3 +202,25 @@ $ ->
             _.each source.split('|'), (v) ->
                 s.push v if v
             return s
+
+
+        display: (mode) ->
+            page =
+                header: $('#header')
+                facets: $('#index')
+                content: $('#content')
+                pane: $('#pane')
+                footer: $('#footer')
+
+            if mode == 'fullScreen'
+                page.header.hide()
+                page.facets.hide()
+                page.content.css top: 0, right: 0, left: 0
+                page.pane.css 'margin-top': 0
+                page.footer.css left: 0
+
+            else
+                page.header.show()
+                page.facets.show()
+                window.App.resizeIndex()
+                page.pane.css 'margin-top': 50

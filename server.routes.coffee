@@ -41,9 +41,6 @@ module.exports = (app, express, passport, flash) ->
     # List of available entities
     entities = require "./#{settings.EntitiesFile}"
 
-    # Default entity is the first entity defined in the entities array
-    defaultEntity = entities[0]
-
     # Application themes
     themes = require './themes.json'
 
