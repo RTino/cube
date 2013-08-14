@@ -39,7 +39,7 @@ $ =>
             "click ul#facet>li>span.fold"               : "toggleFacetNode"
             "click ul#facet>li>h4"                      : "toggleFacetNode"
             "click span#print"                          : "print"
-            "click span#json"                           : "toJson"
+            "click #exporter span"                      : "export"
             "click #entityTitle"                        : "toggleEntitiesMenu"
             "click #columnsMenu"                        : "toggleColumnsMenu"
             "click #columnOptions ul li span"           : "handleColumnsMenuClick"
@@ -151,6 +151,9 @@ $ =>
 
             # Set listener for resize event
             @setResizeListener()
+
+            # Activate exporter menu
+            @exportMenu()
 
 
         # Facet collection init
@@ -1431,23 +1434,48 @@ $ =>
 
             window.open 'print?' + url, '_blank'
 
+        # Add animated effects to export menu
+        exportMenu: () =>
+            container = $('#exporter')
+            json = $('#json')
+            csv = $('#csv')
+            xml = $('#xml')
+            over = () ->
+                container.animate {'width': '111px'}, 200, () ->
+                    json.css('background-image':'url(../assets/json-text.png)')
+                    xml.fadeIn 300
+                    csv.fadeIn 300
+
+            out = () ->
+                json.css('background-image': 'url(../assets/export.png)')
+                csv.fadeOut 300
+                xml.fadeOut 300, () ->
+                    container.animate({'width': '37px'}, 200)
+
+
+            container.hover(over, out);
+
+            json.click out
+            xml.click out
+            csv.click out
+
 
         # Export items to json on a new tab
-        toJson: () =>
-
+        export: (e) =>
+            to = $(e.target).attr('id')
             url = "#{@commonURL(0, window.collection.total)}"
 
             if @getFilterQS().fs.length
                 url += '?'
                 _.each @getFilterQS().fs, (f) =>  url += "&fs=#{f}"
 
-            url += "&json=true"
+            selection = ''
+            _.each window.App.itemSelection.each(), (val, key) ->
+                selection += "&fs=id:#{val.id}"
 
-            id = window.profileView?.model.id
+            url += selection if selection
 
-            url = "collection/#{id}" if window.profileView
-
-            url = "collection/#{@groupIds()}" if window.groupView
+            url += "&#{to}=true"
 
             window.open url, '_blank'
 
