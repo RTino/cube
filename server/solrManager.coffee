@@ -158,6 +158,12 @@ class SolrManager
         # filtering by 'null' returns all items without the property.
         op = "(*:*%20-#{field}:[*%20TO%20*])" if value is 'null'
 
+        # TODO Make this generic
+        if value is 'new'
+            d = new Date()
+            d.setDate d.getDate() - 31
+            op = "startDate-s%3A[#{d.toISOString()}%20TO%20*]"
+
         options.push(op)
 
         _.each values, (v) ->
