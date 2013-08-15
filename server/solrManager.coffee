@@ -184,7 +184,7 @@ class SolrManager
         id = id.join(' OR ') if id instanceof Array
 
         query = client.createQuery()
-            .q("id:(\"#{id}\")")
+            .q("id:(#{id})")
             .start(0)
             .rows(1000)
 

@@ -1,15 +1,19 @@
 #app
     #header
         #controls.unselectable
+            #buttons
+                a(title="Add a New Item")#add.btn Add
             #actions
                 span(title="Connection Failed")#error
                 #extensions
                 span(title="View Mode")#view
                 span(title="Print")#print
-                span(title="Json")#json
                 a(title="Log Out", href="/logout")#logout.control
-            #buttons
-                a(title="Add a New Item")#add.btn Add
+                #exporter
+                    span(title="JSON")#json
+                    span(title="XML")#xml
+                    span(title="CSV")#csv
+
         #entityTitle.unselectable
             h1
             span#arrow
