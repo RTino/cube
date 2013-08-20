@@ -149,6 +149,11 @@ a
     color: rgb(255, 255, 255);
 }
 
+#menu a#zalandode
+{
+    padding: 0;
+}
+
 #menu .active
 {
     color: dodgerblue !important;
