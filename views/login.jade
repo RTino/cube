@@ -19,6 +19,7 @@ html
               input(type="password", name="password", placeholder="Your password", required)#pword
               a(href='http://techblog.zalando.net/2013/06/zalando-platform-account/')#help Need a platform account?
               a#submit.btn Log In
+              input(type="text", name="redirect")#redirect.hidden
 
 script(src="/js/jquery.min.js")
 
@@ -37,7 +38,7 @@ script(type="text/javascript)
         var target = flash.target[0];
     }
 
-    $('form').attr('action', '/login?continue='+redirect);
+    $('input#redirect').val(redirect);
 
     $('#submit').click(function() {
       $('form').submit();
