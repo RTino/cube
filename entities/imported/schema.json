@@ -1,0 +1,100 @@
+[
+    {
+      "id": "pic",
+      "label": "Pic",
+      "index": true,
+      "type": "img"
+    }, {
+      "id": "name",
+      "label": "Firstname",
+      "mandatory": true,
+      "index": true,
+      "search": true,
+      "thumbnail": true
+    }, {
+      "id": "lastname",
+      "label": "Lastname",
+      "mandatory": true,
+      "index": true,
+      "search": true,
+      "thumbnail": true
+    }, {
+      "id": "email",
+      "label": "Email",
+      "type": "email",
+      "mandatory": true,
+      "search": true
+    }, {
+      "id": "startDate",
+      "label": "Start date",
+      "mandatory": true,
+      "type": "date"
+    }, {
+      "id": "team",
+      "label": "Team",
+      "index": true,
+      "type": "facet",
+      "multiedit": true,
+      "specials": ["Management", "System", "Software Procurement", "Platform", "Database", "24x7", "BI", "MIS", "PMO", "RQM", "ZEOS Support"]
+    }, {
+      "id": "role",
+      "label": "Role",
+      "index": true,
+      "type": "facet",
+      "multiedit": true,
+      "classifier": ["dev", "pm", "qa", "sys", "dba", "pcm", "bi"]
+    },
+    {
+      "id": "team:role",
+      "label": "Team:Role",
+      "type": "tuple",
+      "multivalue": true,
+      "multiedit": true
+    },
+    {
+      "id": "position",
+      "label": "Position",
+      "index": true,
+      "type": "facet",
+      "multiedit": true
+    }, {
+      "id": "expertise",
+      "label": "Expertise",
+      "index": true,
+      "type": "facet",
+      "multiedit": true,
+      "search": true
+    }, {
+      "id": "location",
+      "label": "Location",
+      "index": true,
+      "type": "facet",
+      "multiedit": true
+    }, {
+      "id": "gender",
+      "label": "Gender",
+      "type": "dropdown",
+      "options": ["", "Male", "Female"],
+      "additional": true
+    }, {
+      "id": "skype",
+      "label": "Skype",
+      "additional": true,
+      "type": "skype"
+    }, {
+      "id": "mobile",
+      "label": "Mobile",
+      "additional": true,
+      "search": true
+    }, {
+      "id": "bday",
+      "label": "Birthday",
+      "additional": true,
+      "type": "date"
+    }, {
+      "id": "about",
+      "label": "About Me",
+      "additional": true,
+      "type": "multiline"
+    }
+]
