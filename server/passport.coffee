@@ -3,7 +3,6 @@
 # Passport module initialization
 
 _               = require 'lodash'
-bcrypt          = require 'bcrypt'
 
 passportHttp    = require('passport-http')
 BasicStrategy   = passportHttp.BasicStrategy

@@ -6,6 +6,9 @@ BaseImporter = require "../baseImporter.coffee"
 
 class JiraImporter extends BaseImporter
 
+    title: "JIRA Importer"
+
+    # Required modules.
     async = require "async"
     expresser = require "expresser"
     request = require "request"

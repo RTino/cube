@@ -1,8 +1,8 @@
 {
-    "entity": "team",
-    "title": "The Team",
-    "description": "See how you can easily manage your teams in a Cube",
-    "itemType": [ "person", "people" ],
+    "entity": "imported",
+    "title": "Imported",
+    "description": "Imported entity.",
+    "itemType": [ "issue", "issues" ],
     "separator": "/",
     "view": "list",
     "rows": 50,

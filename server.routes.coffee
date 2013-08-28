@@ -70,6 +70,11 @@ module.exports = (app, express, passport, flash) ->
 
     #### Routes
 
+    app.get "/imports", (req, res) ->
+        impman = require("./server/importManager.coffee")
+        impman.start()
+        res.json impman.jobs
+
     # Root route
     app.get '/',            toLogin,    (a...) -> root          a...
 

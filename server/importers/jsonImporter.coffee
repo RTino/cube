@@ -1,26 +1,22 @@
-# CSV IMPORTER
+# JSON IMPORTER (Default)
 # --------------------------------------------------------------------------
-# Imports CSV data to Cube.
+# Imports JSON data to Cube.
 
 BaseImporter = require "../baseImporter.coffee"
 
-class CsvImporter extends BaseImporter
+class JsonImporter extends BaseImporter
 
-    title: "CSV Importer"
-
-    # Required modules.
-    csv2json = require("csvtojson").core.Converter
+    title: "JSON Importer"
 
 
     # IMPLEMENTATION
     # ----------------------------------------------------------------------
 
-    # Transform CSV to JSON.
+    # Transform default JSON.
     transform: (callback) =>
-        csv2json.on "end_parsed", (jsonData) => callback null, jsonData
-        csv2json.from @rawData
+        callback null, @rawData
 
 
 # EXPORTS
 # --------------------------------------------------------------------------
-module.exports = exports = new CsvImporter()
+module.exports = exports = new JsonImporter()

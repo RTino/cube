@@ -6,17 +6,19 @@ BaseImporter = require "../baseImporter.coffee"
 
 class CsvImporter extends BaseImporter
 
+    title: "CSV Importer"
+
+    # Required modules.
+    csv2json = require("csvtojson").core.Converter
+
 
     # IMPLEMENTATION
     # ----------------------------------------------------------------------
 
-    # Fetch the CSV file from the specified URL.
-    fetch: (callback) =>
-        if not @options.uri
-            err = "CSV file or URL was not specified."
-            return callback err, null
-
-        if @options.uri
+    # Transform CSV to JSON.
+    transform: (callback) =>
+        csv2json.on "end_parsed", (jsonData) => callback null, jsonData
+        csv2json.from @rawData
 
 
 # EXPORTS

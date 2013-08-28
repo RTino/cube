@@ -8,11 +8,14 @@
 
 # Requirements
 
+# Expresser.
+expresser = require "expresser"
+
 # Underscore js library
-_     = require 'lodash'
+_ = require 'lodash'
 
 # Solr Nodejs Client library
-solr  = require 'solr-client'
+solr = require 'solr-client'
 
 # Schema manager
 Schema = require './schema'
@@ -25,7 +28,6 @@ class SolrManager
 
 
     constructor: (@name) ->
-
         @schema = new Schema @name if @name
 
 
@@ -60,11 +62,11 @@ class SolrManager
         f = @schema.getFieldById p
 
         # Add suffix
-        sf = "-s"                               # String with analytics field
-        sf = "-i" if f.type is 'integer'        # Integer field
-        sf = "-f" if f.type is 'float'          # Float field
-        sf += "m" if @isMultivalue f            # Multivalue field (array)
-        sf += "r" if f.mandatory                # Required field
+        sf = "-s" # String with analytics field
+        sf = "-i" if f.type is 'integer' # Integer field
+        sf = "-f" if f.type is 'float' # Float field
+        sf += "m" if @isMultivalue f # Multivalue field (array)
+        sf += "r" if f.mandatory # Required field
 
         # Return property with suffix appended at the end
         p + sf
@@ -101,16 +103,14 @@ class SolrManager
         h = []
         sep = '/' unless sep
         _.each str.split(sep), (v, i) ->
-            h.push str.split(sep).slice(0, i+1).join(sep)
+            h.push str.split(sep).slice(0, i + 1).join(sep)
         h
 
     # Solr is not able to sort multivalue fields or fields with analyzers.
     # To be able to do it, a stringified copy of the multivalue field has
     # to be stored in a simple 'string' type field, and use it for sort.
     addSortFields: (item) =>
-
         _.each item, (v, k) =>
-
             return unless item[k]
 
             field = @schema.getFieldById k
@@ -184,9 +184,9 @@ class SolrManager
         id = id.join(' OR ') if id instanceof Array
 
         query = client.createQuery()
-            .q("id:(#{id})")
-            .start(0)
-            .rows(1000)
+        .q("id:(#{id})")
+        .start(0)
+        .rows(1000)
 
         client.search query, (err, result) =>
             return cb err, result if err
@@ -197,15 +197,14 @@ class SolrManager
 
     # Get all documents from Solr that match a value
     getItemsByProp: (key, value, cb) =>
-
         key = @addSuffix key
 
         client = @createClient()
 
         query = client.createQuery()
-            .q("#{key}:#{value}")
-            .start(0)
-            .rows(1000)
+        .q("#{key}:#{value}")
+        .start(0)
+        .rows(1000)
 
         client.search query, (err, result) =>
             return cb err, result if err
@@ -225,7 +224,7 @@ class SolrManager
             return unless item[f.id] and f.facet is 'month'
             d = new Date(item[f.id]).getMonth()
             monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
+                           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" ]
             d = monthNames[d]
             item["_#{f.id}_month-sm"] = [ d ]
         item
@@ -247,7 +246,6 @@ class SolrManager
 
     # Add a document to the solr collection
     addItems: (items, cb) =>
-
         @createClient() unless @client
 
         docs = []
