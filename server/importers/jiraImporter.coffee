@@ -1,6 +1,8 @@
 # JIRA IMPORTER
 # --------------------------------------------------------------------------
 # Imports data from a JIRA server to Cube.
+# THIS WAS PUSHED EARLIER TO AVOID CUBE PUBLIC/INTERNAL MERGE PROBLEMS WITH GIT!!! THE ACTUAL
+# REFACTORED CODE WILL BE SENT OU TO GITHUB ON MONDAY 2ND SEPTEMBER
 
 BaseImporter = require "../baseImporter.coffee"
 
