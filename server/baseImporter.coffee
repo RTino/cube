@@ -75,7 +75,6 @@ class BaseImporter
 
         # Set the SolrManager to use the passed entity.
         solrManager = new (require "./solrManager.coffee")(@entity)
-        solrClient = solrManager.createClient()
 
         # Set start time.
         @startTime = moment()
@@ -101,6 +100,34 @@ class BaseImporter
             request @options.uri, @options.headers, (err, res, data) => callback err, data
         else
             fs.readFile @options.uri, (err, data) => callback err, data
+
+    # Process the transformed data collection.
+    process: =>
+        if expresser.settings.general.debug
+            expresser.logger.info "BaseImporter", "process", @processedData
+
+        # Process each item of `processedData`.
+        try
+            @processItem item for item in @processedData
+            @processCallback null, @processedData
+        catch ex
+            @processCallback ex
+
+    # Process each transformed item. This will check for the field mapping (fields property)
+    # and properly create a new item with the referenced keys and values.
+    processItem: (item) =>
+        if @options.fields?
+            newItem = {}
+            for sourceKey, targetKey of @options.fields
+                newItem[sourceKey] = item[targetKey]
+        else
+            newItem = item
+
+        if expresser.settings.general.debug
+            expresser.logger.info "BaseImporter", "processItem", newItem
+
+        # Add item to Solr.
+        solrManager.addItems item, (err, data) => @error err if err?
 
 
     # CALLBACKS
@@ -157,31 +184,14 @@ class BaseImporter
         # Process the transformed data.
         @process()
 
-    # Process the transformed data collection.
-    process: =>
+    # Callback for the `proccess` method.
+    processCallback: (err, data) =>
         if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "process", @processedData
+            expresser.logger.info "BaseImporter", "processCallback"
 
-        # Process each item of `processedData`.
-        @processItem item for item in @processedData
+        return @error err if err?
 
-    # Process each transformed item. This will check for the field mapping (fields property)
-    # and properly create a new item with the referenced keys and values.
-    processItem: (item) =>
-        if @options.fields?
-            newItem = {}
-            for sourceKey, targetKey of @options.fields
-                newItem[sourceKey] = item[targetKey]
-        else
-            newItem = item
-
-        if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "processItem", newItem
-
-        # Set search field and add item to Solr.
-        newItem = solrManager.addObjSuffix @entity, newItem
-        setSearchField newItem
-        solrClient.add newItem
+        @postRun() if @postRun?
 
 
     # HELPERS

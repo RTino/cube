@@ -2,13 +2,13 @@
     "development": {
         "host": "localhost",
         "port": "38730",
-        "core": "team",
+        "core": "imported",
         "path": "/cube-solr"
     },
     "production": {
         "host": "localhost",
         "port": "38730",
-        "core": "team",
+        "core": "imported",
         "path": "/cube-solr"
     }
 }
