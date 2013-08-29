@@ -150,7 +150,7 @@ module.exports = (app, express, passport, flash) ->
     # Redirect authenticated user to a specifc address from the querystring
     logged = (req, res) ->
 
-        return res.redirect req.query.continue if req.query.continue
+        return res.redirect req.body.redirect if req.body.redirect
 
         res.redirect '/'
 
