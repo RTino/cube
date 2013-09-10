@@ -71,7 +71,6 @@ class SolrManager
         # Return property with suffix appended at the end
         p + sf
 
-
     # Adds suffixes to all keys of an Object
     addObjSuffix: (obj) =>
 
@@ -121,7 +120,6 @@ class SolrManager
 
         item
 
-
     # Remove suffix added to store in solr, like -s, -sr or -sm, etc.
     removeSuffix: (obj) ->
         newObj = {}
@@ -131,7 +129,6 @@ class SolrManager
             newObj[k] = v
         newObj
 
-
     # Checks if the requested field is multivalue. Facet and tuple fields are
     # multivalue by definition.
     isMultivalue: (field) =>
@@ -139,7 +136,6 @@ class SolrManager
         return yes if field.type is 'facet' or field.type is 'tuple'
         return yes if field.type is 'clink'
         return no
-
 
     # Replaces matchFilter method on solr-client until we find a better way
     # to do this.
@@ -175,7 +171,6 @@ class SolrManager
         fq += ')'
 
         @parameters.push(fq)
-
 
     # Get a document from Solr based on its ID
     getItemById: (id, cb) =>
