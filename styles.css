@@ -806,6 +806,8 @@ section#ime ul li
     display: inline-block;
     width: 290px;
     text-align: center;
+    overflow: hidden;
+    height: 160px;
 }
 
 a#fork
