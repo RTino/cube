@@ -9,7 +9,8 @@
 # Requirements
 
 # Underscore js library
-_     = require 'lodash'
+_       = require 'lodash'
+async   = require 'async'
 
 # Solr Nodejs Client library
 solr  = require 'solr-client'
@@ -48,6 +49,43 @@ class SolrManager
         @client
 
 
+    # Returns a new a solr query object ready to perfom searches on the
+    # requested entity's collection.
+    createQuery: (req, cb) =>
+
+        @createClient() unless @client
+
+        entity = req.params.entity
+
+        settings = require "#{__dirname}/../entities/#{entity}/settings.json"
+
+        q       = if req.query.q then "#{req.query.q}*" else "*:*"
+        rows    = req.query.rows or settings.rows
+        start   = rows*req.query.page || 0
+        sort    = @getSort entity, req.query.sort
+
+        query = @client.createQuery()
+            .q(q)
+            .sort(sort)
+            .defType("edismax")
+            .pf(@getSearchableFields())
+            .qf(@getSearchableFields())
+            .start(start)
+            .rows(rows)
+            .facet on: yes, missing: yes, mincount: 1
+
+        # Temporarily replacing solr-client's matchFilter method since
+        # its not meeting our requirements.
+        query.matchFilter = @customMatchFilter
+
+        facetFields = req.query["facet.field"]
+
+        @setFacets facetFields, query if facetFields?.length
+        @setFilters req, query if req.query?.fs
+
+        cb query
+
+
     # Dynamic schemas in solr require a suffix that specifies the type of field
     # to create. Fields in the DB will be stored with the suffix, but the
     # front-end should not know about it.
@@ -58,6 +96,8 @@ class SolrManager
 
         # Get field information from the schema
         f = @schema.getFieldById p
+
+        return null unless f.id
 
         # Add suffix
         sf = "-s"                               # String with analytics field
@@ -90,7 +130,8 @@ class SolrManager
                 return newObj[k] = v if /_year-sm$/.test k
 
                 # Set value to new object
-                newObj[@addSuffix(k)] = v
+                psf = @addSuffix k
+                newObj[psf] = v if psf
 
         newObj
 
@@ -103,6 +144,7 @@ class SolrManager
         _.each str.split(sep), (v, i) ->
             h.push str.split(sep).slice(0, i+1).join(sep)
         h
+
 
     # Solr is not able to sort multivalue fields or fields with analyzers.
     # To be able to do it, a stringified copy of the multivalue field has
@@ -143,7 +185,7 @@ class SolrManager
 
     # Replaces matchFilter method on solr-client until we find a better way
     # to do this.
-    customMatchFilter: (field, values) ->
+    customMatchFilter: (field, values, cubeId) ->
         options = []
         tag = "{!tag=_#{field}}"
         fq = "fq=#{tag}("
@@ -158,12 +200,6 @@ class SolrManager
         # filtering by 'null' returns all items without the property.
         op = "(*:*%20-#{field}:[*%20TO%20*])" if value is 'null'
 
-        # TODO Make this generic
-        if value is 'new'
-            d = new Date()
-            d.setDate d.getDate() - 31
-            op = "startDate-s%3A[#{d.toISOString()}%20TO%20*]"
-
         options.push(op)
 
         _.each values, (v) ->
@@ -177,42 +213,116 @@ class SolrManager
         @parameters.push(fq)
 
 
+    # Return all items from a core
+    getCollection: (query, cb) =>
+
+        @createClient() unless @client
+
+        unless query
+            query = @client.createQuery()
+                .q("*:*")
+                .start(0)
+                .rows(999999)
+
+        @client.search query, (err, result) =>
+            return cb err, result if err
+            @parseCollection result, (err, result) =>
+                throw err if err
+                cb null, result
+
+
+    # Prepare items in the collection to be ready for backend use. Some
+    # fields are stored as stringified json objects for example, and all fields
+    # in Solr contain a suffix which should be removed.
+    parseCollection: (result, cb) =>
+        docs = []
+        _.each result.response?.docs, (doc) =>
+            doc = @removeSuffix doc
+            doc = @parseJsonFields doc
+            docs.push doc
+        result.response.docs = docs
+
+        @setClinkItems result.response.docs, (docs) =>
+            result.response.docs = docs
+            cb null, result
+
+
     # Get a document from Solr based on its ID
     getItemById: (id, cb) =>
-        client = @createClient()
+
+        @createClient() unless @client
 
         id = id.join(' OR ') if id instanceof Array
 
-        query = client.createQuery()
+        query = @client.createQuery()
             .q("id:(#{id})")
             .start(0)
             .rows(1000)
 
-        client.search query, (err, result) =>
+        @client.search query, (err, result) =>
             return cb err, result if err
             docs = []
             _.each result.response?.docs, (doc) =>
-                docs.push @removeSuffix doc
+                doc = @removeSuffix doc
+                doc = @parseJsonFields doc
+                docs.push doc
             cb null, docs
+
 
     # Get all documents from Solr that match a value
     getItemsByProp: (key, value, cb) =>
 
         key = @addSuffix key
 
-        client = @createClient()
+        @createClient() unless @client
 
-        query = client.createQuery()
+        query = @client.createQuery()
             .q("#{key}:#{value}")
             .start(0)
             .rows(1000)
 
-        client.search query, (err, result) =>
+        @client.search query, (err, result) =>
             return cb err, result if err
             docs = []
             _.each result.response?.docs, (doc) =>
                 docs.push @removeSuffix doc
             cb null, docs
+
+
+    # Get the sort parameter. If its not specified on QS, the default value
+    # is specified in the settings file.
+    getSort: (entity, sort) =>
+
+        settings = require "#{__dirname}/../entities/#{entity}/settings.json"
+
+        sorts = {}
+
+        sort = settings.sort unless sort
+
+        _.each sort.split(','), (s) =>
+            [ id, order ] = s.split ':'
+            if s.split(':').length is 3
+                [id1, id2, order] = s.split ':'
+                id = "#{id1}:#{id2}"
+            field = @schema.getFieldById id
+
+            # Solr can't sort multivalue fields. There is a stringified copy
+            # of each mv field with the suffix -sort appended to its id.
+            if @isMultivalue field then id = "#{id}-sort"
+            else id = @addSuffix id
+
+            sorts[id] = order
+        sorts
+
+
+    # Return all fields specified as "searchable" (search: true) on the schema.
+    getSearchableFields: () =>
+        searchables = @schema.getFieldsByProp 'search'
+        fields = {}
+        _.each searchables, (f) =>
+            return fields["#{f.id}-sort"] = 1 if @isMultivalue f
+            fields[@addSuffix(f.id)] = 1 if f.search
+        return fields
 
     # Add a month field that acts like a facet
     addMonthFacetFields: (item) =>
@@ -230,6 +340,7 @@ class SolrManager
             item["_#{f.id}_month-sm"] = [ d ]
         item
 
+
     # Add a year field that acts like a facet
     addYearFacetFields: (item) =>
         dateFields = @schema.getFieldsByType('date')
@@ -245,6 +356,7 @@ class SolrManager
             item["_#{f.id}_year-sm"] = year
         item
 
+
     # Add a document to the solr collection
     addItems: (items, cb) =>
 
@@ -252,10 +364,13 @@ class SolrManager
 
         docs = []
         _.each [].concat(items), (item) =>
+            item = @resetClinkFields item
+            item = @stringifyJsonItem item
             item = @addSortFields item
             item = @addMonthFacetFields item
             item = @addYearFacetFields item
             item = @addObjSuffix item
+            item.id = @generateId() unless item.id
             item['_version_'] = new Date().toISOString()
             docs.push item
 
@@ -265,3 +380,141 @@ class SolrManager
             _.each docs, (doc) =>
                 items.push @removeSuffix doc
             cb null, items
+
+
+    # Adds fields that are of facet type to the query so that the faceted
+    # response includes them.
+    setFacets: (facetFields, query) =>
+        facetFields = [ facetFields ] if typeof facetFields is "string"
+        _.each facetFields, (f) =>
+            fieldParam = @addSuffix f
+            query.facet
+                field: "{!ex=_#{fieldParam}}#{fieldParam}"
+                limit: -1
+
+    # Adds filter parameters to a query. i.e. facet filters or search terms.
+    setFilters: (req, query) =>
+
+        fqFields = {}
+        fq = req.query.fs
+
+        cubeId = req.user?.cubeId || null
+
+        # Handle an array of facet filters
+        if typeof fq is typeof []
+            _.each fq, (fq) =>
+                [ filter, value ] = fq.split ':'
+                filter = @addSuffix filter
+
+                fqFields[filter] = [] unless fqFields[filter]
+                fqFields[filter].push value
+            _.each fqFields, (fields, f) ->
+                query.matchFilter f, fields, cubeId
+            return
+
+        [ filter, value ] = fq.split(':')
+        filter = @addSuffix filter
+
+        query.matchFilter filter, [ value ], cubeId
+
+    # Get data of cube link fields ant set it for each item.
+    setClinkItems: (docs, cb) =>
+
+        return cb docs unless docs.length
+
+        fields = @schema.getFieldsByType 'clink'
+
+        return cb docs unless fields.length
+
+        async.each docs, (doc, _cb) =>
+            async.each fields, (field, __cb) =>
+                @setClinkField field, doc, () =>
+                    return __cb()
+            , (err) ->
+                throw err if err
+                return _cb()
+        , (err) =>
+            throw err if err
+            cb docs
+
+    # Retreive data of a cube link field from another entity and set it.
+    setClinkField: (field, d, cb) =>
+
+        solrManager = new SolrManager field.entity
+
+        if field.cid
+            return cb() unless d[field.id]
+
+            if field.cid isnt 'id'
+                return solrManager.getItemsByProp field.cid, d[field.id].pop(), (err, items) =>
+                    throw err if err
+                    d[field.id] = items
+                    cb()
+
+            solrManager.getItemById "(#{d[field.id].join(' ')})", (err, items) =>
+                throw err if err
+                d[field.id] =  items
+                return cb()
+
+        if field.cfs
+            cfs = d[field.cfs]
+            cfs = cfs[cfs.length-1] if cfs instanceof Array
+            opts =
+                params: entity: field.entity
+                query: rows: 10000, fs: "#{field.entity}:#{cfs}"
+            solrManager.createQuery opts, (query) =>
+                solrManager.getCollection query, (err, result) =>
+                    d[field.id] = result.response.docs
+                    return cb()
+
+
+    # Cube link fields need to be a list of IDs to be saved
+    resetClinkFields: (item) =>
+
+        _.each @schema.getFieldsByType('clink'), (field) =>
+
+            return delete item[field.id] if field.cfs
+
+            return if field.cid isnt 'id'
+
+            oarr = []
+            _.each item[field.id], (i) =>
+                return oarr.push i if typeof i is "string" and oarr.indexOf(i) is -1
+                oarr.push i.id if i.id and oarr.indexOf(i.id) is -1
+
+            item[field.id] = oarr
+        item
+
+    # Fields with property 'json' are saved as stringified json objects. This
+    # will bring json life into them.
+    parseJsonFields: (doc) =>
+        fields = @schema.getFieldsByProp 'json'
+        _.each fields, (field) =>
+            doc[field.id] = JSON.parse doc[field.id] if doc[field.id]
+        doc
+
+
+    # Prepare an item with json fields to be stored
+    stringifyJsonItem: (item) =>
+        fields = @schema.getFieldsByProp 'json'
+        _.each fields, (field) =>
+            item[field.id] = JSON.stringify item[field.id]
+        item
+
+
+    # Remove all documents from core. USE WITH CAUTION!
+    purge: (cb) =>
+
+        @createClient() unless @client
+
+        @client.deleteByQuery "*:*", (err, result) ->
+            cb()
+
+    # Generate a random ID
+    generateId: () ->
+        chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        today = new Date()
+        result = today.valueOf().toString 16
+        result += chars.substr Math.floor(Math.random() * chars.length), 1
+        result += chars.substr Math.floor(Math.random() * chars.length), 1
+        return result

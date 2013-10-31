@@ -62,7 +62,7 @@ class ItemController
         solrManager = new SolrManager entity
         id = req.params.id.split('|')
 
-        solrManager.getItemById id, (err, items) ->
+        solrManager.getItemById id, (err, items) =>
             throw err if err
             items = items.pop() if items.length is 1
             res.send items
@@ -71,32 +71,28 @@ class ItemController
     # Create a new item
     post: (req, res) =>
 
-        entity = req.params.entity
+        entity      = req.params.entity
         solrManager = new SolrManager entity
-        schema = solrManager.schema
-        eSettings = require "../entities/#{entity}/settings.json"
-        id = @generateId()
-        picKey = schema.getFieldsByType('img')[0]?.id
+        schema      = solrManager.schema
+        auth        = settings.Authentication
+        eSettings   = require "../entities/#{entity}/settings.json"
+        id          = @generateId()
+        picKey      = schema.getFieldsByType('img')[0]?.id
+        response    = null
 
-        auth = settings.Authentication
-        if auth?.strategy? isnt 'none' and
-            eSettings.admins?.length and
+        if auth?.strategy? isnt 'none' and eSettings.admins?.length and
             !@isAdmin req.user.mail, eSettings.admins
                 res.setHeaders 403
                 return res.send 'Unauthorized'
 
-        # Cube link fields need to be a list of IDs to be saved
-        @resetClinkFields schema, req.body
 
         # Create a new item with id
         item = _.extend {id: id}, req.body
 
-        response = null
-
         async.series [
 
             (cb) =>
-
+                # Token Fields
                 tokenFields = schema.getFieldsByProp 'token'
                 return cb() unless tokenFields.length
 
@@ -126,32 +122,51 @@ class ItemController
                     throw err if err
                     cb()
 
+            , (cb) =>
+                # Check for picture
+                return cb() if response
 
+                # Ready to add items to db if they don't have a picture
+                return cb() unless req.body[picKey] is item[picKey]
+
+                response = item
+
+                cb()
 
             , (cb) =>
-                return cb() if item[picKey]
+                # Save picture
+
+                return cb() if response
+
+                # Update picture field and add items to db
+                @savePic id, entity, item, (path) =>
+                    item[picKey] = path
+                    response = item
+                    cb()
+
+            , (cb) =>
+                # Extended Backend
+
+                ExtBackend = require("../entities/#{entity}/backend.coffee").ExtBackend
+
+                return cb() unless ExtBackend
+
+                extBackend = new ExtBackend item
+
+                return cb() unless extBackend.create
+
+                extBackend.create (err, i) ->
+                    throw err if err
+                    item = i
+                    cb()
+
+            , (cb) =>
+                # Save item to DB
 
                 solrManager.addItems item, (err, item) =>
                     throw err if err
                     response = item.pop()
                     cb()
-
-            , (cb) =>
-                return cb() if response
-
-                # Get pic url
-                tmp_pic = "#{__dirname}/../public/#{item[picKey]}"
-                target_file = "#{id}.jpg"
-                target_path = "#{__dirname}/../public/images/#{entity}/#{target_file}"
-
-                # Move the picture to its final place and send item object back
-                fs.rename tmp_pic, target_path, (err) =>
-                    return cb err if err
-                    item[picKey] = "/images/#{entity}/#{target_file}" unless err
-                    solrManager.addItems item, (err, item) =>
-                        throw err if err
-                        response = item.pop()
-                        return cb()
 
         ], (err, result) =>
             throw err if err
@@ -170,15 +185,12 @@ class ItemController
         item = null
         response = null
 
-        # Cube link fields need to be a list of IDs to be saved
-        @resetClinkFields schema, req.body
-
         async.series [
 
             (cb) =>
                 # Get item from the id on the querystring
                 solrManager.getItemById req.params.id, (err, result) =>
-                    throw err if err
+                    return cb err if err
                     if result.length is 1
                         item = result.pop()
                         return cb()
@@ -222,11 +234,11 @@ class ItemController
                             docs.push item
 
                         solrManager.addItems docs, (err, docs) =>
-                            throw err if err
+                            return cb err if err
                             _cb()
 
                 , (err, result) =>
-                    throw err if err
+                    return cb err if err
                     cb()
 
             , (cb) =>
@@ -255,9 +267,7 @@ class ItemController
 
                 response = item
 
-                solrManager.addItems item, (err, item) =>
-                    throw err if err
-                    cb()
+                cb()
 
             , (cb) =>
                 return cb() if response
@@ -265,13 +275,36 @@ class ItemController
                 # Update picture field and add items to db
                 @updatePic item.id, entity, req.body[picKey], item[picKey], (path) =>
                     item[picKey] = path
-                    solrManager.addItems item, (err, item) =>
-                        throw err if err
-                        response = item
-                        cb()
+                    response = item
+                    cb()
+
+            , (cb) =>
+
+                ExtBackend = require("../entities/#{entity}/backend.coffee").ExtBackend
+
+                return cb() unless ExtBackend
+
+                extBackend = new ExtBackend item
+
+                return cb() unless extBackend.update
+
+                extBackend.update (err, i) ->
+                    return cb err if err
+                    item = i
+                    cb()
+
+            , (cb) =>
+
+                solrManager.addItems item, (err, item) =>
+                    cb err if err
+                    cb()
 
         ], (err, result) ->
-            throw err if err
+
+            if err
+                console.log 'Error: ', err
+                res.statusCode = 500
+                return res.send err
 
             # Ready to send the response back to backbone app
             res.send response
@@ -287,122 +320,24 @@ class ItemController
 
         solrManager.getItemById id, (err, docs) =>
             throw err if err
-            _.each docs, (item) ->
+            _.each docs, (item) =>
+
+                ExtBackend = require("../entities/#{entity}/backend.coffee").ExtBackend
+
+                if ExtBackend
+                    extBackend = new ExtBackend item if ExtBackend
+                    extBackend.delete (err, i) ->
+                        throw err if err
+
                 solrManager.client.deleteByID id, (err, result) ->
                     throw err if err
                     res.send result
+
                 return unless picKey
+
                 imgPath = "#{__dirname}/../public/#{item[picKey]}"
                 fs.unlink imgPath, (err) ->
                     console.log "Failed to remove pic for user #{id}" if err
-
-
-    # Get the value of a property from one specific item
-    prop: (req, res) =>
-        entity  = req.params.entity
-        item    = req.params.item
-        prop    = req.params.property
-        solrManager = new SolrManager entity
-        solrManager.getItemById item, (err, items) ->
-            throw err if err
-            return res.send [] unless items.length
-            res.send items[0][prop]
-
-
-    # Set or insert a value on a property from an item
-    putValue: (req, res) =>
-
-        entity  = req.params.entity
-        item    = req.params.item
-        prop    = req.params.property
-        value   = req.params.value
-
-        Verify  = require("../entities/#{entity}/code.coffee").Verify
-
-        unless Verify
-            res.statusCode = 403
-            return res.send "Not allowed"
-
-        # Check if its allowed to make this change
-        verify = new Verify req
-
-        verify.isAllowed (allowed) =>
-
-            unless allowed
-                res.statusCode = 403
-                return res.send "Not allowed"
-
-            solrManager = new SolrManager entity
-
-            solrManager.getItemById item, (err, items) =>
-                throw err if err
-                return res.send [] unless items.length
-
-                item = items[0]
-
-                item[prop] = [] unless item[prop]
-
-                if typeof item[prop] is typeof []
-                    item[prop].push value if item[prop].indexOf(value) is -1
-                    return solrManager.addItems item, (err, item) =>
-                        throw err if err
-                        res.send item
-
-                item[prop] = value
-                solrManager.addItems item, (err, item) =>
-                    throw err if err
-                    res.send item
-
-
-    # Delete a value from an item
-    delValue: (req, res) =>
-
-        entity  = req.params.entity
-        item    = req.params.item
-        prop    = req.params.property
-        value   = req.params.value
-
-        Verify  = require("../entities/#{entity}/code.coffee").Verify
-
-        unless Verify
-            res.statusCode = 403
-            return res.send "Not allowed"
-
-        # Check if its allowed to make this change
-        verify = new Verify req
-
-
-        verify.isAllowed (allowed) =>
-
-            if not allowed
-                res.statusCode = 403
-                return res.send "Not allowed"
-
-            solrManager = new SolrManager entity
-
-            solrManager.getItemById item, (err, items) =>
-                throw err if err
-                return res.send [] unless items.length
-
-                item = items[0]
-
-                return res.send [] unless item[prop]
-
-                if value
-
-                    index = item[prop].indexOf value
-
-                    return res.send [] if index is -1
-
-                    item[prop].splice index, 1
-                    return solrManager.addItems item, (err, _item) =>
-                        throw err if err
-                        res.send _item
-
-                delete item[prop]
-                solrManager.addItems item, (err, item) =>
-                    throw err if err
-                    res.send item
 
 
     # Update picture removing old picture and renaming new one.
@@ -419,6 +354,21 @@ class ItemController
                     throw err if err
                     cb target_file
 
+    savePic: (id, entity, item, cb) =>
+        # Get pic url
+        tmp_pic = "#{__dirname}/../public/#{item[picKey]}"
+        target_file = "#{id}.jpg"
+        target_path = "#{__dirname}/../public/images/#{entity}/#{target_file}"
+
+        # Move the picture to its final place and send item object back
+        fs.rename tmp_pic, target_path, (err) =>
+            return cb err if err
+            item[picKey] = "/images/#{entity}/#{target_file}" unless err
+            solrManager.addItems item, (err, item) =>
+                throw err if err
+                response = item.pop()
+                return cb()
+
 
     # Get the value of a property from one specific item
     prop: (req, res) =>
@@ -474,7 +424,9 @@ class ItemController
                         throw err if err
                         res.send item
 
+
                 item[prop] = value
+
                 solrManager.addItems item, (err, item) =>
                     throw err if err
                     res.send item
@@ -529,18 +481,6 @@ class ItemController
                 solrManager.addItems item, (err, _item) =>
                     throw err if err
                     res.send _item
-
-
-    # Transform a list of items into a list of ids, which is what it actually
-    # gets stored in the DB for cube link fields.
-    resetClinkFields: (schema, item) =>
-
-        _.each schema.getFieldsByType('clink'), (field) =>
-            oarr = []
-            _.each item[field.id], (i) =>
-                oarr.push i.id if oarr.indexOf(i.id) is -1
-
-            item[field.id] = oarr
 
 
     # Generate an ID for the item on the db
