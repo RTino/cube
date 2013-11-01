@@ -1,0 +1,8 @@
+[
+    {
+        "id": "Testing JSOM from geonames.",
+        "type": "json",
+        "schedule": "5",
+        "uri": "http://api.geonames.org/postalCodeLookupJSON?postalcode=6600&country=AT&username=demo"
+    }
+]

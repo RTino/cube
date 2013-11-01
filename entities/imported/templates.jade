@@ -1,0 +1,136 @@
+script(type="text/template")#pane-template
+  |   <%
+  |   function setProjectsAmount(name) {
+  |       var qs = "?fs=team:"+name;
+  |       var url = "/project/collection/" + qs;
+  |       $.get(url, function(data) {
+  |           $("a#projects").html(data.response.docs.length);
+  |       });
+  |   }
+  |   setProjectsAmount(t.name);
+  |   function getMentors() {
+  |       var mentors = 0;
+  |       window.collection.each(function(m) {
+  |           positions = m.get("position");
+  |           _.each(positions, function(p) {
+  |               if (p === "Mentor") { mentors += 1; };
+  |           });
+  |       });
+  |       return mentors;
+  |   }
+  |   function getNewbies() {
+  |       var newbies = 0;
+  |       var bM = new Date();
+  |       bM.setDate(bM.getDate() - 30);
+  |       window.collection.each(function(m) {
+  |           startDate = new Date(m.get("startDate"));
+  |           if (startDate >= bM) { newbies += 1; };
+  |       });
+  |       return newbies;
+  |   }
+  |   function getExpertise() {
+  |       var e = [];
+  |       window.collection.each(function(m) {
+  |           var expertises = m.get("expertise");
+  |           var positions = m.get("positions");
+  |           _.each(expertises, function(expertise) {
+  |               if (e.indexOf(expertise) !== -1) { return; }
+  |               e.push(expertise);
+  |           });
+  |       });
+  |       return e;
+  |   }
+  |   function getProjectsURL(name) {
+  |       var qs = "?fs=team:"+name;
+  |       var link = "/project/#qs/"+qs+"&view=list";
+  |       return link;
+  |   }
+  |   function parseMultivalue(values, name) {
+  |       _.each(values, function(v, i, a) { %>
+  |           <span><%  var f = v;
+  |                   if (v.split("/")[1]) { f = v.split("/")[1]; }
+  |                   f = (a.length > 1 && i < a.length -1) ? f+",": f;
+  |               %><%= f %>
+  |           </span><%
+  |       });
+  |   };
+  |   %>
+  |   <a class="destroy"></a>
+  |   <div id="teamPicture" class="pictureContainer">
+  |       <img src="<%= t.pic || "/assets/default-pane-avatar.png" %>"/>
+  |   </div>
+  |   <div id="teamData">
+  |       <ul>
+  |           <li id="description">
+  |               <label class="title"><%= t.title %></label>
+  |               <div class="description">
+  |                  <p class="description"><%= t.description %></p>
+  |               </div>
+  |           </li>
+  |           <% if (t.email) { %>
+  |               <li>
+  |                   <label class="title">Mailing list</label>
+  |                   <div class="subteams">
+  |                      <a href="mailto:<%= t.email %>"><%= t.email %></a>
+  |                   </div>
+  |           <% }; %>
+  |           <% if (t.subteams && t.subteams.length) { %>
+  |               <li>
+  |                   <label class="title">Subteams</label>
+  |                   <div class="subteams">
+  |                      <% parseMultivalue(t.subteams, "team"); %>
+  |                   </div>
+  |           <% }; %>
+  |           <%  var e = getExpertise();
+  |               if (e.length) { %>
+  |               <li>
+  |                   <label class="title">Expertise</label>
+  |                   <div class="subteams">
+  |                       <% parseMultivalue(e, "expertise"); %>
+  |                   </div>
+  |               </li>
+  |           <% }; %>
+  |           <li>
+  |               <label class="title">Statistics</label>
+  |               <ul class="statistics">
+  |                   <li><span class="left">Subteams</span>
+  |                       <span class="aRight">
+  |                           <%= t.subteams? t.subteams.length : 0 %>
+  |                       </span>
+  |                   </li>
+  |                   <li><span class="left">Total members</span>
+  |                       <span class="aRight">
+  |                           <%= window.collection.length %>
+  |                       </span>
+  |                   </li>
+  |                   <li>
+  |                       <span class="left">Teamleads</span>
+  |                       <span class="aRight">
+  |                           <%= $("span.marked", "#items").length %>
+  |                       </span>
+  |                   </li>
+  |                   <li>
+  |                       <span class="left">Mentors</span>
+  |                       <span class="aRight"><%= getMentors() %></span>
+  |                   </li>
+  |                   <li>
+  |                       <span class="left">Newbies</span>
+  |                       <span class="aRight"><%= getNewbies() %></span>
+  |                   </li>
+  |                   <li>
+  |                       <span class="left">
+  |                           <a target="_blank"
+  |                               href="<%= getProjectsURL(t.name) %>">
+  |                               Projects
+  |                           </a>
+  |                       </span>
+  |                       <span class="aRight">
+  |                           <a id="projects" target="_blank"
+  |                               href="<%= getProjectsURL(t.name) %>"></a>
+  |                       </span>
+  |                   </li>
+  |               </ul>
+  |           </li>
+  |       </ul>
+  |   </div>
+
