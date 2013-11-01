@@ -9,6 +9,7 @@
                 span(title="View Mode")#view
                 span(title="Print")#print
                 a(title="Log Out", href="/logout")#logout.control
+                a(title="Profile")#profile.control
                 #exporter
                     span(title="JSON")#json
                     span(title="XML")#xml
@@ -31,7 +32,7 @@
         #innerIndex
             ul#facet.unselectable
     #content
-        #pane
+        #pane.pane
         span#loading.unselectable
         #items
         #columnsSelectWrapper.unselectable
@@ -48,10 +49,14 @@
 
     script(src="/js/jquery.iframe-transport.js")
     script(src="/js/jquery.fileupload.js")
+    script(src="/js/jquery-ui-timepicker-addon.js")
 
     script(src="/js/lodash.js")
     script(src="/js/backbone-min.js")
     script(src="/js/backbone.queryparams.js")
+
+    script(src="/js/moment.min.js")
+    script(src="/js/async.js")
 
     != js('libs/crypt')
     != js('libs/date')
@@ -59,14 +64,16 @@
     != js('libs/schema')
     != js('libs/style')
     != js('libs/colorize')
-    != js('entities/' + entity + '/code')
     != js('models/item')
     != js('models/facet')
+    != js('models/tree')
     != js('collections/collection')
     != js('collections/facets')
     != js('views/profile')
     != js('views/facet')
+    != js('views/tree')
     != js('views/item')
+    != js('entities/' + entity + '/code')
     != js('routes')
     != js('app')
 
@@ -90,9 +97,9 @@
       |   };
       |   function addHeaders() {
       |       _.each(schema, function(f) { %>
-      |           <th id="<%= f.id %>" title="<%= f.label %>" data-type="<%= f.type %>"
+      |           <th id="<%- f.id %>" title="<%- f.label %>" data-type="<%- f.type %>"
       |               class="header <% if (f.index) { %>visible<% }%>">
-      |               <div class="th-inner <% if (hid === f.id) {%><%= ord %><%} if (typeof f.sort === 'undefined' || f.sort === true) { %> sort <% }%>">
+      |               <div class="th-inner <% if (hid === f.id) {%><%- ord %><%} if (typeof f.sort === 'undefined' || f.sort === true) { %> sort <% }%>">
       |               <% if(f.type === "gantt"){
       |                      var week = Date.prototype.week(new Date()); %>
       |                     <div class="ganttHeaderContainer">
@@ -109,7 +116,7 @@
       |       });
       |   };
       | %>
-      | <div id="tableContainer" class="<%= classes %>">
+      | <div id="tableContainer" class="<%- classes %>">
       |     <div class="fixed-table-container-inner">
       |         <table>
       |             <thead><tr><% addHeaders() %></tr></thead>
@@ -118,8 +125,9 @@
       |     </div>
       | </div>
 
+
     script(type="text/template")#columns-menu-template
-      | <li id="<%= field.id %>">
+      | <li id="<%- field.id %>">
       |     <div>
       |         <span class="label"><%= field.label %></span>
       |         <span class="visible <% if (field.index) { %>active<%}%>">Visible</span>
@@ -128,15 +136,15 @@
       | </li>
 
     script(type="text/template")#tuple-field-template
-      | <div id="<%= id %>" class="tupleField">
-      |     <input type="text" id="<%= id %>_1" class="autocomplete tuple p1"
+      | <div id="<%- id %>" class="tupleField">
+      |     <input type="text" id="<%- id %>_1" class="autocomplete tuple p1"
       |         data-type="tuple" value="" /><span class="tupleColon">:
-      |     <input type="text" id="<%= id %>_2" class="autocomplete tuple p2"
+      |     <input type="text" id="<%- id %>_2" class="autocomplete tuple p2"
       |         data-type="tuple" value="" />
       | </div>
 
     script(type="text/template")#category-template
-      | <li class="category" id="category-<%= index %>">
+      | <li class="category" id="category-<%- index %>">
       |     <label class="category">
       |         <%= cat === 'null' ? 'not set' : cat %> <span>- <em></em></span>
       |     </label>

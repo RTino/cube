@@ -1,5 +1,7 @@
 #print
-  h3 Nothing to print
+  #container
+    h3 Nothing to print
+  #extensions
 
   script(src="/js/json2.js")
   script(src="/js/jquery.min.js")
@@ -17,7 +19,7 @@
     |       var bmark = Schema.getBookmark();
     |       _.each(Schema.getIndexes(), function(p) { 
     |       %>
-    |       <td class="<%= p.id %>">
+    |       <td class="<%- p.id %>">
     |         <div class="cont <%if (p.id === 'pic') {%>miniPicContainer<%};%>">
     |         <% if (p.type === 'img') { %>
     |             <% if (bmark['id'] && m[bmark.id].indexOf(bmark.bookmark) != -1) {
@@ -25,9 +27,11 @@
     |                 <span class="marked"></span>
     |             <% }; %>
     |           <img class="miniPic"
-    |               src="<%= m[p.id] || '/images/default-avatar.png' %>"/>
+    |               src="<%- m[p.id] || '/assets/default-avatar.png' %>"/>
+    |         <% } else if (p.type === 'clink' && m[p.id]) { %>
+    |             <%= m[p.id].length %>
     |         <% } else { %>
-    |           <%= m[p.id] %>
+    |           <%- m[p.id] %>
     |         <% }; %>
     |       </div>
     |       </td>
@@ -40,9 +44,9 @@
     |         <div class="fixed-table-container-inner print">
     |             <table><thead><tr>
     |                 <% _.each(window.opener.settings.Schema.getIndexes(), function(header) {
-    |                     %><th class="header <%= header.id %>"><div class="th-inner">
+    |                     %><th class="header <%- header.id %>"><div class="th-inner">
     |                         <span>
-    |                             <%= header.label %>
+    |                             <%- header.label %>
     |                         </span><span id="sortArrow"></span></div></th><%
     |                 }); %>
     |             </tr></thead><tbody></tbody></table>
@@ -66,26 +70,29 @@
     |   };
     |   function fieldText(id, name, value) {
     |       if (value === undefined) { return; };
-    |       %>
-    |           <label for="<%= id %>" ><%= name %></label>
-    |           <div class="text-container" id="<%= id %>">
-    |              <% var v = value.split(','); %>
-    |                 <%= v.join(', ') %>
-    |           </div>
-    |       <%
+    |       if (value instanceof Array) {
+    |         value = value.join(',');
+    |       } %>
+    |       <label for="<%- id %>" ><%- name %></label>
+    |           <div class="text-container" id="<%- id %>">
+    |               <% var v = value.split(','); %><%= v.join(', ') %>
+    |           </div><%
+    |   };
+    |   function fieldClink(id, name, value) { %>
+    |       <label for="<%- id %>" ><%- name %></label>
+    |       <div class="text-container" id="<%- id %>">
+    |           <%= value.length %>
+    |       </div><%
     |   };
     |   function fieldDate(id, name, value) {
-    |       if (value === undefined) { return; };
-    |       %>
-    |           <label for="<%= id %>" ><%= name %></label>
-    |           <div class="text-container">
-    |               <%= formatDate(value) %>
-    |           </div>
-    |       <%
+    |       if (value === undefined) { return; }; %>
+    |       <label for="<%- id %>" ><%= name %></label>
+    |       <div class="text-container"><%= formatDate(value) %></div><%
     |   };
     |   function renderField(field, value) {
     |       rf = fieldText;
     |       if (typeof value === typeof []) { value = value.toString() };
+    |       if (field['type'] === 'clink') { rf = fieldClink; };
     |       if (field['type'] === 'date') { rf = fieldDate;
     |           value = formatDate(value);
     |       };
@@ -93,18 +100,17 @@
     |       rf(field['id'], field['label'], value);
     |   };
     |   if (Schema.getPictures().length) { %>
-    |   <div id="pictureContainer">
-    |       <img id="picture" src="<%= m[picKey] %>"/>
-    |   </div>
-    | <% }; %>
+    |       <div id="pictureContainer">
+    |           <img id="picture" src="<%= m[picKey] || '/assets/default-avatar.png' %>"/>
+    |       </div><%
+    |   }; %>
     |   <div id="data">
-    |   <ul>
-    |       <% _.each(Schema.get(), function(a) { 
-    |           if (a['additional']) { return; };
-    |       %>
-    |       <li><%
-    |          renderField(a, m[a.id]); }); %>
-    |       </li>
+    |       <ul>
+    |           <% _.each(Schema.get(), function(a, index) {
+    |               if (!m[a.id]) { return; };
+    |               if (a['additional']) { return; }; %>
+    |               <li id="<%= index %>"><% renderField(a, m[a.id]); %></li><%
+    |           }); %>
     |   </ul>
     |   </div>
 

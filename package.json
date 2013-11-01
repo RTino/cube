@@ -41,7 +41,7 @@
         "moment": ">= 2.0.0",
         "passport": ">= 0.1.16",
         "passport-http": ">= 0.2.1",
-        "passport-ldapauth": ">= 0.0.6",
+        "passport-ldapauth": ">= 0.1.0",
         "request": ">= 2.21.0",
         "solr-client": ">= 0.2.6",
         "stylus":">= 0.32.1",

@@ -21,7 +21,8 @@ script(src="/js/lodash.js")
 != js('index')
 
 script(type="text/javascript")
-    var entities= !{JSON.stringify(entities)};
+  var entities  = !{JSON.stringify(entities)};
+  var user      = !{JSON.stringify(user)};
 
 script(type="text/html")#list-item
     | <li id="<%= entity %>">

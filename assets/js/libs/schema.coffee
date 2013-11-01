@@ -44,6 +44,9 @@ class window.Schema
     getMandatories: () ->
         @getFieldsByProp 'mandatory'
 
+    getUnique: () ->
+        @getFieldsByProp 'unique'
+
     getAdditionals: () ->
         @getFieldsByProp 'additional'
 

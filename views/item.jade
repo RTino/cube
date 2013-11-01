@@ -3,6 +3,11 @@ script(type="text/html")#item-template
   |   var etiquettes = App.getItemEtiquettes(m);
   |   var model = m.parseSubfields();
   |   var pic = settings.Schema.getImgKey();
+  |   var avatar = '/assets/default-pane-avatar.png';
+  |   if (settings.avatar === 'person') {
+  |       avatar = '/assets/default-person-avatar.png'
+  |   };
+  |   avatar = model[pic] ? model[pic] : avatar;
   |   function addEtiquettes() {
   |       _.each(etiquettes, function(e) {
   |           if (!e) { return; };
@@ -24,7 +29,7 @@ script(type="text/html")#item-template
   |     <div class="etiquettes"><%
   |         addEtiquettes(); %>
   |     </div>
-  |     <img class="thumbnail" src="<%= model[pic] %>">
+  |     <img class="thumbnail" src="<%= avatar %>">
   |     <div class="label"><%= App.getThumbnailLabel(model, schema) %></div>
   | </div>
 
@@ -33,16 +38,20 @@ script(type="text/html")#item-table-template
   |   var pic = settings.Schema.getImgKey();
   |   var etiquettes = App.getItemEtiquettes(m);
   |   var model = m.parseSubfields();
-  |   var dimg = '/images/default-avatar.png';
+  |   var avatar = '/assets/default-avatar.png';
+  |   if (settings.avatar === 'person') {
+  |       avatar = '/assets/default-person-avatar.png'
+  |   };
+  |   avatar = model[pic] ? model[pic] : avatar;
   |   function fieldImg(field, model) { %>
-  |       <img src="<%= model[field.id] || dimg %>" class="hoverpic"/>
+  |       <img src="<%= avatar %>" class="hoverpic"/>
   |       <div id="hoverpicEtiquettes" class="etiquettes"><%
   |           addEtiquettes(); %>
   |       </div>
   |       <div class="cont miniPicContainer"><%
   |           addMiniEtiquette(etiquettes, 'marked', false, model); %>
   |           <object class="miniPic" data="<%= model[field.id] %>">
-  |               <img class="miniPic" src="<%= dimg %>"/>
+  |               <img class="miniPic" src="<%= avatar %>"/>
   |           </object>
   |       </div><%
   |   };
@@ -75,14 +84,14 @@ script(type="text/html")#item-table-template
   |           <div class="ganttInfoL"></div>
   |           <div class="ganttInfoC"></div>
   |           <div class="ganttItem"
-  |               style="margin-left: <%= ((start - current) * 40) + 120 %>px;"
-  |               data-start="<%= start %>" data-end="<%= end %>"
-  |               data-current="<%= current %>"><%
+  |               style="margin-left: <%- ((start - current) * 40) + 120 %>px;"
+  |               data-start="<%- start %>" data-end="<%- end %>"
+  |               data-current="<%- current %>"><%
   |               _.range(start, end + 1).forEach(function(w){
   |                   if(w < 1){ w = 52 + w;} else if(w > 52){ w = w - 52;}
   |                       var week = Date.prototype.getStartAndEndDateOfWeek(w, null, field.dateFormat); %>
   |                       <div class="ganttCell <% if(current === w) {%>ganttCurrent<% } %>"
-  |                           data-notification="<%= week.start + ' - ' + week.end %>"><%= w %></div><%
+  |                           data-notification="<%- week.start + ' - ' + week.end %>"><%- w %></div><%
   |               }); %>
   |           </div>
   |           <div class="ganttInfoR"></div>
@@ -106,8 +115,13 @@ script(type="text/html")#item-table-template
   |           if (nitems) { %><span> +<%= nitems %><% } %>
   |       </div><%
   |   };
-  |   function miniPic(src, label) { %>
-  |       <img class="miniPic" src="<%= src %>" title="<%= label %>"/><%
+  |   function miniPic(src, label) {
+  |       var avatar = '/assets/default-pane-avatar.png';
+  |       if (settings.avatar === 'person') {
+  |           avatar = '/assets/default-person-avatar.png'
+  |       };
+  |       avatar = src ? src : avatar; %>
+  |       <img class="miniPic" src="<%= avatar %>" title="<%- label %>"/><%
   |   }
   |   function renderField(field, model) {
   |       rf = fieldText;
@@ -168,9 +182,11 @@ script(type="text/html")#item-table-template
   |           if (mini) { %>style="<%= css %>"<% } %>>
   |       </span><%
   |   };
-  |   _.each(schema, function(f) { %>
-  |       <td class="<%= f.id %><% if (f.index) { %> visible<% }; if(f.type === 'gantt'){ %> ganttChart<% } %> "
-  |           data-type="<%= f.type %>" >
+  |   _.each(schema, function(f) {
+  |         var title = model[f.id];
+  |         if (title instanceof Array) { title = ''; }; %>
+  |       <td class="<%- f.id %><% if (f.index) { %> visible<% }; if(f.type === 'gantt'){ %> ganttChart<% } %> "
+  |           title="<%- title %>" data-type="<%- f.type %>" >
   |       <% renderField(f, model); %>
   |       </td><%
   |   });

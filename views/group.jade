@@ -20,41 +20,49 @@ script(type="text/template")#group-template
   |       rf = fieldText;
   |       if (field['type'] === 'tuple') { rf = fieldTuple; };
   |       if (field['type'] === 'date') { rf = fieldDate; };
+  |       if (field['type'] === 'datetime') { rf = fieldDateTime; };
   |       rf(field, field['label']);
   |   };
   |   function fieldTuple(f) {
   |       var cat1 = f.id.split(':')[0];
   |       var cat2 = f.id.split(':')[1]; %>
   |       <li class="adaptive">
-  |           <label for="<%= f.id %>"
+  |           <label for="<%- f.id %>"
   |               class="mult"><%= f.label %></label>
-  |               <div id="<%= f.id %>" class="tupleWrapper"><%
+  |               <div id="<%- f.id %>" class="tupleWrapper"><%
   |                    tuppleRow(f); %>
   |               </div>
   |       </li><%
   |   };
   |   function fieldDate(f) { %>
   |       <li>
-  |           <label for="<%= f.id %>" ><%= f.label %></label>
+  |           <label for="<%- f.id %>" ><%= f.label %></label>
   |           <input type="text" readonly="readonly"
-  |               id="<%= f.id %>" data-type="date"/>
+  |               id="<%- f.id %>" data-type="date"/>
+  |       </li><%
+  |   };
+  |   function fieldDateTime(f) { %>
+  |       <li>
+  |           <label for="<%- f.id %>" ><%= f.label %></label>
+  |           <input type="text" readonly="readonly"
+  |               id="<%- f.id %>" data-type="datetime"/>
   |       </li><%
   |   };
   |   function fieldText(f) {
   |       if (window.App.isTuple(f.id)) { return ; }; %>
   |       <li>
-  |           <label for="<%= f.id %>" ><%= f.label %></label>
-  |           <input type="text" id="<%= f.id %>" class="<%= f.type %>" <%
+  |           <label for="<%- f.id %>" ><%= f.label %></label>
+  |           <input type="text" id="<%- f.id %>" class="<%- f.type %>" <%
   |               if (f.multivalue) { %> data-type="multivalue" <% }; %>/>
   |       </li><%
   |   };
   |   function tuppleRow(field) { %>
-  |       <div id="<%= field.id %>" class="tupleField">
-  |           <input type="text" id="<%= field.id %>_1"
+  |       <div id="<%- field.id %>" class="tupleField">
+  |           <input type="text" id="<%- field.id %>_1"
   |               class="autocomplete tuple p1"<%
   |               if (field.multivalue) {%> data-type="tuple" <% }; %>
   |               value="" />:
-  |           <input type="text" id="<%= field.id %>_2"
+  |           <input type="text" id="<%- field.id %>_2"
   |               class="autocomplete tuple p2"<%
   |               if (field.multivalue) {%> data-type="tuple" <% }; %>
   |               value="" />
@@ -67,11 +75,11 @@ script(type="text/template")#group-template
   |           var l = window.App.getThumbnailLabel(i.parseSubfields(), window.schema);
   |           if (e) { emails.push(i.get(emailKey)); };
   |           if (s) { skypes.push(i.get(skypeKey)); }; %>
-  |           <li id="<%= i.get('id') %>"><%
+  |           <li id="<%- i.get('id') %>"><%
   |               if (schema.getPictures().length) { %>
   |                   <object class="miniPic" data="<%= i.get(pic) %>">
   |                       <img class="miniPic"
-  |                           src="/images/default-avatar.png"/>
+  |                           src="/assets/default-avatar.png"/>
   |                   </object><%
   |               }; %>
   |               <div class="name"><%= l %></div>

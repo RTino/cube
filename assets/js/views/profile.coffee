@@ -30,7 +30,7 @@ $ ->
             $('#footer, #columnsSelectWrapper').addClass 'onProfile'
 
             # Show pane. .show() fails on some browsers.
-            $('#pane').css('display', 'block')
+            $('.pane').css('display', 'block')
 
         #### Set Model properties
         # Set values on a model for text, date and picture fields, and allow
@@ -60,7 +60,7 @@ $ ->
         # All of these fields are stored in the DB as strings.
         setModelTextFields: (m, unset) =>
 
-            _.each $('input, textarea', '#pane'), (i) =>
+            _.each $('input, textarea', '.pane'), (i) =>
 
                 $i = $(i)
 
@@ -70,7 +70,8 @@ $ ->
 
                 return unless !f.type or f.type is "text" or
                     f.type is "email" or f.type is "multiline" or
-                    f.type is "skype" or f.type is "link"
+                    f.type is "skype" or f.type is "link" or
+                    f.type is "clink"
 
                 val = $.trim $i.val()
 
@@ -87,7 +88,7 @@ $ ->
         # stored as integer or float respectively.
         setModelIntFields: (m, unset) =>
 
-            _.each $('input', '#pane'), (i) =>
+            _.each $('input', '.pane'), (i) =>
 
                 $i = $(i)
 
@@ -95,7 +96,7 @@ $ ->
 
                 f = window.settings.Schema.getFieldById id.split('_')[0]
 
-                return unless !f.type or f.type is "integer" or
+                return unless f.type is "integer" or
                     f.type is "float"
 
                 val = $.trim $i.val()
@@ -114,7 +115,7 @@ $ ->
         # stored as strings.
         setModelDropdownFields: (m, unset) =>
 
-            _.each $('select', '#pane'), (i) =>
+            _.each $('select', '.pane'), (i) =>
 
                 $i = $(i)
 
@@ -135,7 +136,7 @@ $ ->
         # Sets a model's date fields. Stored as javascript ISO date strings.
         setModelDateFields: (m, unset) =>
 
-            _.each $('input[data-type="date"]', '#pane'), (i) ->
+            _.each $('input[data-type="date"]', '.pane'), (i) ->
 
                 id = $(i).attr 'id'
 
@@ -151,7 +152,7 @@ $ ->
         # Sets a model's date fields. Stored as javascript ISO date strings.
         setModelDateTimeFields: (m, unset) =>
 
-            _.each $('input[data-type="datetime"]', '#pane'), (i) ->
+            _.each $('input[data-type="datetime"]', '.pane'), (i) ->
 
                 id = $(i).attr 'id'
 
@@ -174,7 +175,7 @@ $ ->
 
                 id = pf.id
 
-                $i = $("#picture", '#pane')
+                $i = $("#picture", '.pane')
 
                 return unless $i.attr 'src'
 
@@ -202,6 +203,7 @@ $ ->
                 f = window.settings.Schema.getFieldById id.split('_')[0]
 
                 _.each $i.val().split(','), (v) =>
+                    v = v.toLowerCase() if f.token
                     @setUniqueMultivalueField v, val
 
                 return m.unset(id, silent: yes) if !val.length and unset
@@ -277,7 +279,7 @@ $ ->
 
             @destroy()
 
-            $('#pane').hide()
+            $('.pane').hide()
 
             @app.navigate()
 
@@ -391,7 +393,7 @@ $ ->
 
             validForm = true
 
-            $('.validationFailed', '#pane').removeClass('validationFailed')
+            $('.validationFailed', '.pane, #teamContainer').removeClass('validationFailed')
 
             inputFields = window.settings.Schema.getMandatories()
 
@@ -399,7 +401,7 @@ $ ->
 
                 validField = true
 
-                input = $("input##{f.id}", "#pane")
+                input = $("input##{f.id}", ".pane, #teamContainer")
 
                 validField = false if !input.val()
 
@@ -425,6 +427,41 @@ $ ->
             re = RegExp re.join ''
 
             re.test email
+
+
+        isUnique: (cb) =>
+
+            u = no
+
+            uniqueFields = window.settings.Schema.getUnique()
+
+            u = yes unless uniqueFields.length
+
+            async.each uniqueFields, (f, _cb) =>
+
+                input = $("input##{f.id}", "#pane")
+
+                $.get "/team/property/#{f.id}/#{input.val()}", (items) =>
+
+                    if items.length is 1 and @model.get('id') is items[0].id
+                        input.removeClass 'validationFailed'
+                        u = yes
+                        return _cb()
+
+                    if items.length
+                        u = no
+                        alert "A user with unique field: #{f.id}, of value: #{input.val()}, already exists. Please choose a different value."
+                        input.addClass 'validationFailed'
+                        return _cb()
+
+                    input.removeClass 'validationFailed'
+                    u = yes
+                    _cb()
+
+             , (err) =>
+
+                 cb u
+
 
 
         # Attach autocomplete plugin to input fields (i.e. team, role).
@@ -635,7 +672,7 @@ $ ->
             $('.thumbnailContainer').addClass 'onProfile'
 
 
-        # Render profile inside #pane
+        # Render profile inside .pane
         render: () =>
 
             @$el.html @template m: @model
@@ -679,20 +716,20 @@ $ ->
             # admin key is present
             if @app.isAdmin()
 
-                $('a.text-overlay', '#pane').hide()
-                $('input.hidden', '#pane').removeClass 'hidden'
+                $('a.text-overlay', '.pane').hide()
+                $('input.hidden', '.pane').removeClass 'hidden'
                 $('.multiline').addClass('edit').removeAttr 'style'
                 $('select').addClass('edit').removeAttr 'disabled'
                 $('.text-container').hide()
                 $('.multilineWrapp p').hide()
-                $('textarea', '#pane')
+                $('textarea', '.pane')
                   .removeAttr('disabled')
                   .addClass('edit')
                 $('.tupleWrapper').removeClass('hidden')
                 $('a.link').hide()
 
             # Enable additional fields. No admin key required.
-            $a = $('#pane li.additional')
+            $a = $('.pane li.additional')
             $('a.text-overlay', $a).hide()
             $('input.hidden', $a).removeClass 'hidden'
             $('select', $a).addClass('edit').removeAttr 'disabled'
@@ -701,17 +738,17 @@ $ ->
             $('a.link', $a).hide()
 
             # Enable picture field
-            $('input.pic', '#pane')
+            $('input.pic', '.pane')
                 .addClass('editing')
                 .removeAttr('disabled')
-            $('#pictureContainer p', '#pane').show()
+            $('#pictureContainer p', '.pane').show()
 
             # Show additional fields
-            $('ul', '#pane li.additional').addClass('open')
-            $('span#arrow', '#pane li').addClass('active')
+            $('ul', '.pane li.additional').addClass('open')
+            $('span#arrow', '.pane li').addClass('active')
 
             # Make invisible picture input field clickable
-            $('#pane input.pic').show()
+            $('.pane input.pic').show()
 
             # Highlight mandatory fields
             @setMandatoryLabels() if @app.isAdmin()
@@ -729,7 +766,7 @@ $ ->
             @setMultilineHeight()
 
             # Prepare buttons for edit state (show Save).
-            $('#buttons a', '#pane').hide()
+            $('#buttons a', '.pane').hide()
             $('a#save').css('display', 'inline-block')
 
 
@@ -740,9 +777,13 @@ $ ->
 
             return unless @formIsValid()
 
-            return @create() unless @model.id
+            @isUnique (unique) =>
 
-            @update()
+                return unless unique
+
+                return @create() unless @model.id
+
+                @update()
 
 
         # Creates a new item in the items collection avoiding several clicks
@@ -787,9 +828,9 @@ $ ->
         # Addition fields section of the profile view, expand and collapse!
         showAdditionalFields: () ->
 
-            $('ul', '#pane li.additional').toggleClass('open')
+            $('ul', '.pane li.additional').toggleClass('open')
 
-            $('span#arrow', '#pane li').toggleClass('active')
+            $('span#arrow', '.pane li').toggleClass('active')
 
             window.profileState.additionalOpen = !window.profileState.additionalOpen
 
@@ -813,14 +854,14 @@ $ ->
                 value = item.get m.id
                 return unless value
 
-                cols = $("textarea##{m.id}", '#pane').attr 'cols'
+                cols = $("textarea##{m.id}", '.pane').attr 'cols'
                 lc = 0
 
                 _.each value.split('\n'), (l) ->
                     lc += Math.ceil l.length/cols
 
-                h = $("textarea##{m.id}", '#pane').prop 'scrollHeight'
-                $("textarea##{m.id}", '#pane').height h
+                h = $("textarea##{m.id}", '.pane').prop 'scrollHeight'
+                $("textarea##{m.id}", '.pane').height h
 
 
         # Click handler for profile Tabs
@@ -838,6 +879,7 @@ $ ->
             window.profileState.openTab = id
             return $('#profileTab').show() if id is 'details'
             $("#clink-#{id}").show()
+            $("#buttons.btab").removeClass 'hidden'
 
 
     #### Group view
