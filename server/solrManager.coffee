@@ -254,17 +254,10 @@ class SolrManager
 
         id = id.join(' OR ') if id instanceof Array
 
-<<<<<<< HEAD
         query = @client.createQuery()
             .q("id:(#{id})")
             .start(0)
             .rows(1000)
-=======
-        query = client.createQuery()
-        .q("id:(#{id})")
-        .start(0)
-        .rows(1000)
->>>>>>> 2946a9e18b0c431e8161eced6634fc7edd71023e
 
         @client.search query, (err, result) =>
             return cb err, result if err
@@ -282,17 +275,10 @@ class SolrManager
 
         @createClient() unless @client
 
-<<<<<<< HEAD
         query = @client.createQuery()
             .q("#{key}:#{value}")
             .start(0)
             .rows(1000)
-=======
-        query = client.createQuery()
-        .q("#{key}:#{value}")
-        .start(0)
-        .rows(1000)
->>>>>>> 2946a9e18b0c431e8161eced6634fc7edd71023e
 
         @client.search query, (err, result) =>
             return cb err, result if err
