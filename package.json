@@ -1,6 +1,6 @@
 {
     "name":"Cube",
-    "version":"0.8.0",
+    "version":"0.8.1",
     "description":"Zalando's versatile crud management tool",
     "homepage": "http://cubeapp.io",
     "author":"Emanuel Lauria <emanuel.lauria@zalando.de>",
