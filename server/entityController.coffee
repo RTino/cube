@@ -223,7 +223,9 @@ class EntityController
 
         cm = new CalendarManager(params)
         cm.get (ics) =>
-            res.writeHead 200, {'Content-Type': 'text/calendar', 'Content-disposition': 'inline; filename="tech_academy.ics"'}
+            res.writeHead 200,
+                'Content-Type': 'text/calendar'
+                'Content-disposition': 'inline; filename="tech_academy.ics"'
             res.end ics
 
 
