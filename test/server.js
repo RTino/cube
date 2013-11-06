@@ -1,9 +1,7 @@
 var http    = require('http');
 var should  = require('should');
-var assert  = require('assert');
 var request = require('supertest');
 var restler = require('restler');
-var FormData = require('form-data');
 var fs      = require('fs');
 
 describe('API', function() {
