@@ -395,11 +395,11 @@ class ItemController
 
         Verify  = require("../entities/#{entity}/code.coffee").Verify
 
+        # Check if its allowed to make this change
         unless Verify
             res.statusCode = 403
             return res.send "Not allowed"
 
-        # Check if its allowed to make this change
         verify = new Verify req
 
         verify.isAllowed (allowed) =>
@@ -420,12 +420,8 @@ class ItemController
 
                 if typeof item[prop] is typeof []
                     item[prop].push value if item[prop].indexOf(value) is -1
-                    return solrManager.addItems item, (err, item) =>
-                        throw err if err
-                        res.send item
-
-
-                item[prop] = value
+                else
+                    item[prop] = value
 
                 solrManager.addItems item, (err, item) =>
                     throw err if err
@@ -449,7 +445,6 @@ class ItemController
         # Check if its allowed to make this change
         verify = new Verify req
 
-
         verify.isAllowed (allowed) =>
 
             if not allowed
@@ -464,20 +459,15 @@ class ItemController
 
                 item = items[0]
 
-                return res.send [] unless item[prop]
+                return req.send 404 unless item[prop]
 
-                if value
-
+                if item[prop] instanceof Array
                     index = item[prop].indexOf value
+                    item[prop] = item[prop].splice index, 1
+                    delete item[prop] if item[prop].length is 1
+                else
+                    delete item[prop]
 
-                    return res.send [] if index is -1
-
-                    item[prop].splice index, 1
-                    return solrManager.addItems item, (err, _item) =>
-                        throw err if err
-                        res.send _item
-
-                delete item[prop]
                 solrManager.addItems item, (err, _item) =>
                     throw err if err
                     res.send _item

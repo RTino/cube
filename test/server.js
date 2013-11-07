@@ -182,6 +182,40 @@ describe('API', function() {
                 });
         });
 
+        it('should modify just one property of an existing item', function(done) {
+            request(url)
+                .put('/team/'+item.id+'/property/name/John')
+                .expect(200)
+                .end(function(err, res) {
+                    if (err) { throw err; }
+                    res.body[0].should.be.an.instanceOf(Object);
+                    res.body[0].should.have.property('id');
+                    res.body[0].should.have.property('name').and.eql('John');
+                    res.body[0].should.have.property('lastname').and.eql('Doe');
+                    res.body[0].should.have.property('email').and.eql('john.doe@example.com');
+                    res.body[0].should.have.property('team');
+                    res.body[0].should.have.property('role');
+                    done();
+                });
+        });
+
+        it('should delete one property of an existing item', function(done) {
+            request(url)
+                .del('/team/'+item.id+'/property/role/role')
+                .expect(200)
+                .end(function(err, res) {
+                    if (err) { throw err; }
+                    res.body[0].should.be.an.instanceOf(Object);
+                    res.body[0].should.have.property('id');
+                    res.body[0].should.have.property('name').and.eql('John');
+                    res.body[0].should.have.property('lastname').and.eql('Doe');
+                    res.body[0].should.have.property('email').and.eql('john.doe@example.com');
+                    res.body[0].should.have.property('team');
+                    res.body[0].should.not.have.property('role');
+                    done();
+                });
+        });
+
         it('should get an existing item', function(done) {
             request(url)
                 .get('/team/collection/'+item.id)
@@ -190,11 +224,11 @@ describe('API', function() {
                     if (err) { throw err; }
                     res.body.should.be.an.instanceOf(Object);
                     res.body.should.have.property('id');
-                    res.body.should.have.property('name').and.eql('Jon');
+                    res.body.should.have.property('name').and.eql('John');
                     res.body.should.have.property('lastname').and.eql('Doe');
                     res.body.should.have.property('email').and.eql('john.doe@example.com');
                     res.body.should.have.property('team');
-                    res.body.should.have.property('role');
+                    res.body.should.not.have.property('role');
                     done();
                 });
         });
