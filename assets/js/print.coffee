@@ -70,9 +70,6 @@ $ =>
         # Show a profile view instead of a list view
         showProfile: (id) =>
 
-            if $('#extended-print-template').length
-                @templateProfile = _.template $('extended-print-template').html()
-
             item = window.opener.collection.get id
 
             @$el.html @templateProfile m: item.parseSubfields()
