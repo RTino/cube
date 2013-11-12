@@ -86,6 +86,7 @@ $ =>
 
                 @start()
 
+
         #### Bindings for collections
         bindCollections: () =>
 
@@ -187,7 +188,6 @@ $ =>
                 $('#controls a#profile')
                     .css 'background-image', "url(#{window.user.pic})"
             else
-                console.log 'no session'
                 $('#controls a#profile').hide()
 
             username = window.user.mail
@@ -568,8 +568,11 @@ $ =>
                 success: () =>
 
                     @updateFacetState()
+
                     @setFacetState @filterSelection.get()
+
                     @hideError()
+
                     cb()
 
                 error: (col, res, opts) =>
@@ -618,6 +621,7 @@ $ =>
 
             @filterByPage cb
 
+
         # Updates the facet collection
         updateFacets: (m) =>
 
@@ -647,6 +651,7 @@ $ =>
                         window.location.href = '/login' if res.status is 403
 
                         window.App.showError()
+
 
         # Reset all filters.
         resetAllFilters: () =>
@@ -679,6 +684,7 @@ $ =>
                         window.location.href = '/login' if res.status is 403
 
                         @showError()
+
 
         # Reset only the facet fields but not the search or any other
         resetFacets: (cb) =>

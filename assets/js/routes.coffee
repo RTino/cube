@@ -101,7 +101,6 @@ $ ->
                         window.App.addToSelection $("##{_id}", '#items')
                 window.App.showGroupView()
 
-
         #### Set Filters state
         # 1. Get all filters from the querystring parameters
         # 2. Select filters that are available
@@ -115,7 +114,9 @@ $ ->
                     facet = @traverseUpwards facet
                 return unless facet
                 cat = facet.split(':')[0]
-                field = facet.split(':')[1]
+                field = facet.split(':')
+                field.splice(0,1)
+                field = field.join(':')
                 _fs.push cat: cat, field: field
             window.App.setFacetState _fs
             itemsUrl = window.App.getFilterQS(_fs)

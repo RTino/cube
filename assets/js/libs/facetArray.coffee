@@ -73,3 +73,12 @@ class window.FacetArray
             if c.cat is o.cat and c.field is o.field
                 return r = i
         return r
+
+    #### Index
+    # Return the position of the facet object in the facet array
+    indexCat: (o) =>
+        r = -1
+        _.each @arr, (c, i) =>
+            if c.cat is o.cat
+                return r = i
+        return r

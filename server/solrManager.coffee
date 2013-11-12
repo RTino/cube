@@ -94,7 +94,7 @@ class SolrManager
     addSuffix: (p) =>
 
         # id field doesn't have a suffix, its not a dynamic field.
-        return p if p is "id" or p is undefined
+        return p if p is "id" or p is undefined or p is '_version_'
 
         # Get field information from the schema
         f = @schema.getFieldById p
@@ -112,7 +112,7 @@ class SolrManager
         p + sf
 
 
-    # Adds suffixes to all keys of an Object
+    # Adds suffixes to all keys of an ObjRindfleischtopfect
     addObjSuffix: (obj) =>
 
         # Object to return with suffixes appended.
@@ -192,9 +192,18 @@ class SolrManager
 
         value = values.pop()
 
+        re1 = '.*?'
+        re2 = '((?:2|1)\\d{3}(?:-|\\/)(?:(?:0[1-9])|(?:1[0-2]))(?:-|\\/)(?:(?:0[1-9])|(?:[1-2][0-9])|(?:3[0-1]))(?:T|\\s)(?:(?:[0-1][0-9])|(?:2[0-3])):(?:[0-5][0-9]):(?:[0-5][0-9]))'
+        p   = new RegExp(re1+re2,["i"])
+        m   = p.exec value
+
+        value = m[1] if m?.length
+
         op = "#{field}%3A\"#{encodeURIComponent(value)}\""
 
         op = "#{field}%3A[*%20TO%20*]" if value is '[* TO *]'
+
+        op = "#{field}%3A[#{value}%20TO%20*]" if m?.length
 
         # A string 'null' as a value is a not set property. In other words,
         # filtering by 'null' returns all items without the property.
@@ -223,6 +232,7 @@ class SolrManager
                 .q("*:*")
                 .start(0)
                 .rows(999999)
+
 
         @client.search query, (err, result) =>
             return cb err, result if err
@@ -389,6 +399,7 @@ class SolrManager
                 field: "{!ex=_#{fieldParam}}#{fieldParam}"
                 limit: -1
 
+
     # Adds filter parameters to a query. i.e. facet filters or search terms.
     setFilters: (req, query) =>
 
@@ -400,19 +411,27 @@ class SolrManager
         # Handle an array of facet filters
         if typeof fq is typeof []
             _.each fq, (fq) =>
-                [ filter, value ] = fq.split ':'
-                filter = @addSuffix filter
-
+                [filter, value] = @parseFilter fq
                 fqFields[filter] = [] unless fqFields[filter]
                 fqFields[filter].push value
             _.each fqFields, (fields, f) ->
                 query.matchFilter f, fields, cubeId
             return
 
-        [ filter, value ] = fq.split(':')
-        filter = @addSuffix filter
+        [filter, value] = @parseFilter fq
 
         query.matchFilter filter, [ value ], cubeId
+
+
+    # Gets a query parameter from &fs and parses it to return a filter and value
+    parseFilter: (str) ->
+        filter = str.split(':')[0]
+        filter = @addSuffix filter
+        value = str.split(':')
+        value.splice(0,1)
+        value = value.join(':')
+        [filter, value]
+
 
     # Get data of cube link fields ant set it for each item.
     setClinkItems: (docs, cb) =>
@@ -433,6 +452,7 @@ class SolrManager
         , (err) =>
             throw err if err
             cb docs
+
 
     # Retreive data of a cube link field from another entity and set it.
     setClinkField: (field, d, cb) =>
@@ -501,11 +521,8 @@ class SolrManager
 
     # Remove all documents from core. USE WITH CAUTION!
     purge: (cb) =>
-
         @createClient() unless @client
-
-        @client.deleteByQuery "*:*", (err, result) ->
-            cb()
+        @client.deleteByQuery "*:*", (err, result) -> cb() if cb?
 
     # Generate a random ID
     generateId: () ->
