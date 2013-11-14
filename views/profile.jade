@@ -251,8 +251,8 @@ script(type="text/template")#details-template
   |           if (!e) { return; };
   |           var etq = App.getEtiquetteById(e);
   |           var css, bg = '';
-  |           var label = etq ? etq.label : '';
-  |           var eid = etq ? etq.id : label;
+  |           var label = e;
+  |           var eid = etq ? etq.description : label;
   |           if (etq) {
   |               css = "background-image:url('"+etq.image+"')";
   |               var bgimg = etq.image.split('.')[0] + '-bar.png';
