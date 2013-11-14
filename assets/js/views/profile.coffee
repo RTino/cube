@@ -243,9 +243,11 @@ $ ->
 
                 # Property object contains tuple field and related fields.
                 p[tid]  = tups
-                p[pid1] = pval1.join(',')
-                p[pid2] = pval2.join(',')
+                p[pid1] = pval1.join(',') if pval1.length
+                p[pid2] = pval2.join(',') if pval2.length
 
+                m.unset(pid1, silent:yes) if !pval1.length and unset
+                m.unset(pid2, silent:yes) if !pval2.length and unset
                 return m.unset(tid, silent:yes) if !pval1.length and !pval2.length and unset
 
                 m.set(p, silent: yes) if pval1.length or pval2.length
