@@ -251,7 +251,8 @@ script(type="text/template")#details-template
   |           if (!e) { return; };
   |           var etq = App.getEtiquetteById(e);
   |           var css, bg = '';
-  |           var label = etq ? etq.label : e;
+  |           var label = etq ? etq.label : '';
+  |           var eid = etq ? etq.id : label;
   |           if (etq) {
   |               css = "background-image:url('"+etq.image+"')";
   |               var bgimg = etq.image.split('.')[0] + '-bar.png';
@@ -259,7 +260,7 @@ script(type="text/template")#details-template
   |               bg += "color:"+etq.font;
   |           };
   |           if (etq && color) { css = "background:"+etq.color; }; %>
-  |           <div class="bigEtiquette" title="<%= label %>">
+  |           <div class="bigEtiquette" title="<%= eid %>">
   |               <span class="etiquetteFold" style="<%= css %>"></span>
   |               <label style="<%= bg %>"><%= label %></label>
   |               <span class="etiquetteTip" style="<%= css %>"></span>

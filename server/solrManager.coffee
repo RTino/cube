@@ -29,7 +29,11 @@ class SolrManager
 
 
     constructor: (@name) ->
+
+        @settings = require "#{__dirname}/../entities/#{name}/settings.json" if @name
+
         @schema = new Schema @name if @name
+
 
 
     # Create a Solr instance with propper database connection
@@ -59,10 +63,8 @@ class SolrManager
 
         entity = req.params.entity
 
-        settings = require "#{__dirname}/../entities/#{entity}/settings.json"
-
         q       = if req.query.q then "#{req.query.q}*" else "*:*"
-        rows    = req.query.rows or settings.rows
+        rows    = req.query.rows or @settings.rows
         start   = rows*req.query.page || 0
         sort    = @getSort entity, req.query.sort
 
@@ -136,16 +138,6 @@ class SolrManager
                 newObj[psf] = v if psf
 
         newObj
-
-
-    # Form a hierarchy array from a string like main/node1/node2.
-    # result: [ "main", "main/node1", "main/node1/node2" ]
-    formHierarchyArray: (str, sep) =>
-        h = []
-        sep = '/' unless sep
-        _.each str.split(sep), (v, i) ->
-            h.push str.split(sep).slice(0, i + 1).join(sep)
-        h
 
 
     # Solr is not able to sort multivalue fields or fields with analyzers.
@@ -302,11 +294,9 @@ class SolrManager
     # is specified in the settings file.
     getSort: (entity, sort) =>
 
-        settings = require "#{__dirname}/../entities/#{entity}/settings.json"
-
         sorts = {}
 
-        sort = settings.sort unless sort
+        sort = @settings.sort unless sort
 
         _.each sort.split(','), (s) =>
             [ id, order ] = s.split ':'
@@ -374,6 +364,7 @@ class SolrManager
         _.each [].concat(items), (item) =>
             item = @resetClinkFields item
             item = @stringifyJsonItem item
+            item = @tokenizeFacetFields item
             item = @addSortFields item
             item = @addMonthFacetFields item
             item = @addYearFacetFields item
@@ -518,6 +509,32 @@ class SolrManager
             item[field.id] = JSON.stringify item[field.id]
         item
 
+
+    tokenizeFacetFields: (item) =>
+        fields = @schema.getFieldsByType 'facet'
+        _.each fields, (field) =>
+            return unless item[field.id]
+            return if item[field.id] instanceof Array
+            return item[field.id] = [ item[field.id].toLowerCase() ] if field.token
+            item[field.id] = @tokenizeField item[field.id]
+        item
+
+
+    tokenizeField: (value) =>
+        tokens = []
+        _.each value.split(','), (v, i) =>
+            v = v.trim()
+            _.each @getUniqueTokens(v), (t) =>
+                tokens.push(t) unless tokens.indexOf(t) isnt -1
+
+
+    # result: [ "main", "main/node1", "main/node1/node2" ]
+    getUniqueTokens: (str, sep) =>
+        h = []
+        sep = '/' unless sep
+        _.each str.split(sep), (v, i) ->
+            h.push str.split(sep).slice(0, i + 1).join(sep)
+        h
 
     # Remove all documents from core. USE WITH CAUTION!
     purge: (cb) =>

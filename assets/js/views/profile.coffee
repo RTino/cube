@@ -198,13 +198,9 @@ $ ->
 
                 id = $i.attr 'id'
 
-                val = []
+                val = $i.val()
 
                 f = window.settings.Schema.getFieldById id.split('_')[0]
-
-                _.each $i.val().split(','), (v) =>
-                    v = v.toLowerCase() if f.token
-                    @setUniqueMultivalueField v, val
 
                 return m.unset(id, silent: yes) if !val.length and unset
 
@@ -215,7 +211,6 @@ $ ->
 
                 m.set p, silent: yes if val.length
 
-
         # Sets the tuple property and also the related properties. i.e. for
         # tuple team:role it also sets team and role properties.
         setModelTupleFields: (m, unset) =>
@@ -224,37 +219,34 @@ $ ->
 
                 $te     = $(te)                     # tuple element
                 tups    = []                        # list of tuples
-                pval1   = []                        # vals for related field 1
-                pval2   = []                        # vals for related field 2
                 p       = {}                        # property obj to be set
                 tid     = $te.attr('id')            # name of tuple (team:role)
+                pval1   = []
+                pval2   = []
                 [ pid1, pid2 ] = tid.split(':')     # tuple id part 1 and 2
 
                 _.each $('.tupleField', $te), (i) =>
 
                     $i = $(i)
 
-                    v1 = $.trim $('input.p1', $i).val()
-                    v2 = $.trim $('input.p2', $i).val()
+                    iv1 = $.trim $('input.p1', $i).val()
+                    iv2 = $.trim $('input.p2', $i).val()
+
+                    v1 = if iv1 then iv1 else ''
+                    v2 = if iv2 then iv2 else ''
 
                     # tuple values may contain both parts or just one.
                     tv = "#{v1}:#{v2}" if v1 or v2
                     tups.push tv if tv and tups.indexOf(tv) is -1
-
-                    # Aggregate all values from one part and from the other, to
-                    # store in the respective fields. It is important that we
-                    # only store unique values like 'team/subteam1/group1'
-                    # instead of 'team, team/subteam1, team/subteam1/group1'.
-                    @setUniqueMultivalueField v1, pval1
-                    @setUniqueMultivalueField v2, pval2
+                    pval1.push v1 if v1 and pval1.indexOf(v1) is -1
+                    pval2.push v2 if v2 and pval2.indexOf(v2) is -1
 
                 # Property object contains tuple field and related fields.
                 p[tid]  = tups
-                p[pid1] = pval1
-                p[pid2] = pval2
+                p[pid1] = pval1.join(',') if pval1.length
+                p[pid2] = pval2.join(',') if pval2.length
 
-                if !pval1.length and !pval2.length and unset
-                    return m.unset(tid, silent:yes)
+                return m.unset(tid, silent:yes) if !pval1.length and !pval2.length and unset
 
                 m.set(p, silent: yes) if pval1.length or pval2.length
 
@@ -302,57 +294,6 @@ $ ->
             parentFacet = field.split('/')[0]
 
             @app.facetOpenState.set [ { cat: cat, field: parentFacet } ]
-
-
-        # Appends unique values to a given array, based on a comma separated
-        # list of values. Unique values refer to values such as:
-        # 'team/subteam1/group1' instead of
-        # 'team, team/subteam1, team/subteam1/group1'
-        setUniqueMultivalueField: (list, arr) ->
-
-            _.each @getMultivalueField(list), (v) ->
-
-                arr.push v if arr.indexOf(v) is -1 and v
-
-
-        # Parse an input field that has multiple values and form an array of
-        # unique values useful for Solr.
-        # i.e. Novel/Sci-Fi => [ 'Novel', 'Novel/Sci-Fi' ]
-        getMultivalueField: (field) =>
-
-            uniqueFields = []
-
-            values = field.split ','
-
-            _.each values, (v, i) =>
-
-                v = v.slice(1) if v[0] is ' '
-
-                _.each @getUniqueValues(v), (v) ->
-
-                    uniqueFields.push(v) if uniqueFields.indexOf(v) is -1
-
-            uniqueFields
-
-
-        # Given a value like Team/subteam1/group1 returns a list of values like
-        # team, team/subteam1, team/subteam1/group1.
-        getUniqueValues: (value) =>
-
-            uniqueValues = []
-
-            sep = window.settings.separator
-            tokens = value.split sep
-
-            _.each value.split(sep), (v, i) ->
-
-                u = tokens.slice(0, i).join(sep)
-
-                uniqueValues.push u if u
-
-            uniqueValues.push value
-
-            uniqueValues
 
 
         # Append another tuple fields after last one
@@ -414,7 +355,6 @@ $ ->
 
             validForm
 
-
         # Email validation, match against a regexp.
         emailValid: (email) ->
 
@@ -429,6 +369,7 @@ $ ->
             re.test email
 
 
+        # TODO improve this
         isUnique: (cb) =>
 
             u = no
@@ -505,7 +446,7 @@ $ ->
                 constrainInput  : true
                 showButtonPanel : true
                 showOtherMonths : true
-                yearRange       : "c-70"
+                yearRange       : "c-67:c+10"
                 dateFormat      : "d M yy"
 
 
@@ -518,7 +459,7 @@ $ ->
                 constrainInput  : true
                 showButtonPanel : true
                 showOtherMonths : true
-                yearRange       : "c-70"
+                yearRange       : "c-67:c+10"
                 dateFormat      : "d M yy"
                 timeFormat      : 'HH:mm'
 
@@ -960,6 +901,8 @@ $ ->
 
             if e.charCode or e.charCode is 0 then return unless e.which is 13
 
+            return unless @formIsValid()
+
             amount = @app.itemSelection.length
             warning = "Proceed to apply changes to #{amount} "
             warning += window.App.getItemType()
@@ -992,6 +935,38 @@ $ ->
             $('#multipleEditFields, #multipleEditActions').hide()
             $('#groupActions').show()
 
+
+
+        # Validates a multiple edit form. Mainly tuple fields must have values
+        # on both or non of their 2 parts.
+        formIsValid: () ->
+
+            validForm = true
+
+            $('.validationFailed', '.pane, #teamContainer')
+                .removeClass('validationFailed')
+
+            _.each $('.tupleWrapper'), (te) =>
+                $te = $(te)
+                _.each $('.tupleField', $te), (i) =>
+                    validField = true
+
+                    $i = $(i)
+
+                    v1 = $('input.p1', $i).val()
+                    v2 = $('input.p2', $i).val()
+
+                    if v1 and not v2
+                        validField = false
+                        $('input.p2', $i).addClass('validationFailed')
+
+                    if v2 and not v1
+                        validField = false
+                        $('input.p1', $i).addClass('validationFailed')
+
+                    validForm = false unless validField
+
+            validForm
 
         # Deselects 1 item and takes it out from selection array
         removeSelected: (e) =>
