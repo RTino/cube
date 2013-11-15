@@ -32,26 +32,28 @@
 
             <section id="importing" class="inner">
                 <h3>Importing external data to a Cube.</h3>
-                <ol>
-                    <li>
-                        <h6>Create the import.json file</h6>
-                        <p>
+                <p>
+                    The Cube has a built-in importer framework which you can use to create your own data
+                    importers. It comes with built-in importers for JSON, CSV and XML external data.
+                </p>
+                <p>
+                    The built-in ImportManager is responsible for reading import.json files and scheduling
+                    these importers to run at the specified intervals.
+                </p>
+                <h6>The import.json file</h6>
+                <p>
+                    Importer jobs are defined inside a import.json file, located under the desired Cube entity folder.
 
-                        </p>
-                    </li>
-                    <li><h6>Configure the import schedule</h6>
-                        <p>
-
-                        </p>
-                    </li>
-                    <li>
-                        <h6>View import status</h6>
-
-                        <p>
-
-                        </p>
-                    </li>
-                </ol>
+                </p>
+                <h6>Creating your own custom importer</h6>
+                <p>
+                    If you wish to make a custom importer, for instance to get and transform data from a SQL database,
+                    you'll need to create a xxxImporter.coffee file under the /server/importers/ directory.
+                </p>
+                <h6>Monitoring importer jobs</h6>
+                <p>
+                    The easiest way to view the status of importer jobs is by opening /importers on your browser.
+                </p>
             </section>
         </div>
 
