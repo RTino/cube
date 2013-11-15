@@ -953,3 +953,10 @@ Small Device Styles
     }
 
 }
+
+.tablelist
+{
+    list-style: disc;
+    margin-left: 0;
+    padding-left: 20px;
+}

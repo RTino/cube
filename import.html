@@ -42,9 +42,114 @@
                 </p>
                 <h6>The import.json file</h6>
                 <p>
-                    Importer jobs are defined inside a import.json file, located under the desired Cube entity folder.
-
+                    Importer jobs are defined inside a <strong>import.json</strong> file, located under the
+                    desired Cube entity folder. So for example if you want to import data to the
+                    "My Test Cube", create that file on /entities/mytestcube/import.json.
                 </p>
+                <p>
+                    <strong>Main properties of an importer:</strong>
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>key</th>
+                            <th class="optional">type</th>
+                            <th class="optional">default</th>
+                            <th>description</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td>id</td>
+                        <td>String</td>
+                        <td></td>
+                        <td>Identification or description, alphanumerical only.</td>
+                    </tr>
+                    <tr>
+                        <td>type</td>
+                        <td>String</td>
+                        <td>json</td>
+                        <td>
+                            The type of importer is the prefix of the importer coffee file.<br />
+                            jsonImporter.coffee type is "json"<br />
+                            mySqlImporter.coffee type is "mySql"
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>mode</td>
+                        <td>String</td>
+                        <td>update</td>
+                        <td>
+                            Update: add new and update existing results. Do not delete.<br />
+                            Full: wipe current data and add results.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>schedule</td>
+                        <td>Integer or Array</td>
+                        <td></td>
+                        <td>
+                            Integer: interval in seconds<br />
+                            Array: times using the hh:mm:ss format
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>uri</td>
+                        <td>String</td>
+                        <td></td>
+                        <td>URL or local file path</td>
+                    </tr>
+                </table>
+                <p>
+                    <strong>Extra properties of an importer:</strong>
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>key</th>
+                            <th class="optional">type</th>
+                            <th class="optional">default</th>
+                            <th>description</th>
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td>continueOnError</td>
+                        <td>Boolean</td>
+                        <td>false</td>
+                        <td>If true the importer won't stop when errors are encountered.</td>
+                    </tr>
+                    <tr>
+                        <td>runOnStart</td>
+                        <td>Boolean</td>
+                        <td>false</td>
+                        <td>If true the importer will run when the Node.js app starts.</td>
+                    </tr>
+                    <tr>
+                        <td>childUri</td>
+                        <td>String</td>
+                        <td></td>
+                        <td>
+                            URL or local file path to child data to be merged, having [[parent]].
+                            If childUri is set, the uri will be used as an array of parent IDs
+                            which should be appended to the childUri. For example:
+                            <ul class="tablelist">
+                                <li>
+                                    <strong>uri</strong> http://my.docs.com/projects<br />
+                                    Returns ["live", "staging", "beta"]
+                                </li>
+                                <li>
+                                    <strong>childUri</strong> http://my.docs.com/[[parent]]<br />
+                                    Will download:<br />
+                                    http://my.docs.com/live<br />
+                                    http://my.docs.com/staging<br />
+                                    http://my.docs.com/beta
+                                </li>
+                                <li>
+                                    Downloaded results will be merged.
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
                 <h6>Creating your own custom importer</h6>
                 <p>
                     If you wish to make a custom importer, for instance to get and transform data from a SQL database,
