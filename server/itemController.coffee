@@ -218,7 +218,7 @@ class ItemController
                 fid = tokenFields[0]?.id
                 return cb() unless fid
 
-                value = req.body[fid]
+                value = req.body[fid].split(',')
                 return cb() unless value
 
                 async.each value, (v, _cb) =>
