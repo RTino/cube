@@ -33,11 +33,13 @@
             <section id="api" class="inner">
             <h3>API Reference</h3>
             <p>The Cube provides a simple RESTful API. It offers common CRUD functionality like adding, updating or removing items from your collection.
-            It also provides export functionality so that you can see your tada in json, xml or csv formats. For more advanced queries than what this
-            API is able to perform, you can always use Solr's API. A complete reference of Cube's API follows.
+            It also provides export functionality so that you can see your data in json, xml or csv formats. For more advanced queries than what this
+            API is able to perform, you can always use Solr's API. Just to make things a bit more easy, here is a diagram of the architecture.
             </p>
-            <h6>Entity Resources</h6>
 
+            <img id="architecture" src="architecture.png">
+
+            <h6>Entity Resources</h6>
             <div class="api_resource">
             <h4>GET /:entity/collection</h4>
             <p>Returns all or part of a collection of items from a given entity.</p>
@@ -121,7 +123,6 @@
             <div class="api_resource">
             <h4>DELETE /:entity/collection/:id</h4>
             <p>Removes an item from the DB.</p>
-            <p>Parameters:</p>
             <p>Response: JSON Object</p>
             </div>
             <div class="api_resource">

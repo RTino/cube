@@ -409,6 +409,12 @@ section#api table td span label
     font-weight: bold;
 }
 
+img#architecture {
+    left: 50%;
+    margin-left: -300px;
+    width: 600px;
+}
+
 dl dt
 {
     font-weight: bold;
