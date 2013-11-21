@@ -381,6 +381,34 @@ section#ime
     background: #efeff0;
 }
 
+section#api h6 {
+    margin-top: 50px;
+}
+
+section#api table td
+{
+    vertical-align: top;
+    border: 0;
+    padding: 0;
+}
+
+section#api table tr td:first-child
+{
+    text-align: right;
+    padding-right: 30px;
+}
+
+section#api table td span
+{
+    float: left;
+    clear: both;
+}
+
+section#api table td span label
+{
+    font-weight: bold;
+}
+
 dl dt
 {
     font-weight: bold;
@@ -819,6 +847,10 @@ a#fork
     width: 148px;
     height: 148px;
     z-index: 1;
+}
+
+.api_resource {
+    margin-top: 50px;
 }
 
 /*******************************************************************************
