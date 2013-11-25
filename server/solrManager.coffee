@@ -483,12 +483,16 @@ class SolrManager
 
             return delete item[field.id] if field.cfs
 
-            return if field.cid isnt 'id'
+            cid = field.cid || field.id
 
             oarr = []
-            _.each item[field.id], (i) =>
+
+            items = item[field.id]
+            items = [ items ] unless items instanceof Array
+
+            _.each items, (i) =>
                 return oarr.push i if typeof i is "string" and oarr.indexOf(i) is -1
-                oarr.push i.id if i.id and oarr.indexOf(i.id) is -1
+                oarr.push i[cid] if i[cid] and oarr.indexOf(i[cid]) is -1
 
             item[field.id] = oarr
         item
@@ -522,6 +526,7 @@ class SolrManager
 
     tokenizeField: (value) =>
         tokens = []
+        value = value.toString()
         _.each value.split(','), (v, i) =>
             v = v.trim()
             _.each @getUniqueTokens(v), (t) =>
