@@ -491,6 +491,7 @@ class SolrManager
             items = [ items ] unless items instanceof Array
 
             _.each items, (i) =>
+                return unless i
                 return oarr.push i if typeof i is "string" and oarr.indexOf(i) is -1
                 oarr.push i[cid] if i[cid] and oarr.indexOf(i[cid]) is -1
 
