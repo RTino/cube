@@ -35,7 +35,6 @@ class SolrManager
         @schema = new Schema @name if @name
 
 
-
     # Create a Solr instance with propper database connection
     createClient: () =>
 
@@ -532,7 +531,7 @@ class SolrManager
             v = v.trim()
             _.each @getUniqueTokens(v), (t) =>
                 tokens.push(t) unless tokens.indexOf(t) isnt -1
-
+        tokens
 
     # result: [ "main", "main/node1", "main/node1/node2" ]
     getUniqueTokens: (str, sep) =>
