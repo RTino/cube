@@ -33,13 +33,13 @@ script(type="text/template")#facet-template
   |         <div class="field" data-name="<%- name %>"
   |             data-title="<%- p.path %>">
   |             <label for="id-<%- name %>-<%- p.path %>" class="unselectable">
-  |                 <%= _pname %>
+  |                 <%- _pname %>
   |             </label><%
   |             if (!(window.entity == 'teams' && p.amount == 1)) { %>
-  |                 <span class="amount unselectable"><%= p.amount %></span><%
+  |                 <span class="amount unselectable"><%- p.amount %></span><%
   |             }; %>
   |         </div>
-  |         <ul id="<%= name %>" data-name="<%= name %>" data-title="<%= p.path %>" class="hidden"><%
+  |         <ul id="<%- name %>" data-name="<%- name %>" data-title="<%- p.path %>" class="hidden"><%
   |             _.each(p.subs, addFacetField);%>
   |         </ul>
   |     </li><%

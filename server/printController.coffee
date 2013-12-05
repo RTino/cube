@@ -6,6 +6,9 @@
 # @author: Emanuel Lauria <emanuel.lauria@zalando.de>
 ###
 
+# List of available entities
+entities = require "#{__dirname}/../entities.json"
+
 class PrintController
 
     module.exports = PrintController
@@ -20,4 +23,8 @@ class PrintController
     # Render print view
     print: (req, res) ->
 
-        res.render 'printIndex', entity: req.params.entity
+        entity = req.params.entity
+
+        return res.send 404 if entities.indexOf(entity) is -1
+
+        res.render 'printIndex', entity: entity

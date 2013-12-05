@@ -56,19 +56,19 @@ script(type="text/html")#item-table-template
   |       </div><%
   |   };
   |   function fieldText(field, model) { %>
-  |       <%= model[field.id] %><%
+  |       <%- model[field.id] %><%
   |   };
   |   function fieldFacet(field, model) { %>
-  |       <%= model[field.id] %><%
+  |       <%- model[field.id] %><%
   |   };
   |   function fieldDate(field, model) { %>
-  |       <%= App.formatDate(model[field.id]) %><%
+  |       <%- App.formatDate(model[field.id]) %><%
   |   };
   |   function fieldDateTime(field, model) { %>
-  |       <%= App.formatDateTime(model[field.id]) %><%
+  |       <%- App.formatDateTime(model[field.id]) %><%
   |   };
   |   function fieldNumber(field, model) { %>
-  |       <%= App.formatNumber(model[field.id]) %><%
+  |       <%- App.formatNumber(model[field.id]) %><%
   |   };
   |   function fieldTuple(field, model) {
   |       addRowEtiquettes(etiquettes);
@@ -112,7 +112,7 @@ script(type="text/html")#item-table-template
   |               miniPic(item[cpic], label);
   |               nitems--;
   |           });
-  |           if (nitems) { %><span> +<%= nitems %><% } %>
+  |           if (nitems) { %><span> +<%- nitems %><% } %>
   |       </div><%
   |   };
   |   function miniPic(src, label) {

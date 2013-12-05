@@ -106,6 +106,8 @@ class EntityController
     # uploaded image. Useful for backbone.
     picture: (req, res) =>
         entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+
         upload_id = req.files.picture.path
         target_filename = upload_id + '.jpg'
         target_path= "public/images/#{entity}/archive/"
@@ -216,8 +218,11 @@ class EntityController
 
     # Export selected or user events to .ics file
     calendar: (req, res) ->
+        entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+
         params =
-            entity: req.params.entity
+            entity: entity
             user: if req.session.passport.user? then req.session.passport.user else null
             selection: if req.query.selection? then JSON.parse(req.query.selection) else null
 
@@ -234,6 +239,8 @@ class EntityController
         entity  = req.params.entity
         prop    = req.params.p
         val     = req.params.v
+
+        return res.send 404 if entities.indexOf(entity) is -1
 
         solrManager = new SolrManager entity
 

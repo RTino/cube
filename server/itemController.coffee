@@ -17,6 +17,9 @@ mime  = require "mime-magic"
 # Server settings
 settings = require "#{__dirname}/../server.settings.coffee"
 
+# List of available entities
+entities = require "#{__dirname}/../entities.json"
+
 # Solr Manager to add/remove solr suffixes
 SolrManager = require './solrManager.coffee'
 
@@ -59,6 +62,8 @@ class ItemController
     get: (req, res) =>
 
         entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+
         solrManager = new SolrManager entity
         id = req.params.id.split('|')
 
@@ -71,6 +76,8 @@ class ItemController
     save: (req, res) =>
 
         entity      = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+
         solrManager = new SolrManager entity
         schema      = solrManager.schema
         picKey      = schema.getFieldsByType('img')[0]?.id
@@ -223,6 +230,8 @@ class ItemController
     # Remove item and its picture (if it has).
     delete: (req, res) =>
         entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+
         id = req.params.id
         solrManager = new SolrManager entity
         schema = solrManager.schema
@@ -272,6 +281,8 @@ class ItemController
         item    = req.params.item
         prop    = req.params.property
         value   = req.params.value
+
+        return res.send 404 if entities.indexOf(entity) is -1
 
         Verify  = require("../entities/#{entity}/code.coffee").Verify
 
