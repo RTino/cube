@@ -1,363 +1,363 @@
-script(type="text/template")#details-template
-  | <%
-  |   var model = m.parseSubfields();
-  |   var schema = settings.Schema;
-  |   var pic = schema.getImgKey();
-  |   var etiquettes = App.getItemEtiquettes(m);
-  |   var pictures = schema.getPictures().length
-  |   var withButtons = false;
-  |   var avatar = '/assets/default-pane-avatar.png';
-  |   if (settings.avatar === 'person') {
-  |       avatar = '/assets/default-person-avatar.png'
-  |   };
-  |   avatar = model[pic] ? model[pic] : avatar;
-  |   if (settings.unrestricted) { withButtons = true; }
-  |   if (App.isProfEditable()) { withButtons = true; }
-  |   if (settings.editable === false) { withButtons = false; }
-  |   if ($('#app > #extensions #actions-template').length) { withButtons = true; }
-  |   var cls = pictures === 0 ? 'noPicture' : '';
-  |   cls += withButtons ? '' : ' noButtons';
+script(type="text/template")#details-template.
+    <%
+      var model = m.parseSubfields();
+      var schema = settings.Schema;
+      var pic = schema.getImgKey();
+      var etiquettes = App.getItemEtiquettes(m);
+      var pictures = schema.getPictures().length
+      var withButtons = false;
+      var avatar = '/assets/default-pane-avatar.png';
+      if (settings.avatar === 'person') {
+          avatar = '/assets/default-person-avatar.png'
+      };
+      avatar = model[pic] ? model[pic] : avatar;
+      if (settings.unrestricted) { withButtons = true; }
+      if (App.isProfEditable()) { withButtons = true; }
+      if (settings.editable === false) { withButtons = false; }
+      if ($('#app > #extensions #actions-template').length) { withButtons = true; }
+      var cls = pictures === 0 ? 'noPicture' : '';
+      cls += withButtons ? '' : ' noButtons';
 
-  |   function renderField(field, model) {
-  |       rf = fieldText;
-  |       if (field['type'] === 'date') { rf = fieldDate;
-  |           model[field.id] = App.formatDate(model[field.id]);
-  |       };
-  |       if (field['type'] === 'datetime') { rf = fieldDateTime;
-  |           model[field.id] = App.formatDateTime(model[field.id]);
-  |       };
-  |       if (field['type'] === 'dropdown')   { rf = fieldDropdown; };
-  |       if (field['type'] === 'multiline')  { rf = fieldMultiline; };
-  |       if (field['type'] === 'skype')      { rf = fieldSkype; };
-  |       if (field['type'] === 'email')      { rf = fieldEmail; };
-  |       if (field['type'] === 'facet')      { rf = fieldFacet; };
-  |       if (field['type'] === 'tuple')      { rf = fieldTuple; };
-  |       if (field['type'] === 'link')       { rf = fieldLink; };
-  |       if (field['type'] === 'clink')      { rf = fieldClink; };
-  |       if (field['type'] === 'img')        { return; };
-  |       rf(field, model);
-  |   };
-  |   function fieldText(field, model) { %>
-  |       <li>
-  |           <label for="<%- field.id %>" ><%- field.label %></label>
-  |           <div class="mask">
-  |               <div class="text-container" id="<%- field.id %>"><%
-  |                   if (field.multivalue) {
-  |                       addMultivalue(model[field.id], field.id, 'filter');
-  |                   } else { %><%= model[field.id] %><% } %>
-  |               </div>
-  |           </div>
-  |           <input type="text" id="<%- field.id %>" class="hidden"
-  |               value="<%= model[field.id] %>"/>
-  |       </li><%
-  |   };
-  |   function fieldFacet(field, model ) {
-  |       if (App.isTuple(field.id)) { return ; }; %>
-  |       <li>
-  |           <label for="<%- field.id %>" ><%= field.label %></label>
-  |           <div class="mask">
-  |               <div class="text-container" id="<%- field.id %>"><%
-  |                   addMultivalue(model[field.id], field.id, 'filter'); %>
-  |               </div>
-  |           </div>
-  |           <input type="text" id="<%- field.id %>"
-  |               class="autocomplete hidden facet" <%
-  |               if (field.multivalue) {%> data-type="multivalue" <% }; %>
-  |               value="<%= model[field.id] %>" />
-  |       </li><%
-  |   };
-  |   function fieldMultiline(field, model) { %>
-  |       <li class="adaptive">
-  |           <label for="<%- field.id %>"  class="mult"><%=
-  |               field.label %>
-  |           </label>
-  |           <div class="multilineWrapp">
-  |               <p><%= model[field.id] %></p>
-  |               <textarea id="<%- field.id %>" wrap="virtual"><%=
-  |                   model[field.id]
-  |               %></textarea>
-  |           </div>
-  |       </li><%
-  |   };
-  |   function fieldDropdown(field, model) { %>
-  |       <li>
-  |           <label for="<%- field.id %>" ><%= field.label %></label>
-  |           <div class="dropdownMask">
-  |               <select name="<%- field.id %>" id="<%- field.id %>"
-  |                   disabled="disabled"><%
-  |                   _.each(field.options, function(option) { %>
-  |                       <option value="<%- option %>"<%
-  |                           if (!model[field.id] && option === "") { %>selected<% };
-  |                           if (model[field.id] === option) { %>selected<% };%>>
-  |                           <%= option %>
-  |                       </option><%
-  |                   }); %>
-  |               </select>
-  |           </div>
-  |       </li><%
-  |   };
-  |   function fieldEmail(field, model) { %>
-  |       <li>
-  |           <label for="<%- field.id %>" ><%= field.label %></label>
-  |           <div class="mask">
-  |               <div class="text-container" id="<%- field.id %>">
-  |                   <a class="link" id="email" href="mailto:<%- model[field.id] %>">
-  |                       <%= model[field.id] %>
-  |                   </a>
-  |               </div>
-  |           </div>
-  |           <input type="text" id="<%- field.id %>" class="hidden"
-  |               value="<%- model[field.id] %>"/>
-  |       </li><%
-  |   };
-  |   function fieldDate(field, model) { %>
-  |       <li>
-  |           <label for="<%- field.id %>" ><%= field.label %></label>
-  |           <div class="mask"><%= model[field.id] %></div>
-  |           <input type="text" id="<%- field.id %>" class="hidden"
-  |               value="<%= model[field.id] %>" data-type="date" readonly="readonly"/>
-  |       </li><%
-  |   };
-  |   function fieldDateTime(field, model) { %>
-  |       <li>
-  |           <label for="<%- field.id %>" ><%= field.label %></label>
-  |           <div class="mask"><%= model[field.id] %></div>
-  |           <input type="text" id="<%- field.id %>" class="hidden"
-  |               value="<%= model[field.id] %>" data-type="datetime" readonly="readonly"/>
-  |       </li><%
-  |   };
-  |   function fieldSkype(field, model) {
-  |       %><li>
-  |           <label for="<%- field.id %>" ><%= field.label %></label>
-  |           <div class="mask">
-  |               <div class="text-container" id="<%- field.id %>">
-  |                   <a class="link" id="email"
-  |                       href="skype:<%= model[field.id] %>?chat">
-  |                       <%= model[field.id] %>
-  |                   </a>
-  |               </div>
-  |           </div>
-  |           <input type="text" id="<%- field.id %>" class="hidden"
-  |               value="<%= model[field.id] %>"/>
-  |       </li><%
-  |   };
-  |   function fieldLink(field, model) {
-  |       var value = model[field.id];
-  |       var label = (typeof field.linkLabel !== 'undefined') ? field.linkLabel : value ;
-  |       value = (typeof field.static !== 'undefined') ? field.static.replace(new RegExp('\\?', 'g'), value) : value ; %>
-  |       <li>
-  |           <label for="<%- field.id %>" ><%= field.label %></label>
-  |           <div class="mask">
-  |               <div class="text-container" id="<%- field.id %>">
-  |                  <a class="link" target="_blank" href="<%= value %>">
-  |                      <%= label %>
-  |                  </a>
-  |               </div>
-  |           </div>
-  |           <input type="text" id="<%- field.id %>" class="hidden" <%
-  |               if (field.multivalue) {%> data-type="multivalue" <% }; %>
-  |               value="<%= model[field.id] %>"/>
-  |       </li><%
-  |   };
-  |   function fieldClink(field, model) {
-  |       var csettings = App.getEntitySettings(field.entity);
-  |       var cdenom = csettings.itemType;
-  |       if (!model[field.id]) { return; };
-  |       cdenom = model[field.id].length === 1 ? cdenom[0] : cdenom[1]; %>
-  |       <li>
-  |           <label for="<%- field.id %>" ><%= field.label %></label>
-  |           <div class="mask">
-  |               <a id="<%- field.id%>" class="clinkLink link">
-  |                   <%= model[field.id].length %> <%= cdenom %>
-  |               </a>
-  |           </div>
-  |       </li><%
-  |   };
-  |   function fieldTuple(field, model ) { %>
-  |       <li class="adaptive">
-  |           <label for="<%- field.id %>" class="mult">
-  |               <%= field.label %>
-  |           </label>
-  |           <div class="mask tuple">
-  |               <% tupleLinks(field, model[field.id]); %>
-  |           </div>
-  |           <div id="<%- field.id %>" class="tupleWrapper hidden"><%
-  |               _.each(model[field.id], function(value) {
-  |                   tupleInput(field, value)
-  |               });
-  |               tupleInput(field) %>
-  |           </div>
-  |       </li><%
-  |   };
-  |   function tupleInput(field, value) {
-  |       value = value || '';
-  |       var v1 = value.split(':')[0];
-  |       var v2 = value.split(':')[1]; %>
-  |       <div id="<%- field.id %>" class="tupleField">
-  |           <input type="text" id="<%- field.id %>_1"
-  |               class="autocomplete tuple p1" <%
-  |               if (field.multivalue) {%> data-type="tuple" <% }; %>
-  |               value="<%= v1 %>" /><span class="tupleColon">:</span>
-  |           <input type="text" id="<%- field.id %>_2"
-  |               class="autocomplete tuple p2" <%
-  |               if (field.multivalue) {%> data-type="tuple" <% }; %>
-  |               value="<%= v2 %>" />
-  |       </div><%
-  |   };
-  |   function tupleLinks(field, values) {
-  |       var cat1 = field.id.split(':')[0];
-  |       var cat2 = field.id.split(':')[1];
-  |       _.each(values, function(value) {
-  |           var v1 = value.split(':')[0];
-  |           var v2 = value.split(':')[1];
-  |           var f1 = v1 ? 'filter' : '';
-  |           var f2 = v2 ? 'filter' : ''; %>
-  |           <div class="text-container tuple" id="<%- field.id %>">
-  |               <a class="tuple p1 <%- f1 %>" data-name="<%- cat1 %>"
-  |                   data-title="<%- v1 %>"><%= v1 || '(not set)' %></a>
-  |                   <span class="tupleColon">:</span>
-  |               <a class="tuple p2 <%- f2 %>" data-name="<%- cat2 %>"
-  |                   data-title="<%- v2 %>"><%= v2 || '(not set)' %></a>
-  |           </div><%
-  |       });
-  |   };
-  |   function addMultivalue(values, cat, classes, cb) {
-  |       if (!values || values.length == 0) { return; };
-  |       _.each(values, function(v, i, a) {
-  |           if (cb) { return cb(v); }; %>
-  |           <a data-name="<%- cat %>" data-title="<%- v %>"
-  |               class="<%- classes %>">
-  |               <%= v %></a><% if (a.length > 1 && i < a.length - 1) {%>,<% };
-  |       });
-  |   };
-  |   function addProfilePicture(m) { %>
-  |     <div id="pictureContainer">
-  |         <div class="etiquettes"><%
-  |             addEtiquettes(etiquettes, false, m); %>
-  |         </div><%
-  |         if (m[pic] === undefined) { %>
-  |             <img id="default" src="<%= avatar %>">
-  |             <p>Click to upload photo</p><%
-  |         }; %>
-  |         <div class="inputPicContainer">
-  |             <input type="file" name="picture" data-url="/picture"
-  |                 id="<%- pic %>" class="pic" disabled="disabled" data-type="img"/>
-  |         </div>
-  |         <img id="picture" src="<%= m[pic] %>"/>
-  |     </div><%
-  |   };
-  |   function addEtiquettes(etiquettes, color, model) {
-  |       _.each(etiquettes, function(e) {
-  |           if (!e) { return; };
-  |           var etq = App.getEtiquetteById(e);
-  |           var css, bg = '';
-  |           var label = e;
-  |           var eid = etq ? etq.description : label;
-  |           if (etq) {
-  |               css = "background-image:url('"+etq.image+"')";
-  |               var bgimg = etq.image.split('.')[0] + '-bar.png';
-  |               bg = "background-image:url('"+bgimg+"');";
-  |               bg += "color:"+etq.font;
-  |           };
-  |           if (etq && color) { css = "background:"+etq.color; }; %>
-  |           <div class="bigEtiquette" title="<%= eid %>">
-  |               <span class="etiquetteFold" style="<%= css %>"></span>
-  |               <label style="<%= bg %>"><%= label %></label>
-  |               <span class="etiquetteTip" style="<%= css %>"></span>
-  |           </div><%
-  |       });
-  |   };
-  |   function profileTab() {
-  |     if (schema.getPictures().length) { addProfilePicture(model); }; %>
-  |     <div id="data" class="data <%- cls %>">
-  |         <ul><%
-  |             _.each(schema.get(), function(a) {
-  |                 if (a['type'] === "img") { return; };
-  |                 if (a['additional'] || a['hidden']) { return; };
-  |                 renderField(a, model); });
-  |                 if (schema.getAdditionals().length) { %>
-  |                     <li class="additional">
-  |                     <span id="arrow" class="<%
-  |                         if (window.profileState.additionalOpen) { %>active<%}; %>">
-  |                     </span>
-  |                     <label for="additional-parameters" class="additional">
-  |                         Additional Information
-  |                     </label>
-  |                     <ul class="<%
-  |                         if (window.profileState.additionalOpen) {%>open <% } %>"><%
-  |                         _.each(schema.getAdditionals(), function(a) {
-  |                             if (a['hidden']) { return; }
-  |                             renderField(a, model);
-  |                         }); %>
-  |                     </ul>
-  |                 </li><%
-  |             }; %>
-  |         </ul>
-  |         <div id="extensions"></div>
-  |     </div><%
-  |     var mailCls = model.subscription ? '' : 'hidden';
-  |     if ($('#app > #extensions > #actions-template').length
-  |         || App.isProfEditable()) { %>
-  |         <div id="buttons"><%
-  |             if (App.isProfEditable()) { %>
-  |                 <a id="edit" class="btn">Edit</a>
-  |                 <a id="save" class="btn">Save</a><%
-  |             }
-  |             if (App.isAdmin()) { %>
-  |                 <a id="delete" class="btn">Delete</a>
-  |                 <a id="mailto" class="btn <%- mailCls %>">Mail</a><%
-  |             } %>
-  |             <div id="btnExtensions"></div>
-  |         </div><%
-  |     }
-  |   }
-  |   function clinkTabs() {
-  |       var active = window.profileState.openTab;
-  |       var fields = settings.Schema.getFieldsByType('clink'); %>
-  |       <div id="tabsContainer">
-  |           <ul id="tabs">
-  |               <li id="details" <% if (active === 'details') { 
-  |                   %>class="active"<% } %>>Details</li><%
-  |               _.each(fields, function(f) { %>
-  |                   <li id="<%- f.id %>" <% if (active === f.id) { %>class="active" <%
-  |                   } %> ><%= f.label %></li><%
-  |               }); %>
-  |           </ul>
-  |       </div><%
-  |   }
-  |   function clinkItems(field, items) {
-  |     var csettings = App.getEntitySettings(field.entity);
-  |     var cschema = new Schema(csettings.schema);
-  |     _.each(items, function(i) {
-  |         if (!i) { return; }%>
-  |         <li id="clinkItem-<%- i['id'] %>"><%
-  |                 if (cschema.getPictures().length) {
-  |                     pic = cschema.getPictures()[0]['id']; %>
-  |                     <object class="miniPic" data="<%- i[pic] %>">
-  |                         <img class="miniPic"
-  |                             src="<%= avatar %>"/>
-  |                     </object><%
-  |                 }; %>
-  |             <div class="name">
-  |                 <%= App.getThumbnailLabel(i, csettings.schema) %>
-  |             </div>
-  |         </li><%
-  |       });
-  |   } %>
+      function renderField(field, model) {
+          rf = fieldText;
+          if (field['type'] === 'date') { rf = fieldDate;
+              model[field.id] = App.formatDate(model[field.id]);
+          };
+          if (field['type'] === 'datetime') { rf = fieldDateTime;
+              model[field.id] = App.formatDateTime(model[field.id]);
+          };
+          if (field['type'] === 'dropdown')   { rf = fieldDropdown; };
+          if (field['type'] === 'multiline')  { rf = fieldMultiline; };
+          if (field['type'] === 'skype')      { rf = fieldSkype; };
+          if (field['type'] === 'email')      { rf = fieldEmail; };
+          if (field['type'] === 'facet')      { rf = fieldFacet; };
+          if (field['type'] === 'tuple')      { rf = fieldTuple; };
+          if (field['type'] === 'link')       { rf = fieldLink; };
+          if (field['type'] === 'clink')      { rf = fieldClink; };
+          if (field['type'] === 'img')        { return; };
+          rf(field, model);
+      };
+      function fieldText(field, model) { %>
+          <li>
+              <label for="<%- field.id %>" ><%- field.label %></label>
+              <div class="mask">
+                  <div class="text-container" id="<%- field.id %>"><%
+                      if (field.multivalue) {
+                          addMultivalue(model[field.id], field.id, 'filter');
+                      } else { %><%= model[field.id] %><% } %>
+                  </div>
+              </div>
+              <input type="text" id="<%- field.id %>" class="hidden"
+                  value="<%= model[field.id] %>"/>
+          </li><%
+      };
+      function fieldFacet(field, model ) {
+          if (App.isTuple(field.id)) { return ; }; %>
+          <li>
+              <label for="<%- field.id %>" ><%= field.label %></label>
+              <div class="mask">
+                  <div class="text-container" id="<%- field.id %>"><%
+                      addMultivalue(model[field.id], field.id, 'filter'); %>
+                  </div>
+              </div>
+              <input type="text" id="<%- field.id %>"
+                  class="autocomplete hidden facet" <%
+                  if (field.multivalue) {%> data-type="multivalue" <% }; %>
+                  value="<%= model[field.id] %>" />
+          </li><%
+      };
+      function fieldMultiline(field, model) { %>
+          <li class="adaptive">
+              <label for="<%- field.id %>"  class="mult"><%=
+                  field.label %>
+              </label>
+              <div class="multilineWrapp">
+                  <p><%= model[field.id] %></p>
+                  <textarea id="<%- field.id %>" wrap="virtual"><%=
+                      model[field.id]
+                  %></textarea>
+              </div>
+          </li><%
+      };
+      function fieldDropdown(field, model) { %>
+          <li>
+              <label for="<%- field.id %>" ><%= field.label %></label>
+              <div class="dropdownMask">
+                  <select name="<%- field.id %>" id="<%- field.id %>"
+                      disabled="disabled"><%
+                      _.each(field.options, function(option) { %>
+                          <option value="<%- option %>"<%
+                              if (!model[field.id] && option === "") { %>selected<% };
+                              if (model[field.id] === option) { %>selected<% };%>>
+                              <%= option %>
+                          </option><%
+                      }); %>
+                  </select>
+              </div>
+          </li><%
+      };
+      function fieldEmail(field, model) { %>
+          <li>
+              <label for="<%- field.id %>" ><%= field.label %></label>
+              <div class="mask">
+                  <div class="text-container" id="<%- field.id %>">
+                      <a class="link" id="email" href="mailto:<%- model[field.id] %>">
+                          <%= model[field.id] %>
+                      </a>
+                  </div>
+              </div>
+              <input type="text" id="<%- field.id %>" class="hidden"
+                  value="<%- model[field.id] %>"/>
+          </li><%
+      };
+      function fieldDate(field, model) { %>
+          <li>
+              <label for="<%- field.id %>" ><%= field.label %></label>
+              <div class="mask"><%= model[field.id] %></div>
+              <input type="text" id="<%- field.id %>" class="hidden"
+                  value="<%= model[field.id] %>" data-type="date" readonly="readonly"/>
+          </li><%
+      };
+      function fieldDateTime(field, model) { %>
+          <li>
+              <label for="<%- field.id %>" ><%= field.label %></label>
+              <div class="mask"><%= model[field.id] %></div>
+              <input type="text" id="<%- field.id %>" class="hidden"
+                  value="<%= model[field.id] %>" data-type="datetime" readonly="readonly"/>
+          </li><%
+      };
+      function fieldSkype(field, model) {
+          %><li>
+              <label for="<%- field.id %>" ><%= field.label %></label>
+              <div class="mask">
+                  <div class="text-container" id="<%- field.id %>">
+                      <a class="link" id="email"
+                          href="skype:<%= model[field.id] %>?chat">
+                          <%= model[field.id] %>
+                      </a>
+                  </div>
+              </div>
+              <input type="text" id="<%- field.id %>" class="hidden"
+                  value="<%= model[field.id] %>"/>
+          </li><%
+      };
+      function fieldLink(field, model) {
+          var value = model[field.id];
+          var label = (typeof field.linkLabel !== 'undefined') ? field.linkLabel : value ;
+          value = (typeof field.static !== 'undefined') ? field.static.replace(new RegExp('\\?', 'g'), value) : value ; %>
+          <li>
+              <label for="<%- field.id %>" ><%= field.label %></label>
+              <div class="mask">
+                  <div class="text-container" id="<%- field.id %>">
+                     <a class="link" target="_blank" href="<%= value %>">
+                         <%= label %>
+                     </a>
+                  </div>
+              </div>
+              <input type="text" id="<%- field.id %>" class="hidden" <%
+                  if (field.multivalue) {%> data-type="multivalue" <% }; %>
+                  value="<%= model[field.id] %>"/>
+          </li><%
+      };
+      function fieldClink(field, model) {
+          var csettings = App.getEntitySettings(field.entity);
+          var cdenom = csettings.itemType;
+          if (!model[field.id]) { return; };
+          cdenom = model[field.id].length === 1 ? cdenom[0] : cdenom[1]; %>
+          <li>
+              <label for="<%- field.id %>" ><%= field.label %></label>
+              <div class="mask">
+                  <a id="<%- field.id%>" class="clinkLink link">
+                      <%= model[field.id].length %> <%= cdenom %>
+                  </a>
+              </div>
+          </li><%
+      };
+      function fieldTuple(field, model ) { %>
+          <li class="adaptive">
+              <label for="<%- field.id %>" class="mult">
+                  <%= field.label %>
+              </label>
+              <div class="mask tuple">
+                  <% tupleLinks(field, model[field.id]); %>
+              </div>
+              <div id="<%- field.id %>" class="tupleWrapper hidden"><%
+                  _.each(model[field.id], function(value) {
+                      tupleInput(field, value)
+                  });
+                  tupleInput(field) %>
+              </div>
+          </li><%
+      };
+      function tupleInput(field, value) {
+          value = value || '';
+          var v1 = value.split(':')[0];
+          var v2 = value.split(':')[1]; %>
+          <div id="<%- field.id %>" class="tupleField">
+              <input type="text" id="<%- field.id %>_1"
+                  class="autocomplete tuple p1" <%
+                  if (field.multivalue) {%> data-type="tuple" <% }; %>
+                  value="<%= v1 %>" /><span class="tupleColon">:</span>
+              <input type="text" id="<%- field.id %>_2"
+                  class="autocomplete tuple p2" <%
+                  if (field.multivalue) {%> data-type="tuple" <% }; %>
+                  value="<%= v2 %>" />
+          </div><%
+      };
+      function tupleLinks(field, values) {
+          var cat1 = field.id.split(':')[0];
+          var cat2 = field.id.split(':')[1];
+          _.each(values, function(value) {
+              var v1 = value.split(':')[0];
+              var v2 = value.split(':')[1];
+              var f1 = v1 ? 'filter' : '';
+              var f2 = v2 ? 'filter' : ''; %>
+              <div class="text-container tuple" id="<%- field.id %>">
+                  <a class="tuple p1 <%- f1 %>" data-name="<%- cat1 %>"
+                      data-title="<%- v1 %>"><%= v1 || '(not set)' %></a>
+                      <span class="tupleColon">:</span>
+                  <a class="tuple p2 <%- f2 %>" data-name="<%- cat2 %>"
+                      data-title="<%- v2 %>"><%= v2 || '(not set)' %></a>
+              </div><%
+          });
+      };
+      function addMultivalue(values, cat, classes, cb) {
+          if (!values || values.length == 0) { return; };
+          _.each(values, function(v, i, a) {
+              if (cb) { return cb(v); }; %>
+              <a data-name="<%- cat %>" data-title="<%- v %>"
+                  class="<%- classes %>">
+                  <%= v %></a><% if (a.length > 1 && i < a.length - 1) {%>,<% };
+          });
+      };
+      function addProfilePicture(m) { %>
+        <div id="pictureContainer">
+            <div class="etiquettes"><%
+                addEtiquettes(etiquettes, false, m); %>
+            </div><%
+            if (m[pic] === undefined) { %>
+                <img id="default" src="<%= avatar %>">
+                <p>Click to upload photo</p><%
+            }; %>
+            <div class="inputPicContainer">
+                <input type="file" name="picture" data-url="/picture"
+                    id="<%- pic %>" class="pic" disabled="disabled" data-type="img"/>
+            </div>
+            <img id="picture" src="<%= m[pic] %>"/>
+        </div><%
+      };
+      function addEtiquettes(etiquettes, color, model) {
+          _.each(etiquettes, function(e) {
+              if (!e) { return; };
+              var etq = App.getEtiquetteById(e);
+              var css, bg = '';
+              var label = e;
+              var eid = etq ? etq.description : label;
+              if (etq) {
+                  css = "background-image:url('"+etq.image+"')";
+                  var bgimg = etq.image.split('.')[0] + '-bar.png';
+                  bg = "background-image:url('"+bgimg+"');";
+                  bg += "color:"+etq.font;
+              };
+              if (etq && color) { css = "background:"+etq.color; }; %>
+              <div class="bigEtiquette" title="<%= eid %>">
+                  <span class="etiquetteFold" style="<%= css %>"></span>
+                  <label style="<%= bg %>"><%= label %></label>
+                  <span class="etiquetteTip" style="<%= css %>"></span>
+              </div><%
+          });
+      };
+      function profileTab() {
+        if (schema.getPictures().length) { addProfilePicture(model); }; %>
+        <div id="data" class="data <%- cls %>">
+            <ul><%
+                _.each(schema.get(), function(a) {
+                    if (a['type'] === "img") { return; };
+                    if (a['additional'] || a['hidden']) { return; };
+                    renderField(a, model); });
+                    if (schema.getAdditionals().length) { %>
+                        <li class="additional">
+                        <span id="arrow" class="<%
+                            if (window.profileState.additionalOpen) { %>active<%}; %>">
+                        </span>
+                        <label for="additional-parameters" class="additional">
+                            Additional Information
+                        </label>
+                        <ul class="<%
+                            if (window.profileState.additionalOpen) {%>open <% } %>"><%
+                            _.each(schema.getAdditionals(), function(a) {
+                                if (a['hidden']) { return; }
+                                renderField(a, model);
+                            }); %>
+                        </ul>
+                    </li><%
+                }; %>
+            </ul>
+            <div id="extensions"></div>
+        </div><%
+        var mailCls = model.subscription ? '' : 'hidden';
+        if ($('#app > #extensions > #actions-template').length
+            || App.isProfEditable()) { %>
+            <div id="buttons"><%
+                if (App.isProfEditable()) { %>
+                    <a id="edit" class="btn">Edit</a>
+                    <a id="save" class="btn">Save</a><%
+                }
+                if (App.isAdmin()) { %>
+                    <a id="delete" class="btn">Delete</a>
+                    <a id="mailto" class="btn <%- mailCls %>">Mail</a><%
+                } %>
+                <div id="btnExtensions"></div>
+            </div><%
+        }
+      }
+      function clinkTabs() {
+          var active = window.profileState.openTab;
+          var fields = settings.Schema.getFieldsByType('clink'); %>
+          <div id="tabsContainer">
+              <ul id="tabs">
+                  <li id="details" <% if (active === 'details') { 
+                      %>class="active"<% } %>>Details</li><%
+                  _.each(fields, function(f) { %>
+                      <li id="<%- f.id %>" <% if (active === f.id) { %>class="active" <%
+                      } %> ><%= f.label %></li><%
+                  }); %>
+              </ul>
+          </div><%
+      }
+      function clinkItems(field, items) {
+        var csettings = App.getEntitySettings(field.entity);
+        var cschema = new Schema(csettings.schema);
+        _.each(items, function(i) {
+            if (!i) { return; }%>
+            <li id="clinkItem-<%- i['id'] %>"><%
+                    if (cschema.getPictures().length) {
+                        pic = cschema.getPictures()[0]['id']; %>
+                        <object class="miniPic" data="<%- i[pic] %>">
+                            <img class="miniPic"
+                                src="<%= avatar %>"/>
+                        </object><%
+                    }; %>
+                <div class="name">
+                    <%= App.getThumbnailLabel(i, csettings.schema) %>
+                </div>
+            </li><%
+          });
+      } %>
 
-  |   <a class="destroy"></a><%
-  |   clinkTabs();
-  |   var pcls = "tabPane";
-  |   if (window.profileState.openTab != 'details') { pcls += ' hidden'; }; %>
-  |   <div id="profileTab" class="<%- pcls %>"><%
-  |       profileTab(); %>
-  |   </div><%
-  |   _.each(schema.getFieldsByType('clink'), function(f) {
-  |       var cls = "tabPane itemsContainer";
-  |       if (f.id != window.profileState.openTab) { cls += ' hidden'; }; %>
-  |       <div id="clink-<%- f.id %>" class="<%- cls %>">
-  |           <ul><% clinkItems(f, model[f.id]) %></ul>
-  |       </div><%
-  |   }); %>
+      <a class="destroy"></a><%
+      clinkTabs();
+      var pcls = "tabPane";
+      if (window.profileState.openTab != 'details') { pcls += ' hidden'; }; %>
+      <div id="profileTab" class="<%- pcls %>"><%
+          profileTab(); %>
+      </div><%
+      _.each(schema.getFieldsByType('clink'), function(f) {
+          var cls = "tabPane itemsContainer";
+          if (f.id != window.profileState.openTab) { cls += ' hidden'; }; %>
+          <div id="clink-<%- f.id %>" class="<%- cls %>">
+              <ul><% clinkItems(f, model[f.id]) %></ul>
+          </div><%
+      }); %>
 
 

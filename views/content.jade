@@ -77,7 +77,7 @@
     != js('routes')
     != js('app')
 
-    script(type="text/javascript")
+    script(type="text/javascript").
       var user        = !{JSON.stringify(user)};
       var entity      = !{JSON.stringify(entity)};
       var entities    = !{JSON.stringify(entities)};
@@ -87,94 +87,94 @@
       var pdata       = !{JSON.stringify(pdata)};
       var themes      = !{JSON.stringify(themes)};
 
-    script(type="text/template")#table-template
-      | <%
-      |   var sort = window.collection.sort.split(':');
-      |   var ord = sort[sort.length-1];
-      |   var hid = sort[0];
-      |   if (sort.length == 3) {
-      |       hid = sort.slice(0,2).join(':');
-      |   };
-      |   function addHeaders() {
-      |       _.each(schema, function(f) { %>
-      |           <th id="<%- f.id %>" title="<%- f.label %>" data-type="<%- f.type %>"
-      |               class="header <% if (f.index) { %>visible<% }%>">
-      |               <div class="th-inner <% if (hid === f.id) {%><%- ord %><%} if (typeof f.sort === 'undefined' || f.sort === true) { %> sort <% }%>">
-      |               <% if(f.type === "gantt"){
-      |                      var week = Date.prototype.week(new Date()); %>
-      |                     <div class="ganttHeaderContainer">
-      |                         <span class="ganttLeftArrow ganttBtn" data-direction="left"></span>
-      |                         <span class="ganttRightArrow ganttBtn" data-direction="right"></span>
-      |                         <div class="ganttHeaderContent"></div>
-      |                     </div>
-      |               <% } else { %>
-      |                   <span><%= f.label %></span>
-      |                   <span id="sortArrow"></span>
-      |               <% } %>
-      |                 </div>
-      |           </th><%
-      |       });
-      |   };
-      | %>
-      | <div id="tableContainer" class="<%- classes %>">
-      |     <div class="fixed-table-container-inner">
-      |         <table>
-      |             <thead><tr><% addHeaders() %></tr></thead>
-      |             <tbody></tbody>
-      |         </table>
-      |     </div>
-      | </div>
+    script(type="text/template")#table-template.
+        <%
+          var sort = window.collection.sort.split(':');
+          var ord = sort[sort.length-1];
+          var hid = sort[0];
+          if (sort.length == 3) {
+              hid = sort.slice(0,2).join(':');
+          };
+          function addHeaders() {
+              _.each(schema, function(f) { %>
+                  <th id="<%- f.id %>" title="<%- f.label %>" data-type="<%- f.type %>"
+                      class="header <% if (f.index) { %>visible<% }%>">
+                      <div class="th-inner <% if (hid === f.id) {%><%- ord %><%} if (typeof f.sort === 'undefined' || f.sort === true) { %> sort <% }%>">
+                      <% if(f.type === "gantt"){
+                             var week = Date.prototype.week(new Date()); %>
+                            <div class="ganttHeaderContainer">
+                                <span class="ganttLeftArrow ganttBtn" data-direction="left"></span>
+                                <span class="ganttRightArrow ganttBtn" data-direction="right"></span>
+                                <div class="ganttHeaderContent"></div>
+                            </div>
+                      <% } else { %>
+                          <span><%= f.label %></span>
+                          <span id="sortArrow"></span>
+                      <% } %>
+                        </div>
+                  </th><%
+              });
+          };
+        %>
+        <div id="tableContainer" class="<%- classes %>">
+            <div class="fixed-table-container-inner">
+                <table>
+                    <thead><tr><% addHeaders() %></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
 
 
-    script(type="text/template")#columns-menu-template
-      | <li id="<%- field.id %>">
-      |     <div>
-      |         <span class="label"><%= field.label %></span>
-      |         <span class="visible <% if (field.index) { %>active<%}%>">Visible</span>
-      |         <span class="colorize <% if (field.colorize) { %>active<%}%>">Colorize</span>
-      |     </div>
-      | </li>
+    script(type="text/template")#columns-menu-template.
+        <li id="<%- field.id %>">
+            <div>
+                <span class="label"><%= field.label %></span>
+                <span class="visible <% if (field.index) { %>active<%}%>">Visible</span>
+                <span class="colorize <% if (field.colorize) { %>active<%}%>">Colorize</span>
+            </div>
+        </li>
 
-    script(type="text/template")#tuple-field-template
-      | <div id="<%- id %>" class="tupleField">
-      |     <input type="text" id="<%- id %>_1" class="autocomplete tuple p1"
-      |         data-type="tuple" value="" /><span class="tupleColon">:
-      |     <input type="text" id="<%- id %>_2" class="autocomplete tuple p2"
-      |         data-type="tuple" value="" />
-      | </div>
+    script(type="text/template")#tuple-field-template.
+        <div id="<%- id %>" class="tupleField">
+            <input type="text" id="<%- id %>_1" class="autocomplete tuple p1"
+                data-type="tuple" value="" /><span class="tupleColon">:
+            <input type="text" id="<%- id %>_2" class="autocomplete tuple p2"
+                data-type="tuple" value="" />
+        </div>
 
-    script(type="text/template")#category-template
-      | <li class="category" id="category-<%- index %>">
-      |     <label class="category">
-      |         <%= cat === 'null' ? 'not set' : cat %> <span>- <em></em></span>
-      |     </label>
-      |     <ul class="container"></ul>
-      | </li>
+    script(type="text/template")#category-template.
+        <li class="category" id="category-<%- index %>">
+            <label class="category">
+                <%= cat === 'null' ? 'not set' : cat %> <span>- <em></em></span>
+            </label>
+            <ul class="container"></ul>
+        </li>
 
-    script(type="text/template")#pagination-index-template
-      | <%
-      |   var total = parseFloat(window.collection.total);
-      |   var rows = parseFloat(window.collection.rows);
-      |   var page = parseFloat(window.collection.page) + 1;
-      |   var first = parseFloat(page * rows) - rows + 1;
-      |   var last = page * rows > total ? total : page * rows;
-      | %>
-      | <div id="wrapper">
-      |   <span id="pageStatus">
-      |       <%= first %>-<%= last %>
-      |       <span id="normal"> of </span>
-      |       <%= total %>
-      |   </span>
-      |   <span id="jumpToFirst" class="btn <%
-      |       if (page == 1) { %> disabled <% } %>">
-      |   </span>
-      |   <span id="pageL" class="btn <%
-      |       if (page == 1) { %> disabled <% } %>">
-      |   </span>
-      |   <span id="pageR" class="btn <%
-      |       if (last == total) { %> disabled <% } %>">
-      |   </span>
-      |   <span id="jumpToLast" class="btn <%
-      |       if (last == total) { %> disabled <% } %>">
-      |   </span>
-      | </div>
+    script(type="text/template")#pagination-index-template.
+        <%
+          var total = parseFloat(window.collection.total);
+          var rows = parseFloat(window.collection.rows);
+          var page = parseFloat(window.collection.page) + 1;
+          var first = parseFloat(page * rows) - rows + 1;
+          var last = page * rows > total ? total : page * rows;
+        %>
+        <div id="wrapper">
+          <span id="pageStatus">
+              <%= first %>-<%= last %>
+              <span id="normal"> of </span>
+              <%= total %>
+          </span>
+          <span id="jumpToFirst" class="btn <%
+              if (page == 1) { %> disabled <% } %>">
+          </span>
+          <span id="pageL" class="btn <%
+              if (page == 1) { %> disabled <% } %>">
+          </span>
+          <span id="pageR" class="btn <%
+              if (last == total) { %> disabled <% } %>">
+          </span>
+          <span id="jumpToLast" class="btn <%
+              if (last == total) { %> disabled <% } %>">
+          </span>
+        </div>

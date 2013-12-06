@@ -1,124 +1,128 @@
-script(type="text/template")#group-template
-  | <%
-  |   var schema = window.settings.Schema;
-  |   var emailKey = '';
-  |   var skypeKey = '';
-  |   var emails = [];
-  |   var skypes = [];
-  |   var tabTitle = window.settings.itemType[1];
-  |   tabTitle = tabTitle[0].toUpperCase() + tabTitle.slice(1);
-  |   if (schema.getPictures().length) {
-  |       pic = schema.getPictures()[0]['id'];
-  |   };
-  |   if (schema.getEmails().length) {
-  |       emailKey = schema.getEmails()[0]['id'];
-  |   };
-  |   if (schema.getSkypes().length) {
-  |       skypeKey = schema.getSkypes()[0]['id'];
-  |   };
-  |   function renderField(field, value) {
-  |       rf = fieldText;
-  |       if (field['type'] === 'tuple') { rf = fieldTuple; };
-  |       if (field['type'] === 'date') { rf = fieldDate; };
-  |       if (field['type'] === 'datetime') { rf = fieldDateTime; };
-  |       rf(field, field['label']);
-  |   };
-  |   function fieldTuple(f) {
-  |       var cat1 = f.id.split(':')[0];
-  |       var cat2 = f.id.split(':')[1]; %>
-  |       <li class="adaptive">
-  |           <label for="<%- f.id %>"
-  |               class="mult"><%= f.label %></label>
-  |               <div id="<%- f.id %>" class="tupleWrapper"><%
-  |                    tuppleRow(f); %>
-  |               </div>
-  |       </li><%
-  |   };
-  |   function fieldDate(f) { %>
-  |       <li>
-  |           <label for="<%- f.id %>" ><%= f.label %></label>
-  |           <input type="text" readonly="readonly"
-  |               id="<%- f.id %>" data-type="date"/>
-  |       </li><%
-  |   };
-  |   function fieldDateTime(f) { %>
-  |       <li>
-  |           <label for="<%- f.id %>" ><%= f.label %></label>
-  |           <input type="text" readonly="readonly"
-  |               id="<%- f.id %>" data-type="datetime"/>
-  |       </li><%
-  |   };
-  |   function fieldText(f) {
-  |       if (window.App.isTuple(f.id)) { return ; }; %>
-  |       <li>
-  |           <label for="<%- f.id %>" ><%= f.label %></label>
-  |           <input type="text" id="<%- f.id %>" class="<%- f.type %>" <%
-  |               if (f.multivalue) { %> data-type="multivalue" <% }; %>/>
-  |       </li><%
-  |   };
-  |   function tuppleRow(field) { %>
-  |       <div id="<%- field.id %>" class="tupleField">
-  |           <input type="text" id="<%- field.id %>_1"
-  |               class="autocomplete tuple p1"<%
-  |               if (field.multivalue) {%> data-type="tuple" <% }; %>
-  |               value="" />:
-  |           <input type="text" id="<%- field.id %>_2"
-  |               class="autocomplete tuple p2"<%
-  |               if (field.multivalue) {%> data-type="tuple" <% }; %>
-  |               value="" />
-  |       </div><%
-  |   };
-  |   function genItemsList(m) {
-  |       m.each(function(i) {
-  |           var e = i.get(emailKey);
-  |           var s = i.get(skypeKey);
-  |           var l = window.App.getThumbnailLabel(i.parseSubfields(), window.schema);
-  |           if (e) { emails.push(i.get(emailKey)); };
-  |           if (s) { skypes.push(i.get(skypeKey)); }; %>
-  |           <li id="<%- i.get('id') %>"><%
-  |               if (schema.getPictures().length) { %>
-  |                   <object class="miniPic" data="<%= i.get(pic) %>">
-  |                       <img class="miniPic"
-  |                           src="/assets/default-avatar.png"/>
-  |                   </object><%
-  |               }; %>
-  |               <div class="name"><%= l %></div>
-  |               <a class="minidestroy"></a>
-  |           </li><%
-  |       });
-  |   };
-  | %>
-  | <a class="destroy"></a>
-  | <div id="tabsContainer">
-  |     <ul id="tabs">
-  |         <li id="details" class="active"><%= tabTitle %></li>
-  |     </ul>
-  | </div>
-  | <div class="itemsContainer">
-  |     <ul><% genItemsList(m) %></ul>
-  | </div>
-  | <div id="multipleEditFields">
-  |     <ul><%
-  |         _.each(schema.getMultiedits(), function(a) {
-  |             renderField(a, a.label);
-  |         }); %>
-  |     </ul>
-  | </div>
-  | <div id="groupActions">
-  |     <a class="btn" id="csv">CSV</a><%
-  |     if (emails.length) { %>
-  |         <a class="btn" id="mailto">Mail</a>
-  |         <a class="btn" id="calendar" target="_blank">Cal</a><%
-  |     };
-  |     if (skypes.length) { %>
-  |         <a class="btn" id="skype">Skype</a><%
-  |     };
-  |     if (window.App.isAdmin() && schema.getMultiedits().length) { %>
-  |         <a class="btn" id="edit">Edit</a><%
-  |     }; %>
-  | </div>
-  | <div id="multipleEditActions">
-  |     <a class="btn" id="save">Save</a>
-  |     <a class="btn" id="cancel">Cancel</a>
-  | </div>
+script(type="text/template")#group-template.
+    <%
+      var schema = window.settings.Schema;
+      var emailKey = '';
+      var skypeKey = '';
+      var emails = [];
+      var skypes = [];
+      var tabTitle = window.settings.itemType[1];
+      tabTitle = tabTitle[0].toUpperCase() + tabTitle.slice(1);
+      if (schema.getPictures().length) {
+          pic = schema.getPictures()[0]['id'];
+      };
+      if (schema.getEmails().length) {
+          emailKey = schema.getEmails()[0]['id'];
+      };
+      if (schema.getSkypes().length) {
+          skypeKey = schema.getSkypes()[0]['id'];
+      };
+      function renderField(field, value) {
+          rf = fieldText;
+          if (field['type'] === 'tuple') { rf = fieldTuple; };
+          if (field['type'] === 'date') { rf = fieldDate; };
+          if (field['type'] === 'datetime') { rf = fieldDateTime; };
+          rf(field, field['label']);
+      };
+      function fieldTuple(f) {
+          var cat1 = f.id.split(':')[0];
+          var cat2 = f.id.split(':')[1]; %>
+          <li class="adaptive">
+              <label for="<%- f.id %>"
+                  class="mult"><%= f.label %></label>
+                  <div id="<%- f.id %>" class="tupleWrapper"><%
+                       tuppleRow(f); %>
+                  </div>
+          </li><%
+      };
+      function fieldDate(f) { %>
+          <li>
+              <label for="<%- f.id %>" ><%= f.label %></label>
+              <input type="text" readonly="readonly"
+                  id="<%- f.id %>" data-type="date"/>
+          </li><%
+      };
+      function fieldDateTime(f) { %>
+          <li>
+              <label for="<%- f.id %>" ><%= f.label %></label>
+              <input type="text" readonly="readonly"
+                  id="<%- f.id %>" data-type="datetime"/>
+          </li><%
+      };
+      function fieldText(f) {
+          if (window.App.isTuple(f.id)) { return ; }; %>
+          <li>
+              <label for="<%- f.id %>" ><%= f.label %></label>
+              <input type="text" id="<%- f.id %>" class="<%- f.type %>" <%
+                  if (f.multivalue) { %> data-type="multivalue" <% }; %>/>
+          </li><%
+      };
+      function tuppleRow(field) { %>
+          <div id="<%- field.id %>" class="tupleField">
+              <input type="text" id="<%- field.id %>_1"
+                  class="autocomplete tuple p1"<%
+                  if (field.multivalue) {%> data-type="tuple" <% }; %>
+                  value="" />:
+              <input type="text" id="<%- field.id %>_2"
+                  class="autocomplete tuple p2"<%
+                  if (field.multivalue) {%> data-type="tuple" <% }; %>
+                  value="" />
+          </div><%
+      };
+      function genItemsList(m) {
+          m.each(function(i) {
+              var e = i.get(emailKey);
+              var s = i.get(skypeKey);
+              var l = window.App.getThumbnailLabel(i.parseSubfields(), window.schema);
+              var avatar = '/assets/default-pane-avatar.png';
+              if (settings.avatar === 'person') {
+                  avatar = '/assets/default-person-avatar.png'
+              };
+              if (e) { emails.push(i.get(emailKey)); };
+              if (s) { skypes.push(i.get(skypeKey)); }; %>
+              <li id="<%- i.get('id') %>"><%
+                  if (schema.getPictures().length) { %>
+                      <object class="miniPic" data="<%= i.get(pic) %>">
+                          <img class="miniPic"
+                              src="<%= avatar %>"/>
+                      </object><%
+                  }; %>
+                  <div class="name"><%= l %></div>
+                  <a class="minidestroy"></a>
+              </li><%
+          });
+      };
+    %>
+    <a class="destroy"></a>
+    <div id="tabsContainer">
+        <ul id="tabs">
+            <li id="details" class="active"><%= tabTitle %></li>
+        </ul>
+    </div>
+    <div class="itemsContainer">
+        <ul><% genItemsList(m) %></ul>
+    </div>
+    <div id="multipleEditFields">
+        <ul><%
+            _.each(schema.getMultiedits(), function(a) {
+                renderField(a, a.label);
+            }); %>
+        </ul>
+    </div>
+    <div id="groupActions">
+        <a class="btn" id="csv">CSV</a><%
+        if (emails.length) { %>
+            <a class="btn" id="mailto">Mail</a>
+            <a class="btn" id="calendar" target="_blank">Cal</a><%
+        };
+        if (skypes.length) { %>
+            <a class="btn" id="skype">Skype</a><%
+        };
+        if (window.App.isAdmin() && schema.getMultiedits().length) { %>
+            <a class="btn" id="edit">Edit</a><%
+        }; %>
+    </div>
+    <div id="multipleEditActions">
+        <a class="btn" id="save">Save</a>
+        <a class="btn" id="cancel">Cancel</a>
+    </div>
 
