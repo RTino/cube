@@ -23,6 +23,7 @@
     },
     "dependencies":{
         "async": ">= 0.2.6",
+        "bcrypt": ">= 0.7.7",
         "coffee-script":">= 1.6.2",
         "connect": "2.7.3",
         "connect-assets":">= 2.4.1",
