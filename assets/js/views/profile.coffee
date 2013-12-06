@@ -30,7 +30,7 @@ $ ->
             $('#footer, #columnsSelectWrapper').addClass 'onProfile'
 
             # Show pane. .show() fails on some browsers.
-            $('#pane').css('display', 'block')
+            $('.pane').css('display', 'block')
 
         #### Set Model properties
         # Set values on a model for text, date and picture fields, and allow
@@ -60,7 +60,7 @@ $ ->
         # All of these fields are stored in the DB as strings.
         setModelTextFields: (m, unset) =>
 
-            _.each $('input, textarea', '#pane'), (i) =>
+            _.each $('input, textarea', '.pane'), (i) =>
 
                 $i = $(i)
 
@@ -70,7 +70,8 @@ $ ->
 
                 return unless !f.type or f.type is "text" or
                     f.type is "email" or f.type is "multiline" or
-                    f.type is "skype" or f.type is "link"
+                    f.type is "skype" or f.type is "link" or
+                    f.type is "clink"
 
                 val = $.trim $i.val()
 
@@ -87,7 +88,7 @@ $ ->
         # stored as integer or float respectively.
         setModelIntFields: (m, unset) =>
 
-            _.each $('input', '#pane'), (i) =>
+            _.each $('input', '.pane'), (i) =>
 
                 $i = $(i)
 
@@ -95,7 +96,7 @@ $ ->
 
                 f = window.settings.Schema.getFieldById id.split('_')[0]
 
-                return unless !f.type or f.type is "integer" or
+                return unless f.type is "integer" or
                     f.type is "float"
 
                 val = $.trim $i.val()
@@ -114,7 +115,7 @@ $ ->
         # stored as strings.
         setModelDropdownFields: (m, unset) =>
 
-            _.each $('select', '#pane'), (i) =>
+            _.each $('select', '.pane'), (i) =>
 
                 $i = $(i)
 
@@ -135,7 +136,7 @@ $ ->
         # Sets a model's date fields. Stored as javascript ISO date strings.
         setModelDateFields: (m, unset) =>
 
-            _.each $('input[data-type="date"]', '#pane'), (i) ->
+            _.each $('input[data-type="date"]', '.pane'), (i) ->
 
                 id = $(i).attr 'id'
 
@@ -151,7 +152,7 @@ $ ->
         # Sets a model's date fields. Stored as javascript ISO date strings.
         setModelDateTimeFields: (m, unset) =>
 
-            _.each $('input[data-type="datetime"]', '#pane'), (i) ->
+            _.each $('input[data-type="datetime"]', '.pane'), (i) ->
 
                 id = $(i).attr 'id'
 
@@ -174,7 +175,7 @@ $ ->
 
                 id = pf.id
 
-                $i = $("#picture", '#pane')
+                $i = $("#picture", '.pane')
 
                 return unless $i.attr 'src'
 
@@ -197,12 +198,9 @@ $ ->
 
                 id = $i.attr 'id'
 
-                val = []
+                val = $i.val()
 
                 f = window.settings.Schema.getFieldById id.split('_')[0]
-
-                _.each $i.val().split(','), (v) =>
-                    @setUniqueMultivalueField v, val
 
                 return m.unset(id, silent: yes) if !val.length and unset
 
@@ -213,7 +211,6 @@ $ ->
 
                 m.set p, silent: yes if val.length
 
-
         # Sets the tuple property and also the related properties. i.e. for
         # tuple team:role it also sets team and role properties.
         setModelTupleFields: (m, unset) =>
@@ -222,37 +219,36 @@ $ ->
 
                 $te     = $(te)                     # tuple element
                 tups    = []                        # list of tuples
-                pval1   = []                        # vals for related field 1
-                pval2   = []                        # vals for related field 2
                 p       = {}                        # property obj to be set
                 tid     = $te.attr('id')            # name of tuple (team:role)
+                pval1   = []
+                pval2   = []
                 [ pid1, pid2 ] = tid.split(':')     # tuple id part 1 and 2
 
                 _.each $('.tupleField', $te), (i) =>
 
                     $i = $(i)
 
-                    v1 = $.trim $('input.p1', $i).val()
-                    v2 = $.trim $('input.p2', $i).val()
+                    iv1 = $.trim $('input.p1', $i).val()
+                    iv2 = $.trim $('input.p2', $i).val()
+
+                    v1 = if iv1 then iv1 else ''
+                    v2 = if iv2 then iv2 else ''
 
                     # tuple values may contain both parts or just one.
                     tv = "#{v1}:#{v2}" if v1 or v2
                     tups.push tv if tv and tups.indexOf(tv) is -1
-
-                    # Aggregate all values from one part and from the other, to
-                    # store in the respective fields. It is important that we
-                    # only store unique values like 'team/subteam1/group1'
-                    # instead of 'team, team/subteam1, team/subteam1/group1'.
-                    @setUniqueMultivalueField v1, pval1
-                    @setUniqueMultivalueField v2, pval2
+                    pval1.push v1 if v1 and pval1.indexOf(v1) is -1
+                    pval2.push v2 if v2 and pval2.indexOf(v2) is -1
 
                 # Property object contains tuple field and related fields.
                 p[tid]  = tups
-                p[pid1] = pval1
-                p[pid2] = pval2
+                p[pid1] = pval1.join(',') if pval1.length
+                p[pid2] = pval2.join(',') if pval2.length
 
-                if !pval1.length and !pval2.length and unset
-                    return m.unset(tid, silent:yes)
+                m.unset(pid1, silent:yes) if !pval1.length and unset
+                m.unset(pid2, silent:yes) if !pval2.length and unset
+                return m.unset(tid, silent:yes) if !pval1.length and !pval2.length and unset
 
                 m.set(p, silent: yes) if pval1.length or pval2.length
 
@@ -277,7 +273,7 @@ $ ->
 
             @destroy()
 
-            $('#pane').hide()
+            $('.pane').hide()
 
             @app.navigate()
 
@@ -300,57 +296,6 @@ $ ->
             parentFacet = field.split('/')[0]
 
             @app.facetOpenState.set [ { cat: cat, field: parentFacet } ]
-
-
-        # Appends unique values to a given array, based on a comma separated
-        # list of values. Unique values refer to values such as:
-        # 'team/subteam1/group1' instead of
-        # 'team, team/subteam1, team/subteam1/group1'
-        setUniqueMultivalueField: (list, arr) ->
-
-            _.each @getMultivalueField(list), (v) ->
-
-                arr.push v if arr.indexOf(v) is -1 and v
-
-
-        # Parse an input field that has multiple values and form an array of
-        # unique values useful for Solr.
-        # i.e. Novel/Sci-Fi => [ 'Novel', 'Novel/Sci-Fi' ]
-        getMultivalueField: (field) =>
-
-            uniqueFields = []
-
-            values = field.split ','
-
-            _.each values, (v, i) =>
-
-                v = v.slice(1) if v[0] is ' '
-
-                _.each @getUniqueValues(v), (v) ->
-
-                    uniqueFields.push(v) if uniqueFields.indexOf(v) is -1
-
-            uniqueFields
-
-
-        # Given a value like Team/subteam1/group1 returns a list of values like
-        # team, team/subteam1, team/subteam1/group1.
-        getUniqueValues: (value) =>
-
-            uniqueValues = []
-
-            sep = window.settings.separator
-            tokens = value.split sep
-
-            _.each value.split(sep), (v, i) ->
-
-                u = tokens.slice(0, i).join(sep)
-
-                uniqueValues.push u if u
-
-            uniqueValues.push value
-
-            uniqueValues
 
 
         # Append another tuple fields after last one
@@ -391,7 +336,7 @@ $ ->
 
             validForm = true
 
-            $('.validationFailed', '#pane').removeClass('validationFailed')
+            $('.validationFailed', '.pane, #teamContainer').removeClass('validationFailed')
 
             inputFields = window.settings.Schema.getMandatories()
 
@@ -399,7 +344,7 @@ $ ->
 
                 validField = true
 
-                input = $("input##{f.id}", "#pane")
+                input = $("input##{f.id}", ".pane, #teamContainer")
 
                 validField = false if !input.val()
 
@@ -411,7 +356,6 @@ $ ->
                 validForm = false unless validField
 
             validForm
-
 
         # Email validation, match against a regexp.
         emailValid: (email) ->
@@ -425,6 +369,42 @@ $ ->
             re = RegExp re.join ''
 
             re.test email
+
+
+        # TODO improve this
+        isUnique: (cb) =>
+
+            u = no
+
+            uniqueFields = window.settings.Schema.getUnique()
+
+            u = yes unless uniqueFields.length
+
+            async.each uniqueFields, (f, _cb) =>
+
+                input = $("input##{f.id}", "#pane")
+
+                $.get "/team/property/#{f.id}/#{input.val()}", (items) =>
+
+                    if items.length is 1 and @model.get('id') is items[0].id
+                        input.removeClass 'validationFailed'
+                        u = yes
+                        return _cb()
+
+                    if items.length
+                        u = no
+                        alert "A user with unique field: #{f.id}, of value: #{input.val()}, already exists. Please choose a different value."
+                        input.addClass 'validationFailed'
+                        return _cb()
+
+                    input.removeClass 'validationFailed'
+                    u = yes
+                    _cb()
+
+             , (err) =>
+
+                 cb u
+
 
 
         # Attach autocomplete plugin to input fields (i.e. team, role).
@@ -468,7 +448,7 @@ $ ->
                 constrainInput  : true
                 showButtonPanel : true
                 showOtherMonths : true
-                yearRange       : "c-70"
+                yearRange       : "c-67:c+10"
                 dateFormat      : "d M yy"
 
 
@@ -481,7 +461,7 @@ $ ->
                 constrainInput  : true
                 showButtonPanel : true
                 showOtherMonths : true
-                yearRange       : "c-70"
+                yearRange       : "c-67:c+10"
                 dateFormat      : "d M yy"
                 timeFormat      : 'HH:mm'
 
@@ -635,7 +615,7 @@ $ ->
             $('.thumbnailContainer').addClass 'onProfile'
 
 
-        # Render profile inside #pane
+        # Render profile inside .pane
         render: () =>
 
             @$el.html @template m: @model
@@ -679,20 +659,20 @@ $ ->
             # admin key is present
             if @app.isAdmin()
 
-                $('a.text-overlay', '#pane').hide()
-                $('input.hidden', '#pane').removeClass 'hidden'
+                $('a.text-overlay', '.pane').hide()
+                $('input.hidden', '.pane').removeClass 'hidden'
                 $('.multiline').addClass('edit').removeAttr 'style'
                 $('select').addClass('edit').removeAttr 'disabled'
                 $('.text-container').hide()
                 $('.multilineWrapp p').hide()
-                $('textarea', '#pane')
+                $('textarea', '.pane')
                   .removeAttr('disabled')
                   .addClass('edit')
                 $('.tupleWrapper').removeClass('hidden')
                 $('a.link').hide()
 
             # Enable additional fields. No admin key required.
-            $a = $('#pane li.additional')
+            $a = $('.pane li.additional')
             $('a.text-overlay', $a).hide()
             $('input.hidden', $a).removeClass 'hidden'
             $('select', $a).addClass('edit').removeAttr 'disabled'
@@ -701,17 +681,17 @@ $ ->
             $('a.link', $a).hide()
 
             # Enable picture field
-            $('input.pic', '#pane')
+            $('input.pic', '.pane')
                 .addClass('editing')
                 .removeAttr('disabled')
-            $('#pictureContainer p', '#pane').show()
+            $('#pictureContainer p', '.pane').show()
 
             # Show additional fields
-            $('ul', '#pane li.additional').addClass('open')
-            $('span#arrow', '#pane li').addClass('active')
+            $('ul', '.pane li.additional').addClass('open')
+            $('span#arrow', '.pane li').addClass('active')
 
             # Make invisible picture input field clickable
-            $('#pane input.pic').show()
+            $('.pane input.pic').show()
 
             # Highlight mandatory fields
             @setMandatoryLabels() if @app.isAdmin()
@@ -729,7 +709,7 @@ $ ->
             @setMultilineHeight()
 
             # Prepare buttons for edit state (show Save).
-            $('#buttons a', '#pane').hide()
+            $('#buttons a', '.pane').hide()
             $('a#save').css('display', 'inline-block')
 
 
@@ -740,9 +720,13 @@ $ ->
 
             return unless @formIsValid()
 
-            return @create() unless @model.id
+            @isUnique (unique) =>
 
-            @update()
+                return unless unique
+
+                return @create() unless @model.id
+
+                @update()
 
 
         # Creates a new item in the items collection avoiding several clicks
@@ -787,9 +771,9 @@ $ ->
         # Addition fields section of the profile view, expand and collapse!
         showAdditionalFields: () ->
 
-            $('ul', '#pane li.additional').toggleClass('open')
+            $('ul', '.pane li.additional').toggleClass('open')
 
-            $('span#arrow', '#pane li').toggleClass('active')
+            $('span#arrow', '.pane li').toggleClass('active')
 
             window.profileState.additionalOpen = !window.profileState.additionalOpen
 
@@ -813,14 +797,14 @@ $ ->
                 value = item.get m.id
                 return unless value
 
-                cols = $("textarea##{m.id}", '#pane').attr 'cols'
+                cols = $("textarea##{m.id}", '.pane').attr 'cols'
                 lc = 0
 
                 _.each value.split('\n'), (l) ->
                     lc += Math.ceil l.length/cols
 
-                h = $("textarea##{m.id}", '#pane').prop 'scrollHeight'
-                $("textarea##{m.id}", '#pane').height h
+                h = $("textarea##{m.id}", '.pane').prop 'scrollHeight'
+                $("textarea##{m.id}", '.pane').height h
 
 
         # Click handler for profile Tabs
@@ -838,6 +822,7 @@ $ ->
             window.profileState.openTab = id
             return $('#profileTab').show() if id is 'details'
             $("#clink-#{id}").show()
+            $("#buttons.btab").removeClass 'hidden'
 
 
     #### Group view
@@ -918,6 +903,8 @@ $ ->
 
             if e.charCode or e.charCode is 0 then return unless e.which is 13
 
+            return unless @formIsValid()
+
             amount = @app.itemSelection.length
             warning = "Proceed to apply changes to #{amount} "
             warning += window.App.getItemType()
@@ -950,6 +937,38 @@ $ ->
             $('#multipleEditFields, #multipleEditActions').hide()
             $('#groupActions').show()
 
+
+
+        # Validates a multiple edit form. Mainly tuple fields must have values
+        # on both or non of their 2 parts.
+        formIsValid: () ->
+
+            validForm = true
+
+            $('.validationFailed', '.pane, #teamContainer')
+                .removeClass('validationFailed')
+
+            _.each $('.tupleWrapper'), (te) =>
+                $te = $(te)
+                _.each $('.tupleField', $te), (i) =>
+                    validField = true
+
+                    $i = $(i)
+
+                    v1 = $('input.p1', $i).val()
+                    v2 = $('input.p2', $i).val()
+
+                    if v1 and not v2
+                        validField = false
+                        $('input.p2', $i).addClass('validationFailed')
+
+                    if v2 and not v1
+                        validField = false
+                        $('input.p1', $i).addClass('validationFailed')
+
+                    validForm = false unless validField
+
+            validForm
 
         # Deselects 1 item and takes it out from selection array
         removeSelected: (e) =>

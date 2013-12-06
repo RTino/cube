@@ -32,12 +32,8 @@ $ =>
         events:
             "keyup #inputSearch"                        : "onSearchInput"
             "click a#add.btn"                           : "addNewItem"
-            "click ul#facet ul li .field"               : "handleFacetClick"
             "click span#reset a"                        : "resetAllFilters"
             "click span#view"                           : "toggleViewMode"
-            "click ul#facet li ul span.fold"            : "toggleFacetSubfields"
-            "click ul#facet>li>span.fold"               : "toggleFacetNode"
-            "click ul#facet>li>h4"                      : "toggleFacetNode"
             "click span#print"                          : "print"
             "click #exporter span"                      : "export"
             "click #entityTitle"                        : "toggleEntitiesMenu"
@@ -76,13 +72,23 @@ $ =>
             # Set collection settings like sort criteria or amount of rows
             @setColSettings()
 
-            # Set the schema ffor the entity
-            @createSchema()
+            # Get the schema of the current entity
+            @getSchema()
 
             # Create style object
             @style = new window.Style
 
-            #### Collections bindings
+            # Collection bindings only if necessary
+            @bindCollections()
+
+            # Get entity's custom templates and start app on success.
+            @getExtensions () =>
+
+                @start()
+
+
+        #### Bindings for collections
+        bindCollections: () =>
 
             # Display any new items in the container.
             window.collection.bind  'add',      @addOne,        @
@@ -96,10 +102,6 @@ $ =>
             # Draw all facets whenever the collection is resetted.
             window.facets.bind      'reset',    @addAllFacets,  @
 
-            # Get extension templates and start app on success.
-            @getExtensions () =>
-
-                @start()
 
         #### Start
         start: =>
@@ -132,11 +134,6 @@ $ =>
             # Create the entities menu
             @generateEntitiesMenu()
 
-            # Fetch facets and start backbone history right after. This will
-            # route to window.settings.Separator which in turn will fetch
-            # items and draw app.
-            @initFacets()
-
             # Start app with search input text focused
             $('#inputSearch').focus() unless @isTablet()
 
@@ -155,9 +152,14 @@ $ =>
             # Activate exporter menu
             @exportMenu()
 
+            # Fetch facets and start backbone history right after.
+            @initFacets () => Backbone.history.start()
+
 
         # Facet collection init
-        initFacets: () =>
+        initFacets: (cb) =>
+
+            return cb() if settings.facets is 'tree'
 
             #Fetch facets from database
             window.facets.fetch success: () =>
@@ -168,10 +170,10 @@ $ =>
                 # Set expanded/folded state on facet HTML index
                 @setFacetOpenState()
 
-                # App is ready to start navigation history
-                Backbone.history.start()
+                cb()
 
             , error: (col, res, opts) =>
+
                 # Redirect to login page in case it got a 403
                 window.location.href = '/login' if res.status is 403
 
@@ -182,18 +184,23 @@ $ =>
         # Set user icon on controls section as a logout btn.
         setUser: () ->
 
-            if window.user.pic
-                $('#controls a#logout')
-                    .css 'background', "url(#{window.user.pic}) no-repeat center center"
-                $('#controls a#logout').css 'background-size', "40px 40px"
+            if window.user?.pic
+                $('#controls a#profile')
+                    .css 'background-image', "url(#{window.user.pic})"
+            else
+                $('#controls a#profile').hide()
 
             username = window.user.mail
             if window.user.name and window.user.lastname
                 username = "#{window.user.name} #{window.user.lastname}"
 
-            $('#controls a#logout').attr 'title', 'Sign Out user ' + username
+            $('#controls a#profile')
+                .attr('title', 'Logged in as ' + username)
+                .css('display', 'inline-block' if username)
+                .attr 'href', '/team/#qs/?id=' + window.user?.id
 
-            $('#controls a#logout').css 'display', 'inline-block' if username
+            $('#controls a#logout')
+                .css 'display', 'inline-block' if window.user.id
 
 
         # Settings object holds all configuration parameters
@@ -244,7 +251,7 @@ $ =>
             facets = window.settings.Schema.getFacets()
 
             # If there are no facet fields, hide the facet pane
-            return @disableFacets() unless facets.length
+            # return @disableFacets() unless facets.length
 
             # Resize the facet pane to user preferences
             @setIndexResizable()
@@ -272,7 +279,7 @@ $ =>
                 @ganttInfoInit()
 
 
-        # Get extesion HTML/JS code and append it to current dom.
+        # Get extesion HTML/JS code and append it to dom.
         getExtensions: (cb) =>
 
             $.get 'template', (exthtml) ->
@@ -301,7 +308,7 @@ $ =>
                 actionsTemplate = _.template $('#app > #extensions #actions-template')
                     .html()
 
-                $('#pane #buttons #btnExtensions').append actionsTemplate()
+                $('.pane #buttons #btnExtensions').append actionsTemplate()
 
                 window.extensions?.bindActions()?
 
@@ -310,11 +317,11 @@ $ =>
                 detailsTemplate = _.template $('#app > #extensions #details-template')
                     .html()
 
-                $('#pane #extensions').append detailsTemplate t:item
+                $('.pane #extensions').append detailsTemplate t:item
 
 
         # Get schema and attach it to our Settings object
-        createSchema: ->
+        getSchema: ->
 
             window.settings?.Schema = new window.Schema window.schema
 
@@ -350,6 +357,8 @@ $ =>
             $('#search span#reset').hide() unless letters or @filterSelection
                 .get().length
 
+            @renderTreeView() if settings.facets is 'tree'
+
             return @addAll window.collection
 
 
@@ -370,8 +379,8 @@ $ =>
             # Create a new list view
             view = new ItemListView model: item
 
-            # Append it to the tabel
-            @$("table tbody", "#items").append view.render().el
+            # Append it to the table
+            @$("#items #tableContainer table tbody").append view.render().el
 
 
         # Add one item with a thumbnail view
@@ -379,6 +388,10 @@ $ =>
 
             # Create a new Thumbnail view
             view = new ItemThumbnailView model: item
+
+            if settings.facets is 'tree'
+                return @$('ul.thumbnailContainer ul.container', '#items')
+                    .append view.render().el
 
             # Choose category to append it to appropriate container
             cat = item.get window.settings.Schema.getClassifier().id
@@ -442,10 +455,13 @@ $ =>
 
             @clearSelection()
 
+            if settings.detailedView is 'team'
+                @showExtendedView new window.Item
+                window.extendedView.edit()
+                return @navigate()
+
             @showProfile new window.Item
-
             window.profileView.form()
-
             @navigate()
 
 
@@ -458,6 +474,9 @@ $ =>
             @addToSelection $e
 
             @scrollToSelection $e
+
+            if settings.detailedView is 'team'
+                return @showExtendedView  window.collection.get $e.attr 'id'
 
             @showProfile window.collection.get($e.attr('id')), attr
 
@@ -536,6 +555,8 @@ $ =>
         # Fetch facets
         fetchFacet: (cb) =>
 
+            return cb() if settings.facets is 'tree'
+
             @showLoadingAnimation()
 
             # Fetch facets using current facet selection as filters
@@ -547,8 +568,11 @@ $ =>
                 success: () =>
 
                     @updateFacetState()
+
                     @setFacetState @filterSelection.get()
+
                     @hideError()
+
                     cb()
 
                 error: (col, res, opts) =>
@@ -597,6 +621,7 @@ $ =>
 
             @filterByPage cb
 
+
         # Updates the facet collection
         updateFacets: (m) =>
 
@@ -626,6 +651,7 @@ $ =>
                         window.location.href = '/login' if res.status is 403
 
                         window.App.showError()
+
 
         # Reset all filters.
         resetAllFilters: () =>
@@ -658,6 +684,7 @@ $ =>
                         window.location.href = '/login' if res.status is 403
 
                         @showError()
+
 
         # Reset only the facet fields but not the search or any other
         resetFacets: (cb) =>
@@ -764,36 +791,6 @@ $ =>
             # Apply content style from schema
             @style.apply()
 
-        # Handle a click on a facet field. Add facet to selection, filter
-        # with new selection and activate field
-        handleFacetClick: (e) =>
-
-            $e    = $(e.currentTarget)
-            cat   = $e.attr 'data-name'
-            name  = $e.attr 'data-title'
-
-            if e.ctrlKey or e.altKey
-                @filterSelection.toggleMult cat: cat, field:name
-            else
-                @filterSelection.toggle cat:cat, field:name
-
-            @showLoadingAnimation()
-
-            @filterByFacet () =>
-
-                window.paneView?.close() if @filterSelection.get().length != 1
-
-                $e.toggleClass 'active'
-
-                $('span.amount', $e).toggleClass 'active'
-
-                $('span#reset')
-                    .show() unless @filterSelection.get().length is 0
-
-                @showPaneView()
-
-            $('#inputSearch').focus() unless @isTablet()
-
 
         # Reset filtes and set app state. User clicked on "reset filters" link.
         onResetFilter: () =>
@@ -823,7 +820,7 @@ $ =>
 
                 $f = $("li[data-name='#{c.cat}'][data-title='#{c.field}']")
                 $('>span.fold', $f).addClass('open').html '–'
-                $('>ul', $f).css('display', 'block')
+                $('>ul', $f).removeClass 'hidden'
 
             @showPaneView()
 
@@ -833,7 +830,7 @@ $ =>
 
             @trigger 'updateFacetState'
 
-            $('#pane').hide() unless window.groupView or window.paneView
+            $('.pane').hide() unless window.groupView or window.paneView or window.extendedView
 
             # New filter selection
             nf = []
@@ -983,51 +980,6 @@ $ =>
             return ls.sort
 
 
-        # Open/Close a facet section
-        toggleFacetNode: (e) =>
-
-            $e = $(e.currentTarget)
-            $e = $e.siblings('span') unless $e.hasClass 'fold'
-            $ul = $e.siblings('ul')
-            cat = $ul.attr 'id'
-
-            if $e.hasClass 'open'
-
-                # Collapse facet node
-                $ul.hide()
-                @facetOpenState.toggle cat: cat, field: 'facet'
-                @saveFacetOpenState()
-                return $e.removeClass('open').html '+'
-
-            # Expand facet node
-            $ul.css('display', 'block')
-            @facetOpenState.push cat: cat, field: 'facet'
-            $e.addClass('open').html '–'
-
-            # Save facet state on localStorage
-            @saveFacetOpenState()
-
-
-        # Handles expansion and collapse of facet fields when clicking on '+'
-        # or '-' icons next to the facet field label.
-        toggleFacetSubfields: (e) =>
-
-            $e  = $(e.currentTarget)
-            $p = $e.parent()
-            cat = $p.attr 'data-name'
-            field = $p.attr 'data-title'
-
-            if $e.hasClass 'open'
-                $("ul[data-name='#{cat}'][data-title='#{field}']", $p).hide()
-                $e.removeClass 'open'
-                @facetOpenState.toggle cat:cat, field:field
-                return $e.removeClass('open').html '+'
-
-            @facetOpenState.push cat: cat, field: field
-            $("ul[data-name='#{cat}'][data-title='#{field}']", $p).show()
-            $e.addClass('open').html '–'
-
-
         # Show a detailed view of an item in the rightmost pane
         showProfile: (item) =>
 
@@ -1038,7 +990,7 @@ $ =>
             window.profileView = new ProfileView model: item
 
             # Render profile View
-            $('#pane').html window.profileView.render().el
+            $('.pane').html window.profileView.render().el
 
             # Shrink table to make space for the profile view
             $('#tableContainer, #thumbnailContainer').addClass 'onProfile'
@@ -1056,7 +1008,7 @@ $ =>
 
             window.groupView = new GroupView unless window.groupView
 
-            $('#pane').css('display', 'block').html window.groupView.render().el
+            $('.pane').css('display', 'block').html window.groupView.render().el
 
             @navigate()
 
@@ -1077,7 +1029,7 @@ $ =>
 
             window.paneView = new PaneView template, t: window.pdata[cat][field]
 
-            $('#pane').css('display', 'block').html window.paneView.render().el
+            $('.pane').css('display', 'block').html window.paneView.render().el
 
             # Close pane only after successfull reset of facets
             $(window.paneView.el).bind 'close', () =>
@@ -1116,6 +1068,8 @@ $ =>
         # Renders containers for each category on the thumbnail view mode.
         renderCategoryView: (cb) =>
 
+            template = _.template $('#category-template').html()
+
             c = window.settings.Schema.getClassifier()
 
             onProfile = ''
@@ -1124,13 +1078,17 @@ $ =>
             html = "<ul class='thumbnailContainer #{onProfile}'></div>"
             $('#items').html html
 
+            if settings.facets is 'tree'
+                $('#items .thumbnailContainer').append template
+                    cat: settings.itemType[1]
+                    index: 1
+                return cb()
+
             window.facets?.each (facet) =>
 
                 return unless facet.get('name') is c.id
 
                 window.categories = []
-
-                template = _.template $('#category-template').html()
 
                 presentCategories = _.extend {},
 
@@ -1171,6 +1129,35 @@ $ =>
 
             cb()
 
+        renderTreeView: () =>
+
+            model = new Tree window.collection.models.slice(0)
+
+            treeView = new TreeView model: model
+            $('ul#facet').html('').append treeView.render().el
+
+
+        isPresent: (node, col) ->
+            present = no
+            _.each col, (_node) ->
+                present = yes if _node.get('id') is node.get('id')
+            return present
+
+        showExtendedView: (model) =>
+
+            parent = window.collection.get(model.get('parentId'))?.get 'name'
+            model.set 'parentId', parent if parent
+
+            window.extendedView = new window.ExtendedView model: model
+
+            $('#pane').append window.extendedView.render().el
+            $('.pane').addClass 'extendedContainer'
+            $('.pane').show()
+
+            $('.field.active').removeClass 'active'
+            $("##{model.id}.field").addClass 'active'
+
+            @navigate()
 
         # Hide empty categories on thumbnail view after all items were added.
         hideEmptyCategories: () =>
@@ -1262,10 +1249,8 @@ $ =>
             rows = "&rows=#{window.collection.rows}"
             sort = "&sort=#{window.collection.sort}"
 
-            if window.collection.display?
-                display = "&display=#{window.collection.display}"
-            else
-                display = ''
+            display = ''
+            display = "&display=#{window.collection.display}" if window.collection.display
 
             nav = [page + rows + sort + display]
             id = ''
@@ -1287,6 +1272,10 @@ $ =>
             if window.profileView
                 id = window.profileView.model.id || 'new'
                 @setWindowTitle window.profileView.model?.getTitle()
+
+            else if window.extendedView
+                id = window.extendedView.model.id || 'new'
+                @setWindowTitle window.extendedView.model?.getTitle()
 
             else if window.groupView
                 id = []
@@ -1394,16 +1383,20 @@ $ =>
         # Parses a given Date into a readable formatted string (DD MMMM YYYY)
         formatDate: (date) =>
 
-            if typeof date is typeof [] then date = date[0]
+            if date instanceof Array then date = date[0]
 
             return '' unless date
 
-            monthNames = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
-                "Aug", "Sep", "Oct", "Nov", "Dec" ]
+            moment(date).format('DD MMM YYYY')
 
-            d = new Date date
-            d = [ d.getDate(), monthNames[d.getMonth()], d.getFullYear() ]
-            d.join ' '
+        # Parses a given Date into a readable formatted string (DD MMMM YYYY HH mm)
+        formatDateTime: (datetime) =>
+
+            if datetime instanceof Array then datetime = datetime[0]
+
+            return '' unless datetime
+
+            moment(datetime).format('DD MMM YYYY HH:mm')
 
         # Parses a given Number into a readable formatted string like 000,000.00
         formatNumber: (number) =>
@@ -1428,6 +1421,8 @@ $ =>
 
             url.push "id=#{window.profileView.model.id}" if window.profileView
 
+            url.push "id=#{window.extendedView.model.id}" if window.extendedView
+
             url.push "id=#{@groupIds()}" if window.groupView
 
             url = url.join '&'
@@ -1436,13 +1431,13 @@ $ =>
 
         # Add animated effects to export menu
         exportMenu: () =>
-            container = $('#exporter')
-            json = $('#json')
-            csv = $('#csv')
-            xml = $('#xml')
-            over = () ->
+            container   = $('#exporter')
+            json        = $('#json')
+            csv         = $('#csv')
+            xml         = $('#xml')
+            over        = () ->
                 container.animate {'width': '111px'}, 200, () ->
-                    json.css('background-image':'url(../assets/json-text.png)')
+                    json.css 'background-image' : 'url(../assets/json-text.png)'
                     xml.fadeIn 300
                     csv.fadeIn 300
 
@@ -1453,7 +1448,7 @@ $ =>
                     container.animate({'width': '37px'}, 200)
 
 
-            container.hover(over, out);
+            container.hover over, out
 
             json.click out
             xml.click out
@@ -1466,7 +1461,7 @@ $ =>
             url = "#{@commonURL(0, window.collection.total)}"
 
             if @getFilterQS().fs.length
-                url += '?'
+                url += '?' unless url.indexOf('?') isnt -1
                 _.each @getFilterQS().fs, (f) =>  url += "&fs=#{f}"
 
             selection = ''
@@ -1610,7 +1605,6 @@ $ =>
             #fix for problem with table header
             @addAll window.collection if cl == 'visible'
 
-
         # Show/hide a column from the table
         toggleColumnVisibility: (id) =>
             id = id.replace(new RegExp(':', 'g'), '\\\\:')
@@ -1659,6 +1653,7 @@ $ =>
             w = parseFloat ls.css?.facet_width
 
             w
+
 
         # Resize facet index
         resizeIndex: (event, ui) =>

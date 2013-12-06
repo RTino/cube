@@ -1,5 +1,13 @@
 script(type="text/template")#facet-template
   | <%
+  | var markActiveFields = function() {
+  |     var activeFields = window.App.filterSelection
+  |     _.each( activeFields.get('arr'), function(item){
+  |         $field = $(".field[data-title='"+item.field+"']", "ul#facet li ul#"+item.cat);
+  |         $field.addClass('active');
+  |         $field.find('span.amount').addClass('active');
+  |     });
+  | }
   | var addAllFacetFields = function() {
   |     _.each(fields.normal, addFacetField);
   |     for (p in fields.special) { %>
@@ -7,9 +15,10 @@ script(type="text/template")#facet-template
   |         break;
   |     };
   |     _.each(fields.special, addFacetField);
+  |     markActiveFields();
   | };
   | var addFacetField = function(properties, pname) {
-  |     var _pname = pname;
+  |     _pname = pname;
   |     var sep = window.settings.separator;
   |     if (properties.amount === 0) { return; };
   |     if (pname === 'null') { _pname = 'not set'; }
@@ -17,22 +26,24 @@ script(type="text/template")#facet-template
   |     fieldElement(properties, _pname, name);
   | };
   | var fieldElement = function(p, _pname, name) { %>
-  |     <li data-name="<%= name %>" data-title="<%= p.path %>"><%
+  |     <li data-name="<%- name %>" data-title="<%- p.path %>"><%
   |         if (!$.isEmptyObject(p.subs)) { %>
   |             <span class="fold unselectable">+</span><%
   |         }; %>
-  |         <div class="field" data-name="<%= name %>"
-  |             data-title="<%= p.path %>">
-  |             <label for="id-<%= name %>-<%= p.path %>" class="unselectable">
-  |                 <%= _pname %>
-  |             </label>
-  |             <span class="amount unselectable"><%= p.amount %><span>
+  |         <div class="field" data-name="<%- name %>"
+  |             data-title="<%- p.path %>">
+  |             <label for="id-<%- name %>-<%- p.path %>" class="unselectable">
+  |                 <%- _pname %>
+  |             </label><%
+  |             if (!(window.entity == 'teams' && p.amount == 1)) { %>
+  |                 <span class="amount unselectable"><%- p.amount %></span><%
+  |             }; %>
   |         </div>
-  |         <ul data-name="<%= name %>" data-title="<%= p.path %>"><%
+  |         <ul id="<%- name %>" data-name="<%- name %>" data-title="<%- p.path %>" class="hidden"><%
   |             _.each(p.subs, addFacetField);%>
   |         </ul>
   |     </li><%
   | }; %>
-  | <span class="fold unselectable">+</span>
-  | <h4 class="unselectable"><%= label %></h4>
-  | <ul id="<%= name %>"><% addAllFacetFields(); %></ul>
+  | <span class="fold unselectable facetParent">+</span>
+  | <h4 class="unselectable facetParent"><%= label %></h4>
+  | <ul id="<%= name %>" class="hidden" data-title="facet"><% addAllFacetFields(); %></ul>

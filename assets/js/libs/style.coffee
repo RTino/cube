@@ -189,7 +189,7 @@ class window.Style
 
         # Add default theme to themes object
 
-        Object.defineProperty themes, 'default', {value: {text: '#000', backgroundColor: '#EEE', secondaryBackgroundColor: '#FFF', baseColor: 'dodgerBlue', hoverColor: '#cfe8ff', selected: '#CCC', disabled: 'transparent', disabledBorder: '#CCC'}, writable : true, enumerable : true, configurable : true}
+        Object.defineProperty themes, 'default', {value: {text: '#000', backgroundColor: '#EEE', secondaryBackgroundColor: '#FFF', baseColor: '#1E90FF', hoverColor: '#cfe8ff', selected: '#CCC', disabled: 'transparent', disabledBorder: '#CCC'}, writable : true, enumerable : true, configurable : true}
 
         themes
 
@@ -366,7 +366,7 @@ class window.Style
                     target: '#items table tbody tr.active'
             ,
 
-                selector: '#pane'
+                selector: '.pane'
                 style:
                     'border-color': 'baseColor'
             ,

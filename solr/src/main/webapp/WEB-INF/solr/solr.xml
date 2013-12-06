@@ -3,6 +3,5 @@
   <cores adminPath="/admin/cores">
       <core name="team" instanceDir="conf/cube/" dataDir="conf/cube/team"/>
       <core name="world" instanceDir="conf/cube/" dataDir="conf/cube/world"/>
-      <core name="imported" instanceDir="conf/cube/" dataDir="conf/cube/imported"/>
   </cores>
 </solr>

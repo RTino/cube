@@ -21,6 +21,8 @@ facetManager = new FacetManager
 SolrManager = require './solrManager.coffee'
 solrManager = new SolrManager
 
+CalendarManager = require './calendarManager.coffee'
+
 # Schema class provides methos to handle schemas easily.
 Schema = require './schema'
 
@@ -44,6 +46,9 @@ class EntityController
         app.get   '/:entity/ufacets',         auth, (a...) => @ufacets    a...
         app.post  '/:entity/picture',         auth, (a...) => @picture    a...
         app.get   '/:entity/template',        auth, (a...) => @template   a...
+        app.get   '/:entity/calendar',        auth, (a...) => @calendar   a...
+        app.get   '/:entity/property/:p/:v',  auth, (a...) => @getByProp  a...
+
 
     # Return appropriate schema for each entity
     schema: (req, res) ->
@@ -65,13 +70,17 @@ class EntityController
     collection: (req, res) =>
         entity = req.params.entity
         return res.send 404 unless @isEntity(entity)
-        @createQuery req, (query, db) =>
-            @setFacets req, query if req.query["facet.field"]
-            @setFilters req, query if req.query?.fs
-            @getCollection db, query, (result) =>
-                @setClinkItems entity, result, (result) =>
-                    @setCollectionResponse req, res, result, (result) =>
-                        res.send result
+        solrManager = new SolrManager entity
+        solrManager.createQuery req, (query) =>
+            solrManager.getCollection query, (err, result) =>
+                return @error res, err if err
+                @setResponse req, res, result, (result) =>
+                    res.send result
+
+    error: (res, err) =>
+        res.statusCode = 500
+        res.send err
+
 
     # Returns pane.json, containing extra data for custom panes.
     pane: (req, res) ->
@@ -83,6 +92,7 @@ class EntityController
             return res.send {} if err
             res.send data
 
+
     # Get unique values from all the facet fields. Useful for autocomplete.
     ufacets: (req, res) =>
         entity = req.params.entity
@@ -90,11 +100,14 @@ class EntityController
         facetManager.distincts req.params.entity, (d) =>
             res.send d
 
+
     # Picture uploader. Save picture on tmp location, convert, manipulate and
     # move to storage location. Respond with an array of properties from the
     # uploaded image. Useful for backbone.
     picture: (req, res) =>
         entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+
         upload_id = req.files.picture.path
         target_filename = upload_id + '.jpg'
         target_path= "public/images/#{entity}/archive/"
@@ -116,21 +129,13 @@ class EntityController
                     response.push size: stats.size
                     res.send response
 
+
     # Return templates from an entity
     template: (req, res) ->
         entity = req.params.entity
         return res.send 404 if entities.indexOf(entity) is -1
         res.render "../entities/#{entity}/templates"
 
-    # Run query and return either CSV, JSON or XML
-    getCollection: (db, query, cb) =>
-        db.search query, (err, result) =>
-            docs = []
-            return cb(docs) unless result and result.response
-            _.each result.response?.docs, (doc) ->
-                docs.push solrManager.removeSuffix doc
-            result.response?.docs = docs
-            cb result
 
     # Return all available entities with its settings
     getEntities: (cb) =>
@@ -140,65 +145,12 @@ class EntityController
             es[e] = settings
         cb es
 
-
-    # Get the sort parameter. If its not specified on QS, the default value
-    # is specified in the settings file.
-    getSort: (req, cb) =>
-        entity = req.params.entity
-        solrManager = new SolrManager entity
-        settings = require "#{__dirname}/../entities/#{entity}/settings.json"
-        sorts = {}
-
-        sort = if req.query.sort then req.query.sort else settings.sort
-        _.each sort.split(','), (sort) =>
-            [ id, order ] = sort.split ':'
-            if sort.split(':').length is 3
-                [id1, id2, order] = sort.split ':'
-                id = "#{id1}:#{id2}"
-            field = solrManager.schema.getFieldById id
-
-            # Solr can't sort multivalue fields. There is a stringified copy
-            # of each mv field with the suffix -sort appended to its id.
-            if @isMultivalue field then id = "#{id}-sort"
-            else id = solrManager.addSuffix id
-
-            sorts[id] = order
-        cb sorts
-
-    # Returns a new a solr query object ready to perfom searches on the
-    # requested entity's collection.
-    createQuery: (req, cb) =>
-        entity = req.params.entity
-        settings = require "#{__dirname}/../entities/#{entity}/settings.json"
-        q = if req.query.q then "#{req.query.q}*" else "*:*"
-        rows =  req.query.rows or settings.rows
-        start = rows*req.query.page || 0
-        @getSort req, (sort) =>
-            solrManager = new SolrManager entity
-            db = solrManager.createClient()
-            query = db.createQuery()
-                .q(q)
-                .sort(sort)
-                .defType("edismax")
-                .pf(@getSearchableFields(entity))
-                .qf(@getSearchableFields(entity))
-                .start(start)
-                .rows(rows)
-                .facet on: yes, missing: yes, mincount: 1
-
-            # Temporarily replacing solr-client's matchFilter method since
-            # its not meeting our requirements.
-            query.matchFilter = solrManager.customMatchFilter
-
-            cb query, db
-
     # Set response of a collection request, depending on the format asked.
-    setCollectionResponse: (req, res, result, cb) =>
+    setResponse: (req, res, result, cb) =>
         return @responseJson res, result, cb if req.query.json
         return @responseXml res, result, cb if req.query.xml
         return @responseCSV req.params.entity, res, result, cb if req.query.csv
         cb result
-
 
     responseJson: (res, result, cb) =>
         res.setHeader 'Content-Type', 'application/json'
@@ -213,7 +165,6 @@ class EntityController
 
 
     responseXml: (res, result, cb) =>
-
         easyxml.configure
             singularizeChildren: yes
             underscoreAttributes: yes
@@ -235,86 +186,11 @@ class EntityController
         cb result
 
 
-    # Adds fields that are of facet type to the query so that the faceted
-    # response includes them.
-    setFacets: (req, query) =>
-        entity = req.params.entity
-        solrManager = new SolrManager entity
-        facetFilter = req.query["facet.field"]
-        facetFilter = [ facetFilter ] if typeof facetFilter is "string"
-        _.each facetFilter, (f) ->
-            fieldParam = solrManager.addSuffix f
-            query.facet field: "{!ex=_#{fieldParam}}#{fieldParam}"
-
-    # Adds filter parameters to a query. i.e. facet filters or search terms.
-    setFilters: (req, query) =>
-
-        entity = req.params.entity
-        solrManager = new SolrManager entity
-        fqFields = {}
-        fq = req.query.fs
-
-        # Handle an array of facet filters
-        if typeof fq is typeof []
-            _.each fq, (fq) ->
-                [ filter, value ] = fq.split ':'
-                filter = solrManager.addSuffix filter
-
-                fqFields[filter] = [] unless fqFields[filter]
-                fqFields[filter].push value
-            _.each fqFields, (fields, f) ->
-                query.matchFilter f, fields
-            return
-
-        [ filter, value ] = fq.split(':')
-        filter = solrManager.addSuffix filter
-
-        query.matchFilter filter, [ value ]
-
-    # Gets a list of IDs and an entity and fetches all items from the
-    # entity's collection, replacing the IDs for full objects.
-    setClinkItems: (entity, result, cb) =>
-        return cb result unless result.response?.docs?.length
-        solrManager = new SolrManager entity
-        docs = result.response.docs
-        async.each docs, (d, _cb) =>
-            fields = solrManager.schema.getFieldsByType 'clink'
-            return _cb() unless fields.length
-            _.each fields, (field) =>
-                return _cb() unless d[field.id]
-                _solrManager = new SolrManager field.entity
-                _solrManager.getItemById "(#{d[field.id].join(' ')})", (err, items) =>
-                    throw err if err
-                    d[field.id] =  items
-                    _cb()
-        , (err) =>
-            throw err if err
-            cb result
-
-
-    # Return all fields specified as "searchable" (search: true) on the schema.
-    getSearchableFields: (entity) =>
-        solrManager = new SolrManager entity
-        searchables = solrManager.schema.getFieldsByProp 'search'
-        fields = {}
-        _.each searchables, (f) =>
-            return fields["#{f.id}-sort"] = 1 if @isMultivalue f
-            fields[solrManager.addSuffix(f.id)] = 1 if f.search
-        return fields
-
-
     # Checks if the requested resource is one of the available entities
     isEntity: (entity) =>
         return yes unless entities.indexOf(entity) is -1
         return no
 
-    # Checks if the requested field is multivalue. Facet and tuple fields are
-    # multivalue by definition.
-    isMultivalue: (field) =>
-        return yes if field.multivalue
-        return yes if field.type is 'facet' or field.type is 'tuple'
-        return yes if field.type is 'clink'
-        return no
 
     # Converts a json array into a csv file
     toCSV: (entity, res, cb) ->
@@ -338,3 +214,36 @@ class EntityController
             line = line.replace /\\"/g, '""'
             str += os.EOL + line
         cb str
+
+
+    # Export selected or user events to .ics file
+    calendar: (req, res) ->
+        entity = req.params.entity
+        return res.send 404 if entities.indexOf(entity) is -1
+
+        params =
+            entity: entity
+            user: if req.session.passport.user? then req.session.passport.user else null
+            selection: if req.query.selection? then JSON.parse(req.query.selection) else null
+
+        cm = new CalendarManager(params)
+        cm.get (ics) =>
+            res.writeHead 200,
+                'Content-Type': 'text/calendar'
+                'Content-disposition': 'inline; filename="tech_academy.ics"'
+            res.end ics
+
+
+    getByProp: (req, res) ->
+
+        entity  = req.params.entity
+        prop    = req.params.p
+        val     = req.params.v
+
+        return res.send 404 if entities.indexOf(entity) is -1
+
+        solrManager = new SolrManager entity
+
+        solrManager.getItemsByProp prop, val, (err, items) =>
+            res.send items
+

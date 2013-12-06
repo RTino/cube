@@ -28,8 +28,10 @@ $ ->
             @model.view = @
 
             if window.profileView?.model.id is @model.id
-                window.App.selectOne @$el
+                return window.App.selectOne @$el
 
+            if window.extendedView?.model.id is @model.id
+                return window.App.selectOne @$el
 
         #### Render item
         # Render an item view

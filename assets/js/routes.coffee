@@ -25,6 +25,7 @@ $ ->
             params.id = @parseToArr params.id if params.id?.indexOf('|') isnt -1
 
             if params.id is "new" then @setPage 0
+
             if typeof params.id is "string" and !params.page
                 return @getPageOfId params.id, 0, (page) =>
                     @setPage page
@@ -33,6 +34,7 @@ $ ->
 
 
         onRoute: (params) =>
+
             # Get view mode: list or thumbnail.
             window.settings.view = params.view || 'list'
             if window.settings.view isnt 'list'
@@ -59,8 +61,10 @@ $ ->
             # Destroy profile view if existent
             window.profileView?.close()
 
-            $('#pane').hide()
-            $('#pane').html ''
+            window.extendedView?.close()
+
+            $('.pane').hide()
+            $('.pane').html ''
 
             # Remove all items selections
             # window.App.clearSelection()
@@ -77,8 +81,14 @@ $ ->
         setId: (id) =>
 
             if id is 'new'
+                if settings.detailedView is 'team'
+                    window.App.showExtendedView new window.Item
+                    return window.extendedView.edit()
                 window.App.showProfile new window.Item
                 return window.profileView.form()
+
+            if typeof id is typeof 'string' and settings.detailedView is 'team'
+                return window.App.showExtendedView window.collection.get id
 
             if typeof id is typeof 'string'
                 return unless @isItemInCol id
@@ -90,7 +100,6 @@ $ ->
                     if $("##{_id}", '#items').length
                         window.App.addToSelection $("##{_id}", '#items')
                 window.App.showGroupView()
-
 
         #### Set Filters state
         # 1. Get all filters from the querystring parameters
@@ -105,7 +114,9 @@ $ ->
                     facet = @traverseUpwards facet
                 return unless facet
                 cat = facet.split(':')[0]
-                field = facet.split(':')[1]
+                field = facet.split(':')
+                field.splice(0,1)
+                field = field.join(':')
                 _fs.push cat: cat, field: field
             window.App.setFacetState _fs
             itemsUrl = window.App.getFilterQS(_fs)
@@ -209,18 +220,18 @@ $ ->
                 header: $('#header')
                 facets: $('#index')
                 content: $('#content')
-                pane: $('#pane')
+                pane: $('.pane')
                 footer: $('#footer')
 
             if mode == 'fullScreen'
                 page.header.hide()
                 page.facets.hide()
                 page.content.css top: 0, right: 0, left: 0
-                page.pane.css 'margin-top': 0
+                #page.pane.css 'margin-top': 0
                 page.footer.css left: 0
 
             else
                 page.header.show()
                 page.facets.show()
                 window.App.resizeIndex()
-                page.pane.css 'margin-top': 50
+                #page.pane.css 'margin-top': 50

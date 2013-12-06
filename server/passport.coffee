@@ -3,6 +3,8 @@
 # Passport module initialization
 
 _               = require 'lodash'
+bcrypt          = require 'bcrypt'
+SolrManager     = require './solrManager.coffee'
 
 passportHttp    = require('passport-http')
 BasicStrategy   = passportHttp.BasicStrategy
@@ -33,23 +35,22 @@ basicStrategy = new BasicStrategy {}, (uname, pword, cb) ->
 
         cb null, user
 
-
-# Bassic HTTP Authentication LDAP Binded.
-ldapStrategy = new BasicStrategy {}, (uname, pword, cb) ->
-
-    ldapauth = new LdapAuth authSettings.options
-
-    ldapauth.authenticate uname, pword, (err, user) ->
-        return cb null, no if err
-        return cb null, no unless user
-        cb null, user
+ldapStrategy = new LdapStrategy server: authSettings.options, (user, done) ->
+    console.log 'user authenticated'
+    done null, user
 
 
 # List of avialble auth strategies
 strategies =
-    basic: ldapStrategy
-    #basic: basicStrategy
-    ldapauth: new LdapStrategy server: authSettings.options
+    basic: basicStrategy
+    ldapauth: new LdapStrategy {server: authSettings.options}, (profile, done) ->
+
+        solrManager = new SolrManager 'team'
+
+        solrManager.getItemsByProp 'email', profile.mail, (err, data) ->
+            console.log err if err
+            profile.cubeId = data.pop()?.id
+            done null, profile
 
 
 module.exports = (passport) ->

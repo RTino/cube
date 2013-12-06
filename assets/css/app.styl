@@ -238,105 +238,15 @@ body
       float         right
       margin-right  10px
       background      url('/assets/logout.png') no-repeat 6px -31px
-      &:hover
-        background      url('/assets/logout.png') no-repeat 6px -31px !important
-        background-size auto !important
+    &#profile
+      background-size       40px 40px
+      background-repeat     no-repeat
+      background-position-x center
+      background-position-y center
+      float                 right
     &#ics
       background        url("/assets/icons/Calendar.png") no-repeat 2px 1px
 
-
-#index
-  position        absolute
-  width           facetWidth
-  padding         facetPadding
-  padding-right   0
-  border-right    1px solid lineColor
-  top             headerHeight
-  bottom          0
-  overflow-y      hidden
-  overflow-x      hidden
-  #innerIndex
-    position      absolute
-    width         facetWidth - 10px
-    overflow      hidden
-    left          10px
-  &:hover
-      overflow-y  auto
-  span.fold
-      position    absolute
-      margin-top  0
-      cursor      pointer
-  ul
-    padding     0
-    margin      0
-    list-style  none
-    position    relative
-    li
-      overflow  hidden
-      h4
-        margin          10px 0 5px 15px
-        cursor          pointer
-      &:first-child h4
-        margin-top      0
-
-    ul
-      margin-left       15px
-      display           none
-      li
-        font-size           facetFontSize
-        color               facetFontColor
-        padding             0
-        margin              1px 0
-        cursor              pointer
-        &.separator
-          border-top        1px solid facetSeparator
-          margin            5px
-        .field
-          padding           5px
-          margin            0
-          margin-left       15px
-          height            15px
-          &:hover
-              background    tableItemHoverBg
-              span.amount
-                background  tableItemHoverBg
-          &.active
-              background    facetActiveBg
-              &:hover
-                span.amount
-                    background  facetActiveBg
-        label
-          position          absolute
-          overflow          hidden
-          cursor            pointer
-          white-space       nowrap
-          left              10px
-          padding-left      10px
-        span
-          position          absolute
-          text-align        right
-          right             0
-          padding-right     5px
-          color             amountNumberColor
-          &.amount
-            background      white
-            padding         0 5px
-            &.active
-                background  facetActiveBg
-          &.fold
-            float           left
-            position        relative
-            top             4px
-            &:hover
-                color       black
-        ul
-          display           none
-
-#innerIndex>ul>li>span.fold
-    margin-top      10px
-
-#innerIndex>ul>li:first-child>span.fold
-    margin-top      0
 
 #content
   position    absolute
@@ -652,16 +562,17 @@ span.miniEtq
 
 #tableContainer
     .etiquettes
-        position      absolute
-        padding-top   5px
-        width         40px
-        height        220px
-        right         213px
-        top           50px
-        display       none
+        position        absolute
+        padding-top     5px
+        width           40px
+        height          220px
+        right           213px
+        top             50px
+        display         none
+        z-index         3
 
 #print table,
-#items table
+#items #tableContainer table
   width                 100%
   border-collapse       collapse
   border-top            1px solid tableBorder
@@ -780,7 +691,8 @@ span.miniEtq
         padding-right       10px
       .miniPic
         position        relative
-        max-width       25px
+        width       25px
+        height      25px
 
 
       &:hover
@@ -795,6 +707,7 @@ span.miniEtq
         padding         10px
         background      #FFF
         border          1px solid dodgerblue
+        z-index         1
       span.rowEtiquette
           padding         2px
           margin          1px
@@ -865,12 +778,13 @@ span.miniEtq
                 color             #FFF
 
 #print table tr td, #print table tr th
-        display         table-cell
+    display         table-cell
 
 #print table tr td .cont
     white-space         initial
 
-#pane
+
+.pane
   display             none
   position            fixed
   border-left         1px solid lineColor
@@ -892,7 +806,7 @@ span.miniEtq
   #multipleEditFields
     position        absolute
     left            15px
-    right           42px
+    right           20px
     bottom          60px
     height          230px
     display         none
@@ -913,8 +827,6 @@ span.miniEtq
       margin          5px
       &.additional
         margin-top    10px
-        .dropdownMask
-            left      -10px
         ul
           display     none
           margin-left 5px
@@ -927,6 +839,9 @@ span.miniEtq
             margin-right    0
         .mask
             left            -10px
+            width           175px
+        .dropdownMask
+            width           175px
         input
             left            90px
       .multiline.edit
@@ -982,13 +897,11 @@ span.miniEtq
               padding       2px
               padding-left  4px
               width         177px
+              margin-left   -10px
       .dropdownMask,
       .mask
-          position    absolute
-          float       left
           margin-left 100px
           width       184px
-          height      1.2em
           overflow    hidden
           font-size   paneFontSize
           &.tuple
@@ -997,7 +910,9 @@ span.miniEtq
             height      auto
       .dropdownMask
           width       184px
-          height      22px
+          height      16px
+          margin-left 100px
+          overflow    visible
       .scroll
           display     none
           position    absolute
@@ -1016,8 +931,7 @@ span.miniEtq
             background    url('/assets/arrowLeft.png') no-repeat
             right         180px
       .text-container
-        white-space       nowrap
-        line-height       1em
+        width             184px
         &.tuple
             margin-top      10px
             &:last-child
@@ -1084,9 +998,9 @@ span.miniEtq
             margin        0
 
 
-#pane #buttons,
-#pane #multipleEditActions,
-#pane #groupActions
+.pane #buttons,
+.pane #multipleEditActions,
+.pane #groupActions
     background        footerBg
     bottom            0
     left              0
@@ -1094,11 +1008,12 @@ span.miniEtq
     width             100%
     position          absolute
     overflow          hidden
+    white-space       nowrap
     height            30px
     #btnExtensions
         display       inline-block
 
-#pane .data
+.pane .data
     padding-top       0
     overflow          auto
     position          absolute
@@ -1117,7 +1032,7 @@ span.miniEtq
     &.noPicture.noButtons
       bottom          0
 
-#pane #teamData
+.pane #teamData
     top               250px
     bottom            20px
     ul
@@ -1162,7 +1077,7 @@ span.miniEtq
             a
               line-height 14px
 
-#pane .itemsContainer
+.pane .itemsContainer
     border          1px solid groupBorder
     overflow        auto
     position        absolute
@@ -1182,7 +1097,7 @@ span.miniEtq
         max-width   35px
         max-height  35px
 
-#pane .itemsContainer ul
+.pane .itemsContainer ul
     margin        0
     li
         width           100%
@@ -1206,8 +1121,8 @@ span.miniEtq
             white-space     nowrap
             overflow        hidden
 
-#pane #pictureContainer,
-#pane .pictureContainer
+.pane #pictureContainer,
+.pane .pictureContainer
     height            300px
     width             300px
     text-align        center
@@ -1264,21 +1179,21 @@ span.miniEtq
       z-index         2
 
 
-#pane a.destroy
+.pane a.destroy
     position            absolute
     float               right
     top                 10px
     right               10px
     z-index             1
 
-#pane #tabsContainer
+.pane #tabsContainer
     background          headerBg
     overflow            hidden
     width               100%
     height              41px
     border-bottom       1px solid #CCC
 
-#pane ul#tabs
+.pane ul#tabs
     position            absolute
     z-index             1
     li
@@ -1443,8 +1358,9 @@ input
             width     360px
             padding   10px 0
         label
-            float     left
+            float       left
             font-weight bold
+            max-width   100px
         .text-container
             margin-left   100px
 

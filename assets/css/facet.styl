@@ -1,0 +1,131 @@
+lineColor         = dodgerblue
+btnColor          = dodgerblue
+headerBg          = #EEE
+footerBg          = #CCC
+groupItemBg       = #EEE
+groupItemHeight   = 30px
+groupBorder       = #CCC
+tableHeaderBg     = #EEE
+tableBorder       = #EEE
+profileImgBorder  = #EEE
+profileImgBg      = #EEE
+profileImgFontC   = #DDD
+profileLabelColor = #666
+controlBtnBorder  = #CCC
+thumbnailCatBorder= #CCC
+thumbnailBorder   = #DDD
+thumbnailBg       = #FFF
+thumbnailFontSize = 13px
+thumbnailActiveBd = #000
+tableRowActiveBg  = #CCC
+tableRowActiveBgH = #CCC
+tableRowHeight    = 40px
+tableHeaderActive = #DDD
+facetActiveBg     = #CCC
+facetSeparator    = #CCC
+facetFontColor    = #333
+facetFontSize     = 13px
+amountNumberColor = #999
+tableItemHoverBg  = #cfe8ff
+font              = 14px "Helvetica Neue", Helvetica, Arial, sans-serif
+
+headerHeight      = 50px
+
+facetWidth        = 180px
+facetPadding      = 20px
+
+paneWidth         = 345px
+paneBg            = #FFF
+paneFontSize      = 13px
+
+footerHeight      = 49px
+
+#index
+  position        absolute
+  width           facetWidth
+  padding         facetPadding
+  padding-right   0
+  border-right    1px solid lineColor
+  top             headerHeight
+  bottom          0
+  overflow-y      hidden
+  overflow-x      hidden
+  #innerIndex
+    position      absolute
+    width         facetWidth - 10px
+    overflow      hidden
+    left          10px
+  &:hover
+      overflow-y  auto
+  span.fold
+      position    absolute
+      margin-top  0
+      cursor      pointer
+  ul
+    padding     0
+    margin      0
+    list-style  none
+    position    relative
+    li
+      overflow  hidden
+      h4
+        margin          10px 0 5px 15px
+        cursor          pointer
+      &:first-child h4
+        margin-top      0
+
+    ul
+      margin-left       15px
+      li
+        font-size           facetFontSize
+        color               facetFontColor
+        padding             0
+        margin              1px 0
+        cursor              pointer
+        &.separator
+          border-top        1px solid facetSeparator
+          margin            5px
+        .field
+          padding           5px
+          margin            0
+          margin-left       15px
+          height            15px
+          &:hover
+              background    tableItemHoverBg
+              span.amount
+                background  tableItemHoverBg
+          &.active
+              background    facetActiveBg
+              &:hover
+                span.amount
+                    background  facetActiveBg
+        label
+          position          absolute
+          overflow          hidden
+          cursor            pointer
+          white-space       nowrap
+          left              10px
+          padding-left      10px
+        span
+          position          absolute
+          text-align        right
+          right             0
+          padding-right     5px
+          color             amountNumberColor
+          &.amount
+            background      white
+            padding         0 5px
+            &.active
+                background  facetActiveBg
+          &.fold
+            float           left
+            position        relative
+            top             4px
+            &:hover
+                color       black
+
+#innerIndex>ul>li>span.fold
+    margin-top      10px
+
+#innerIndex>ul>li:first-child>span.fold
+    margin-top      0

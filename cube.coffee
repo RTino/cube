@@ -26,6 +26,9 @@ db              = redis.createClient()
 
 store           = new redisStore client: db
 
+importManager   = require "./server/importManager.coffee"
+
+env             = global.process.env.NODE_ENV
 
 # Create express app
 app = module.exports.app = express()
@@ -53,4 +56,7 @@ require("./server.routes.coffee")(app, express, passport, flash)
 
 
 # Listen by default on port 3000. Change on server.settings.coffee.
-app.listen settings.Web[global.process.env.NODE_ENV]?.port || 3000
+app.listen settings.Web[env || 'development']?.port || 3000
+
+# Start the import manager.
+# importManager.start()

@@ -10,7 +10,7 @@ $ =>
     class AppView extends Backbone.View
 
 
-        el: $('#print')
+        el: $('#container')
 
 
         # Template for list view
@@ -27,6 +27,15 @@ $ =>
         # list view or a profile view.
         # 3. Show profile view or list view accordingly.
         initialize: () =>
+
+            @getExtensions () =>
+
+                templateExtended: _.template $('#extended-print-template').html()
+
+                @start()
+
+
+        start: () =>
 
             id = @getParameterByName('id').split('|')
 
@@ -60,8 +69,6 @@ $ =>
 
         # Show a profile view instead of a list view
         showProfile: (id) =>
-
-            console.log 'showProfile'
 
             item = window.opener.collection.get id
 
@@ -146,6 +153,17 @@ $ =>
             url += '?' + fs.join '&' if fs.length
 
             url
+
+
+        # Get extesion HTML/JS code and append it to dom.
+        getExtensions: (cb) =>
+
+            $.get 'template', (exthtml) ->
+
+                # Append HTML on extension container
+                $('#print #extensions').html exthtml
+
+                cb()
 
 
     #Lets create our app!

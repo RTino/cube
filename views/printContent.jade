@@ -1,110 +1,118 @@
 #print
-  h3 Nothing to print
+    #container
+        h3 Nothing to print
+    #extensions
 
-  script(src="/js/json2.js")
-  script(src="/js/jquery.min.js")
+    script(src="/js/json2.js")
+    script(src="/js/jquery.min.js")
 
-  script(src="/js/lodash.js")
-  script(src="/js/backbone-min.js")
+    script(src="/js/lodash.js")
+    script(src="/js/backbone-min.js")
 
-  script(src="/js/jquery.tablesorter.min.js")
+    script(src="/js/jquery.tablesorter.min.js")
 
-  != js('print')
+    != js('print')
 
-  script(type="text/html")#item-table-template
-    |   <%
-    |       var Schema = window.opener.settings.Schema;
-    |       var bmark = Schema.getBookmark();
-    |       _.each(Schema.getIndexes(), function(p) { 
-    |       %>
-    |       <td class="<%= p.id %>">
-    |         <div class="cont <%if (p.id === 'pic') {%>miniPicContainer<%};%>">
-    |         <% if (p.type === 'img') { %>
-    |             <% if (bmark['id'] && m[bmark.id].indexOf(bmark.bookmark) != -1) {
-    |             %>
-    |                 <span class="marked"></span>
-    |             <% }; %>
-    |           <img class="miniPic"
-    |               src="<%= m[p.id] || '/images/default-avatar.png' %>"/>
-    |         <% } else { %>
-    |           <%= m[p.id] %>
-    |         <% }; %>
-    |       </div>
-    |       </td>
-    |   <% }); %>
+    script(type="text/html")#item-table-template.
+           <%
+               var Schema = window.opener.settings.Schema;
+               var bmark = Schema.getBookmark();
+               _.each(Schema.getIndexes(), function(p) {
+               %>
+               <td class="<%- p.id %>">
+                 <div class="cont <%if (p.id === 'pic') {%>miniPicContainer<%};%>">
+                 <% if (p.type === 'img') { %>
+                     <% if (bmark['id'] && m[bmark.id].indexOf(bmark.bookmark) != -1) {
+                     %>
+                         <span class="marked"></span>
+                     <% }; %>
+                   <img class="miniPic"
+                       src="<%- m[p.id] || '/assets/default-avatar.png' %>"/>
+                 <% } else if (p.type === 'clink' && m[p.id]) { %>
+                     <%= m[p.id].length %>
+                 <% } else { %>
+                   <%- m[p.id] %>
+                 <% }; %>
+               </div>
+               </td>
+           <% }); %>
 
-  script(type="text/template")#table-template
-    | <li class="list">
-    |     <div id="tableContainer" class="print">
-    |         <div class="header-background"></div>
-    |         <div class="fixed-table-container-inner print">
-    |             <table><thead><tr>
-    |                 <% _.each(window.opener.settings.Schema.getIndexes(), function(header) {
-    |                     %><th class="header <%= header.id %>"><div class="th-inner">
-    |                         <span>
-    |                             <%= header.label %>
-    |                         </span><span id="sortArrow"></span></div></th><%
-    |                 }); %>
-    |             </tr></thead><tbody></tbody></table>
-    |         </div>
-    |     </div>
-    | </li>
+    script(type="text/template")#table-template.
+         <li class="list">
+             <div id="tableContainer" class="print">
+                 <div class="header-background"></div>
+                 <div class="fixed-table-container-inner print">
+                     <table><thead><tr>
+                         <% _.each(window.opener.settings.Schema.getIndexes(), function(header) {
+                             %><th class="header <%- header.id %>"><div class="th-inner">
+                                 <span>
+                                     <%- header.label %>
+                                 </span><span id="sortArrow"></span></div></th><%
+                         }); %>
+                     </tr></thead><tbody></tbody></table>
+                 </div>
+             </div>
+         </li>
 
-  script(type="text/template")#details-print-template
-    | <% 
-    |   var picKey = '';
-    |   var Schema = window.opener.settings.Schema;
-    |   if (Schema.getPictures().length) { picKey = Schema.getPictures()[0].id };
-    |   function formatDate(date) {
-    |       if (!date) { return ''; };
-    |       var d, monthNames;
-    |       monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
-    |         "Aug", "Sep", "Oct", "Nov", "Dec"];
-    |       d = new Date(date);
-    |       d = [d.getDate(), monthNames[d.getMonth()], d.getFullYear()];
-    |       return d.join(' ');
-    |   };
-    |   function fieldText(id, name, value) {
-    |       if (value === undefined) { return; };
-    |       %>
-    |           <label for="<%= id %>" ><%= name %></label>
-    |           <div class="text-container" id="<%= id %>">
-    |              <% var v = value.split(','); %>
-    |                 <%= v.join(', ') %>
-    |           </div>
-    |       <%
-    |   };
-    |   function fieldDate(id, name, value) {
-    |       if (value === undefined) { return; };
-    |       %>
-    |           <label for="<%= id %>" ><%= name %></label>
-    |           <div class="text-container">
-    |               <%= formatDate(value) %>
-    |           </div>
-    |       <%
-    |   };
-    |   function renderField(field, value) {
-    |       rf = fieldText;
-    |       if (typeof value === typeof []) { value = value.toString() };
-    |       if (field['type'] === 'date') { rf = fieldDate;
-    |           value = formatDate(value);
-    |       };
-    |       if (field['type'] === 'img') { return; };
-    |       rf(field['id'], field['label'], value);
-    |   };
-    |   if (Schema.getPictures().length) { %>
-    |   <div id="pictureContainer">
-    |       <img id="picture" src="<%= m[picKey] %>"/>
-    |   </div>
-    | <% }; %>
-    |   <div id="data">
-    |   <ul>
-    |       <% _.each(Schema.get(), function(a) { 
-    |           if (a['additional']) { return; };
-    |       %>
-    |       <li><%
-    |          renderField(a, m[a.id]); }); %>
-    |       </li>
-    |   </ul>
-    |   </div>
-
+    script(type="text/template")#details-print-template.
+         <%
+           var picKey = '';
+           var Schema = window.opener.settings.Schema;
+           if (Schema.getPictures().length) { picKey = Schema.getPictures()[0].id };
+           function formatDate(date) {
+               if (!date) { return ''; };
+               var d, monthNames;
+               monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                 "Aug", "Sep", "Oct", "Nov", "Dec"];
+               d = new Date(date);
+               d = [d.getDate(), monthNames[d.getMonth()], d.getFullYear()];
+               return d.join(' ');
+           };
+           function fieldText(id, name, value) {
+               if (value === undefined) { return; };
+               if (value instanceof Array) {
+                 value = value.join(',');
+               } %>
+               <label for="<%- id %>" ><%- name %></label>
+                   <div class="text-container" id="<%- id %>">
+                       <% var v = value.split(','); %><%= v.join(', ') %>
+                   </div><%
+           };
+           function fieldClink(id, name, value) { %>
+               <label for="<%- id %>" ><%- name %></label>
+               <div class="text-container" id="<%- id %>">
+                   <%= value.length %>
+               </div><%
+           };
+           function fieldDate(id, name, value) {
+               if (value === undefined) { return; }; %>
+               <label for="<%- id %>" ><%= name %></label>
+               <div class="text-container"><%= formatDate(value) %></div><%
+           };
+           function renderField(field, value) {
+               rf = fieldText;
+               if (field.type != 'clink' && typeof value != "string") {
+                   value = value.toString();
+               }
+               if (field.multivalue) { value = value.toString(); }
+               if (field['type'] === 'clink') { rf = fieldClink; };
+               if (field['type'] === 'date') { rf = fieldDate;
+                   value = formatDate(value);
+               };
+               if (field['type'] === 'img') { return; };
+               rf(field['id'], field['label'], value);
+           };
+           if (Schema.getPictures().length) { %>
+               <div id="pictureContainer">
+                   <img id="picture" src="<%= m[picKey] || '/assets/default-avatar.png' %>"/>
+               </div><%
+           }; %>
+           <div id="data">
+               <ul>
+                 <%  _.each(Schema.get(), function(a, index) {
+                       if (!m[a.id]) { return; };
+                       if (a['additional']) { return; }; %>
+                       <li id="<%= index %>"><% renderField(a, m[a.id]); %></li><%
+                   }); %>
+           </ul>
+           </div>

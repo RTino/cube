@@ -73,3 +73,11 @@ class @Extensions
         if @app.filterSelection.index(cat: 'startDate', field: 'new') isnt -1
             @showPaneView()
 
+
+class @Verify
+
+    constructor: (@request) ->
+
+    isAllowed: (cb) ->
+
+        cb yes

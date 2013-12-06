@@ -104,7 +104,7 @@ module.exports = (app, express, passport, flash) ->
     root =  (req, res) ->
 
         # Req is fine, get available entities and render index page.
-        res.render 'index', entities: getEntities(), user: req.user
+        res.render 'index', entities: getEntities(), user: req.user or {}
 
 
     # Serves an entity rendering the app with the appropriate collection. It
