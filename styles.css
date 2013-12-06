@@ -381,6 +381,40 @@ section#ime
     background: #efeff0;
 }
 
+section#api h6 {
+    margin-top: 50px;
+}
+
+section#api table td
+{
+    vertical-align: top;
+    border: 0;
+    padding: 0;
+}
+
+section#api table tr td:first-child
+{
+    text-align: right;
+    padding-right: 30px;
+}
+
+section#api table td span
+{
+    float: left;
+    clear: both;
+}
+
+section#api table td span label
+{
+    font-weight: bold;
+}
+
+img#architecture {
+    left: 50%;
+    margin-left: -300px;
+    width: 600px;
+}
+
 dl dt
 {
     font-weight: bold;
@@ -506,7 +540,7 @@ span#logo
     background: dodgerblue;
     font-weight: bold;
     position: absolute;
-    right: 24px;
+    right: 30px;
     top: 0;
 }
 
@@ -806,6 +840,8 @@ section#ime ul li
     display: inline-block;
     width: 290px;
     text-align: center;
+    overflow: hidden;
+    height: 175px;
 }
 
 a#fork
@@ -817,6 +853,10 @@ a#fork
     width: 148px;
     height: 148px;
     z-index: 1;
+}
+
+.api_resource {
+    margin-top: 50px;
 }
 
 /*******************************************************************************
