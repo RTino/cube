@@ -33,74 +33,22 @@
             <section id="importing" class="inner">
                 <h3>Importing external data to a Cube.</h3>
                 <p>
-                    The Cube has a built-in importer framework which you can use to create your own data
-                    importers. It comes with built-in importers for JSON, CSV and XML external data.
+                    The Cube comes with an Importer Framework which you can use to create your own data
+                    importers. It has built-in importers for JSON, CSV and XML external data.
                 </p>
                 <p>
-                    The built-in ImportManager is responsible for reading import.json files and scheduling
-                    these importers to run at the specified intervals.
+                    The ImportManager is responsible for reading import.json files on the entities directory
+                    and scheduling these importers to run at the specified intervals.
                 </p>
                 <h6>The import.json file</h6>
                 <p>
                     Importer jobs are defined inside a <strong>import.json</strong> file, located under the
                     desired Cube entity folder. So for example if you want to import data to the
-                    "My Test Cube", create that file on /entities/mytestcube/import.json.
+                    "My Test Cube", create that file on /entities/mytestcube/import.json. Each cube entity
+                    can have multiple importers, running on different schedules and having different properties.
                 </p>
                 <p>
-                    <strong>Main properties of an importer:</strong>
-                </p>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>key</th>
-                            <th class="optional">type</th>
-                            <th class="optional">default</th>
-                            <th>description</th>
-                        </tr>
-                    </thead>
-                    <tr>
-                        <td>id</td>
-                        <td>String</td>
-                        <td></td>
-                        <td>Identification or description, alphanumerical only.</td>
-                    </tr>
-                    <tr>
-                        <td>type</td>
-                        <td>String</td>
-                        <td>json</td>
-                        <td>
-                            The type of importer is the prefix of the importer coffee file.<br />
-                            jsonImporter.coffee type is "json"<br />
-                            mySqlImporter.coffee type is "mySql"
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>mode</td>
-                        <td>String</td>
-                        <td>update</td>
-                        <td>
-                            Update: add new and update existing results. Do not delete.<br />
-                            Full: wipe current data and add results.
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>schedule</td>
-                        <td>Integer or Array</td>
-                        <td></td>
-                        <td>
-                            Integer: interval in seconds<br />
-                            Array: times using the hh:mm:ss format
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>uri</td>
-                        <td>String</td>
-                        <td></td>
-                        <td>URL or local file path</td>
-                    </tr>
-                </table>
-                <p>
-                    <strong>Extra properties of an importer:</strong>
+                    <strong>Main properties:</strong>
                 </p>
                 <table>
                     <thead>
@@ -115,7 +63,53 @@
                         <td>continueOnError</td>
                         <td>Boolean</td>
                         <td>false</td>
-                        <td>If true the importer won't stop when errors are encountered.</td>
+                        <td>
+                            If true the importer won't stop when errors are encountered. Otherwise it will stop
+                            and jump to the onFinish() of that specific importer.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>disabled</td>
+                        <td>Boolean</td>
+                        <td>false</td>
+                        <td>
+                            If disabled is true, the importer won't run. Useful to temporarily disable importers.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>fields</td>
+                        <td>Object (target:source)</td>
+                        <td></td>
+                        <td>
+                            If specified, the fields object maps data from the source data to the target destination,
+                            using "targetNameField: sourceNameFieldOrIndex". For example to map the "fullname" from the
+                            external JSON to the "name" field on Cube, and get "id" value from the first property of
+                            the external JSON.
+<code>
+"fields": {
+    "name": "fullname",
+    "id": 0
+}</code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>id</td>
+                        <td>String</td>
+                        <td></td>
+                        <td>Identification or description, alphanumerical only.</td>
+                    </tr>
+                    <tr>
+                        <td>mode</td>
+                        <td>String</td>
+                        <td>full</td>
+                        <td>
+                            <ul class="tablelist">
+                                <li><strong>full</strong> wipe current data and add results.</li>
+                                <li><strong>update</strong> add new and update existing results.
+                                    This can be used in conjunction with the "updateKey" property to
+                                    identify which items needs updating.</li>
+                            </ul>
+                        </td>
                     </tr>
                     <tr>
                         <td>runOnStart</td>
@@ -123,6 +117,45 @@
                         <td>false</td>
                         <td>If true the importer will run when the Node.js app starts.</td>
                     </tr>
+                    <tr>
+                        <td>schedule</td>
+                        <td>Integer or Array</td>
+                        <td></td>
+                        <td>
+                            Integer: interval in seconds<br />
+                            Array: times using the hh:mm:ss format
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>type</td>
+                        <td>String</td>
+                        <td>json</td>
+                        <td>
+                            The type of importer is the prefix of the importer coffee file.<br />
+                            jsonImporter.coffee type is "json"<br />
+                            csvImporter.coffee type is "csv"<br />
+                            mySqlImporter.coffee type is "mySql"
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>uri</td>
+                        <td>String</td>
+                        <td></td>
+                        <td>URL or local file path.</td>
+                    </tr>
+                </table>
+                <p>
+                    <strong>Extra properties:</strong>
+                </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>key</th>
+                            <th class="optional">type</th>
+                            <th class="optional">default</th>
+                            <th>description</th>
+                        </tr>
+                    </thead>
                     <tr>
                         <td>childUri</td>
                         <td>String</td>
@@ -149,6 +182,26 @@
                             </ul>
                         </td>
                     </tr>
+                    <tr>
+                        <td>headers</td>
+                        <td>Object or String</td>
+                        <td></td>
+                        <td>
+                            Headers to be passed along HTTP requests (credentials, for example).<br />
+                            If Object, the whole object will be send out.<br />
+                            If String, it must be a path to a JSON file containing the headers object.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>updateKey</td>
+                        <td>String</td>
+                        <td>id</td>
+                        <td>
+                            The item property to be used to find items which needs to be updated
+                            and not added to the database. For example sometimes an importer might
+                            use "email" instead of "id" to find existing items.
+                        </td>
+                    </tr>
                 </table>
                 <h6>Creating your own custom importer</h6>
                 <p>
@@ -157,7 +210,8 @@
                 </p>
                 <h6>Monitoring importer jobs</h6>
                 <p>
-                    The easiest way to view the status of importer jobs is by opening /importers on your browser.
+                    You can see the current status of the ImporterManager by going to the
+                    <strong>/importers/status</strong> path on your browser.
                 </p>
             </section>
         </div>

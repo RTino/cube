@@ -951,7 +951,17 @@ Small Device Styles
     {
         display: none;
     }
+}
 
+#importing table code
+{
+    background: transparent;
+    border: 0;
+    clear: both;
+    color: rgb(50, 60, 50);
+    font-size: 14px;
+    line-height: 1.3;
+    white-space: pre-wrap;
 }
 
 .tablelist
