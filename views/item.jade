@@ -1,37 +1,37 @@
-script(type="text/html")#item-template
-  | <%
-  |   var etiquettes = App.getItemEtiquettes(m);
-  |   var model = m.parseSubfields();
-  |   var pic = settings.Schema.getImgKey();
-  |   var avatar = '/assets/default-pane-avatar.png';
-  |   if (settings.avatar === 'person') {
-  |       avatar = '/assets/default-person-avatar.png'
-  |   };
-  |   avatar = model[pic] ? model[pic] : avatar;
-  |   function addEtiquettes() {
-  |       _.each(etiquettes, function(e) {
-  |           if (!e) { return; };
-  |           var etq = App.getEtiquetteById(e);
-  |           var label = e;
-  |           var style, font;
-  |           if (etq) {
-  |               label = etq.label;
-  |               style = "background-image:url('"+etq.image+"');";
-  |               font = "color:"+etq.font;
-  |           }; %>
-  |           <span class="etiquette" style="<%= style %>'">
-  |               <label style="<%= font %>"><%= label %></label>
-  |           </span><%
-  |       });
-  |   };
-  | %>
-  | <div class="view">
-  |     <div class="etiquettes"><%
-  |         addEtiquettes(); %>
-  |     </div>
-  |     <img class="thumbnail" src="<%= avatar %>">
-  |     <div class="label"><%= App.getThumbnailLabel(model, schema) %></div>
-  | </div>
+script(type="text/html")#item-template.
+     <%
+       var etiquettes = App.getItemEtiquettes(m);
+       var model = m.parseSubfields();
+       var pic = settings.Schema.getImgKey();
+       var avatar = '/assets/default-pane-avatar.png';
+       if (settings.avatar === 'person') {
+           avatar = '/assets/default-person-avatar.png'
+       };
+       avatar = model[pic] ? model[pic] : avatar;
+       function addEtiquettes() {
+           _.each(etiquettes, function(e) {
+               if (!e) { return; };
+               var etq = App.getEtiquetteById(e);
+               var label = e;
+               var style, font;
+               if (etq) {
+                   label = etq.label;
+                   style = "background-image:url('"+etq.image+"');";
+                   font = "color:"+etq.font;
+               }; %>
+               <span class="etiquette" style="<%= style %>'">
+                   <label style="<%= font %>"><%= label %></label>
+               </span><%
+           });
+       };
+     %>
+     <div class="view">
+         <div class="etiquettes"><%
+             addEtiquettes(); %>
+         </div>
+         <img class="thumbnail" src="<%= avatar %>">
+         <div class="label"><%= App.getThumbnailLabel(model, schema) %></div>
+     </div>
 
 script(type="text/html")#item-table-template
   | <%
@@ -59,7 +59,7 @@ script(type="text/html")#item-table-template
   |       <%- model[field.id] %><%
   |   };
   |   function fieldFacet(field, model) { %>
-  |       <%- model[field.id] %><%
+  |       <%= model[field.id] %><%
   |   };
   |   function fieldDate(field, model) { %>
   |       <%- App.formatDate(model[field.id]) %><%

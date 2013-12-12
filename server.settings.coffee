@@ -10,7 +10,7 @@ ServerSettings = ->
 
         development:
 
-            port: 3000
+            port: 3030
 
         production:
 
@@ -59,7 +59,6 @@ ServerSettings = ->
     #       ldapField: ''           # name of field on ldap user to match to.
     #
     # Avoid any authentication by setting strategy to 'none'
-
 
     Authentication:
         strategy: 'none'

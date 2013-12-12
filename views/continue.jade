@@ -1,17 +1,15 @@
 !!! 5
 html
-  head
-    title Cube authenticating...
-  body
+    head
+        title Cube authenticating...
+    body
 
-script(type="text/javascript)
+    script.
 
-  var qs = '';
+        var qs = '';
 
-  if (window.location.pathname || window.location.hash) {
-    qs = '?continue=' + window.location.href;
-  }
+        if (window.location.pathname || window.location.hash) {
+        qs = '?continue=' + window.location.href;
+        }
 
-  window.location = '/login' + qs;
-
-
+        window.location = '/login' + qs;

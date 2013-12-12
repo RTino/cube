@@ -77,15 +77,15 @@
     != js('routes')
     != js('app')
 
-    script(type="text/javascript").
-      var user        = !{JSON.stringify(user)};
-      var entity      = !{JSON.stringify(entity)};
-      var entities    = !{JSON.stringify(entities)};
-      var settings    = !{JSON.stringify(settings)};
-      var schema      = !{JSON.stringify(schema)};
-      var etiquettes  = !{JSON.stringify(etiquettes)};
-      var pdata       = !{JSON.stringify(pdata)};
-      var themes      = !{JSON.stringify(themes)};
+    script.
+        var user        = !{JSON.stringify(user)};
+        var entity      = !{JSON.stringify(entity)};
+        var entities    = !{JSON.stringify(entities)};
+        var settings    = !{JSON.stringify(settings)};
+        var schema      = !{JSON.stringify(schema)};
+        var etiquettes  = !{JSON.stringify(etiquettes)};
+        var pdata       = !{JSON.stringify(pdata)};
+        var themes      = !{JSON.stringify(themes)};
 
     script(type="text/template")#table-template.
         <%

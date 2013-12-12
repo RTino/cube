@@ -3,7 +3,6 @@
 # Passport module initialization
 
 _               = require 'lodash'
-bcrypt          = require 'bcrypt'
 SolrManager     = require './solrManager.coffee'
 
 passportHttp    = require('passport-http')

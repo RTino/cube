@@ -4,7 +4,7 @@ class @Tree extends Backbone.Model
 
     initialize: (@col) =>
 
-        @tree = @formTree '0',  @col
+        @tree = @formTree '0',  @col.sort(@compare)
 
 
     formNode: (node, col) =>
@@ -23,3 +23,9 @@ class @Tree extends Backbone.Model
             pid = node.get 'parentId' if node.get 'parentId'
             tree.push @formNode(node, col) if pid is parentId
         tree
+
+
+    compare: (a, b) ->
+        return -1 if a.get('name') < b.get('name')
+        return 1 if a.get('name') > b.get('name')
+        return 0

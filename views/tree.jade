@@ -1,25 +1,24 @@
-script(type="text/template")#tree-template
-  | <%
-  | var renderNode = function(node) {
-  |     if (!node.name) { return; };
-  |     var name = node.name.split('/');
-  |     name = name[name.length -1];
-  |     var hide = node.child.length ? "" : "hidden"; %>
-  |     <li id="<%= node.id %>">
-  |         <span id="<%= node.id %>" class="fold unselectable <%= hide %> open">–</span>
-  |         <div class="field" id="<%= node.id %>">
-  |             <label for="<%= node.id %>" class="unselectable"><%= name %></label>
-  |         </div>
-  |         <ul id="<%= node.id %>"><% addNodes(node.child) %></ul>
-  |     </li><%
-  | }
-  | var addNodes = function(tree) {
-  |     _.each(tree, function(node) {
-  |         renderNode(node);
-  |     });
-  | }
-  | %>
-  | <span class="fold unselectable open">–</span>
-  | <h4 class="unselectable">Teams</h4>
-  | <ul><% addNodes(tree) %></ul>
-
+script(type="text/template")#tree-template.
+     <%
+     var renderNode = function(node) {
+         if (!node.name) { return; };
+         var name = node.name.split('/');
+         name = name[name.length -1];
+         var hide = node.child.length ? "" : "hidden"; %>
+         <li id="<%= node.id %>">
+             <span id="<%= node.id %>" class="fold unselectable <%= hide %> open">–</span>
+             <div class="field" id="<%= node.id %>">
+                 <label for="<%= node.id %>" class="unselectable"><%= name %></label>
+             </div>
+             <ul id="<%= node.id %>"><% addNodes(node.child) %></ul>
+         </li><%
+     }
+     var addNodes = function(tree) {
+         _.each(tree, function(node) {
+             renderNode(node);
+         });
+     }
+     %>
+     <span class="fold unselectable open">–</span>
+     <h4 class="unselectable">Teams</h4>
+     <ul><% addNodes(tree) %></ul>

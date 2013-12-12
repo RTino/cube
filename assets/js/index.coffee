@@ -3,6 +3,21 @@
 # Welcomes the user with a nice header and a list of available
 # entities.
 
+# Check if admin key is present in QS
+isAdmin = (settings) =>
+
+    return yes if settings.unrestricted
+
+    uid = window.user.email or window.user.mail
+
+    return yes unless uid
+
+    return yes unless settings.admins and settings.admins.length
+
+    return yes unless settings.admins.indexOf(uid) is -1
+
+    no
+
 $ ->
 
     # Show a list of entities available
@@ -22,7 +37,9 @@ $ ->
             icon    : '/assets/hypercube_logo_50.png',
 
         # Get each entitie's collection and show the amount of items.
-        $.get "/#{name}/collection/", (col) ->
+        url = "/#{name}/collection/"
+
+        $.get url, (col) ->
 
             l = col.response.numFound
 

@@ -20,14 +20,14 @@ script(src="/js/lodash.js")
 
 != js('index')
 
-script(type="text/javascript")
-  var entities  = !{JSON.stringify(entities)};
-  var user      = !{JSON.stringify(user)};
+script.
+    var entities  = !{JSON.stringify(entities)};
+    var user      = !{JSON.stringify(user)};
 
-script(type="text/html")#list-item
-    | <li id="<%= entity %>">
-    |     <img src="<%= icon %>"/>
-    |     <label><%= title %></label>
-    |     <p id="amount"></p>
-    |     <p id="desc"><%= desc %></p>
-    | </li>
+script(type="text/html")#list-item.
+    <li id="<%= entity %>">
+        <img src="<%= icon %>"/>
+        <label><%= title %></label>
+        <p id="amount"></p>
+        <p id="desc"><%= desc %></p>
+    </li>

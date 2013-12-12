@@ -5,18 +5,19 @@
 class BaseImporter
 
     # Required modules.
+    async = require "async"
     expresser = require "expresser"
     fs = require "fs"
     lodash = require "lodash"
     moment = require "moment"
     request = require "request"
-    solr = require "solr-client"
-    solrManager = null
-    solrClient = null
 
 
     # PROPERTIES
     # ----------------------------------------------------------------------
+
+    # SolrManager will be created during `run`.
+    solrManager: null
 
     # The entity and schema will be set automatically on `run`.
     entity: null
@@ -24,10 +25,6 @@ class BaseImporter
 
     # Options must be set manually before calling `run`.
     options: null
-
-    # The raw and processed values will be set on each importer.
-    rawData: null
-    processedData: null
 
     # Runs before anything else.
     preRun: null
@@ -38,46 +35,79 @@ class BaseImporter
     # Runs after import is done.
     postRun: null
 
+    # The raw and processed data must set on each importer.
+    # The items to add, update and to delete are set by the `process` method.
+    rawData: null
+    processedData: null
+    itemsToUpdate: null
+    itemsToDelete: null
+
     # These are session related properties to track job status.
-    startTime: null
-    endTime: null
-    lastSync: null
+    startTime: moment 0
+    endTime: moment 0
+
+    # Holds all result and error messages triggered during import.
+    results: []
+    errors: []
+
+    # The `onFinish` is set automatically on the ImportManager.
+    onFinish: null
 
 
     # MAIN METHODS
     # ----------------------------------------------------------------------
 
-    # Start the importer. An `options` object can be passed (optional).
-    run: (options) =>
-        if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "run", options
+    # Helper to set default values.
+    # Make sure mode is correctly set. Default is `full`.
+    # Make sure uri is used instead of url.
+    # If no fetch is set on the importer, use `smartFetch`.
+    setDefaults: =>
+        @options.mode = "full" if not @options.mode? or @options.mode is ""
+        @options.mode = @options.mode.toLowerCase()
+        @options.uri = @options.url if @options.url? and not @options.uri?
+        @options.updateKey = "id" if @options.mode is "update" and (not @options.updateKey? or @options.updateKey is "")
 
+        @fetch = @smartFetch if not @fetch? or @fetch is false
+
+        @solrManager = new (require "./solrManager.coffee")(@entity) if not @solrManager? and @entity?
+
+    # Start the importer. An `options` object can be passed (optional) to override the default options,
+    # which is usually taken from the `import.json` file for the specified entity.
+    run: (options) =>
+        @rawData = null
+        @processedData = null
+        @itemsToUpdate = []
+        @itemsToDelete = []
+
+        # Reset errors and results on each run.
+        @errors = []
+        @results = []
+
+        # If options was passed, override the default options.
         if options? and options isnt false and options isnt ""
             @options = options
 
+        # Make sure options were set.
         if not @options? or @options is ""
-            return @error "Importer options must be set before running!"
+            return @error "run", "Importer options must be set before running. Abort!"
 
-        if not @entity? or not @schema?
-            return @error "Importer entity and schema must be set before running!"
+        # Make sure an ID was specified.
+        if not @options.id? or @options.id is ""
+            return @error "run", "Importer ID was not set. Abort!"
 
-        if not @transform? or not lodash.isFunction @transform
-            return @error "Importer 'transform' must be a function."
+        # Make sure `entity` and `schema` are set.
+        if not @entity? or @entity is "" or not @schema? or @schema is ""
+            return @error "run", "Importer entity and schema must be set before running. Abort!"
 
-        # User might use URL instead of URI.
-        @options.uri = @options.url if @options.url? and not @options.uri?
+        if expresser.settings.general.debug
+            if options?
+                @log "run", "Overriding options"
+            else
+                @log "run"
 
-        # If no fetch is set on the importer, use `smartFetch`.
-        if not @fetch? or @fetch is false
-            @fetch = @smartFetch
-            if expresser.settings.general.debug
-                expresser.logger.info "BaseImporter", "run", "Using smartFetch (fetch is not defined)."
-
-        # Set the SolrManager to use the passed entity.
-        solrManager = new (require "./solrManager.coffee")(@entity)
-
-        # Set start time.
+        # Set start and end time.
         @startTime = moment()
+        @endTime = moment()
 
         # Check if a `preRun` is set on the importer.
         if @preRun?
@@ -85,49 +115,184 @@ class BaseImporter
         else
             @preRunCallback()
 
-    # Helper to fetch a local or remote file. This will be called ONLY if the
-    # importer doesn't implement a `fetch` method.
+    # Helper to fetch a local or remote file, with optional child requests if a `uriChild` is specified.
+    # This will be called ONLY if the running importer doesn't implement a `fetch` method.
     smartFetch: (callback) =>
         if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "smartFetch"
+            @log "smartFetch"
 
         if not @options.uri?
             return @error "URI or URL was not specified."
 
-        # If URI is a remote file, get data using the `request` module.
-        # Otherwise assume a local file and read from the file system.
-        if @options.uri.substring(0, 7) is "http://" or @options.uri.substring(0, 4) is "www."
-            request @options.uri, @options.headers, (err, res, data) => callback err, data
-        else
-            fs.readFile @options.uri, (err, data) => callback err, data
+        # Request the main URI and check if child data should be requested as well.
+        @smartRequest @options.uri, (err, data) =>
+            if @options.childUri? and @options.childUri isnt ""
+                data = JSON.parse data
+                mergedData = []
+
+                # Set the child callback to merge data.
+                childCallback = (child, cb) =>
+                    parentId = (if @options.parentKey then child[@options.parentKey] else child)
+                    childUri = @options.childUri.replace("[[parent]]", parentId)
+
+                    @smartRequest childUri, (errChild, childData) =>
+                        if errChild?
+                            if @options.continueOnError
+                                cb()
+                                @error "smartFetch", errChild, true
+                            else
+                                cb errChild
+                        else
+                            childData = JSON.parse childData
+                            mergedData = mergedData.concat childData
+                            cb()
+
+                async.eachSeries data, childCallback, (errAsync) => callback errAsync, mergedData
+            else
+                callback err, data
+
+    # Helper to fetch a local or remote file. This will be called ONLY if the running
+    # importer doesn't implement a `fetch` method. Might get called multiple times to request
+    # child data in case options have `childUri` and `childKey` set.
+    smartRequest: (uri, callback) =>
+        if expresser.settings.general.debug
+            @log "smartRequest", uri
+
+        headers = @options.headers
+
+        try
+            # If `header` is a path, load it.
+            headers = require headers if headers? and lodash.isString headers
+            auth = headers.auth if headers?.auth?
+
+            # Make sure headers `auth` is properly set in case user misplaced user/password.
+            if headers?.user? and headers?.password? and not headers?.auth?
+                auth = {user: headers.user, password: headers.password, sendImmediately: false}
+                delete headers["user"]
+                delete headers["password"]
+
+            # Remote location, use the `request` module if it has http:// or www.
+            if uri.substring(0, 7) is "http://" or uri.substring(0, 4) is "www."
+                request {uri: uri, headers: headers, auth: auth}, (err, res, data) ->
+                    err = "Invalid status code #{res.statusCode} from #{uri}." if res.statusCode < 200 or res.statusCode > 399
+                    callback err, data
+            # Otherwise read from local path using the `fs` module.
+            else
+                fs.exists uri, (exists) ->
+                    if exists
+                        fs.readFile uri, {encoding: "utf8"},  (err, data) -> callback err, data
+                    else
+                        callback "File #{uri} does not exist!"
+
+        # Catch errors.
+        catch ex
+            @error "smartRequest", ex
+            if not @options.continueOnError
+                @onFinish() if @onFinish?
+                return false
 
     # Process the transformed data collection.
     process: =>
         if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "process", @processedData
+            @log "process", "Processing #{lodash.size(@processedData)} docs."
 
-        # Process each item of `processedData`.
-        try
-            @processItem item for item in @processedData
-            @processCallback null, @processedData
-        catch ex
-            @processCallback ex
+        # If import mode is full, wipe contents before proceeding.
+        @wipe() if @options.mode is "full"
 
-    # Process each transformed item. This will check for the field mapping (fields property)
-    # and properly create a new item with the referenced keys and values.
-    processItem: (item) =>
-        if @options.fields?
-            newItem = {}
-            for sourceKey, targetKey of @options.fields
-                newItem[sourceKey] = item[targetKey]
+        # Get docs to update, based on the `itemsToUpdate` option or
+        # if not present use everything from the `processedData`.
+        if @options.itemsToUpdate? and @options.itemsToUpdate isnt ""
+            @itemsToUpdate = @processedData[@options.itemsToUpdate]
         else
-            newItem = item
+            @itemsToUpdate = @processedData
 
+        # Get docs to delete, based on the `itemsToDelete` option.
+        if @options.itemsToDelete? and @options.itemsToDelete isnt ""
+            @itemsToDelete = @processedData[@options.itemsToDelete]
+
+        # Process each item of `itemsToUpdate`.
+        try
+            lodash.each @itemsToUpdate, (item) => @updateItem item
+            lodash.each @itemsToDelete, (item) => @deleteItem item
+        catch ex
+            @error "process", ex
+            if not @options.continueOnError
+                @processCallback ex, @processedData
+                return false
+
+        @processCallback null, @processedData
+
+    # Process each transformed item to be updated. This will check for the field mapping (fields property)
+    # and properly create a new item with the referenced keys and values.
+    updateItem: (item) =>
         if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "processItem", newItem
+            @log "updateItem", item
 
-        # Add item to Solr.
-        solrManager.addItems item, (err, data) => @error err if err?
+        # Check if item is array and no `fields` were set. In this case, call recursively
+        # to update each of this array's elements.
+        if item.length > 0 and not @options.fields?
+            if expresser.settings.general.debug
+                @log "updateItem", "Ttem is array(#{item.length})! Call recursively."
+            lodash.each item, (subItem) => @updateItem subItem
+            return
+
+        # Create `processedItem` and iterate fields to build it.
+        processedItem = {}
+
+        if @options.fields?
+            for sourceKey, targetKey of @options.fields
+                processedItem[sourceKey] = @getItemProperty item, sourceKey, targetKey
+        else
+            for schemaField in @schema
+                if item[schemaField.id]?
+                    processedItem[schemaField.id] = @getItemProperty item, schemaField.id, schemaField.id
+
+        # If `mode` is update, try finding an existing item first.
+        if @options.mode is "update"
+            @solrManager.getItemsByProp @options.updateKey, processedItem[@options.updateKey], (err, items) =>
+
+                # Found multiple items, so throw error and end item processing here.
+                if items.length > 1
+                    @error "updateItem", "Multiple items found for #{@options.updateKey} = #{processedItem[@options.updateKey]}"
+                    return false
+                # Existing member, extend its properties.
+                else if items.length is 1
+                    lodash.defaults processedItem, items[0]
+
+
+
+                # Update item on Solr.
+                @solrManager.addItems processedItem, (err2, data) => @error("updateItem", err2) if err2?
+
+        # Mode is `full` so add to Solr without searching first.
+        else
+            @solrManager.addItems processedItem, (err, data) => @error("updateItem", err) if err?
+
+    # Delete the specified item.
+    deleteItem: (item) =>
+        if expresser.settings.general.debug
+            @log "deleteItem", item
+
+        # Check if item is array and no `fields` were set. In this case, call recursively
+        # to delete each of this array's elements.
+        if item.length > 0 and not @options.fields?
+            if expresser.settings.general.debug
+                @log "updateItem", "Ttem is array(#{item.length})! Call recursively."
+            lodash.each item, (subItem) => @deleteItem subItem
+            return
+
+        # Delete item.
+        @solrManager.client.deleteByID item.id, (err, data) => @error("deleteItem", err) if err?
+
+    # Parse the original item data property to return the processed value. This is execute
+    # for each schema field against items to be imported.
+    getItemProperty: (item, sourceKey, targetKey) =>
+        if isNaN targetKey
+            t = targetKey
+        else
+            t = parseInt targetKey
+
+        return item[t]
 
 
     # CALLBACKS
@@ -135,47 +300,62 @@ class BaseImporter
 
     # Callback to the `preRun` method.
     preRunCallback: (err, data) =>
-        if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "preRunCallback"
-
-        return @error err if err?
+        if err?
+            @error "preRunCallback", err
+            if not @options.continueOnError
+                @onFinish() if @onFinish?
+                return false
+        else  if expresser.settings.general.debug
+            @log "preRunCallback", "OK."
 
         @fetch @fetchCallback
 
     # Callback for the `fetch` method.
     fetchCallback: (err, data) =>
-        if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "fetchCallback"
-
-        return @error err if err?
+        if err?
+            @error "fetchCallback", err
+            if not @options.continueOnError
+                @onFinish() if @onFinish?
+                return false
+        else if expresser.settings.general.debug
+            @log "fetchCallback", "OK. Raw data length: #{lodash.size(data)}"
 
         # If data was passed, set it as the `rawData`.
         @rawData = data if data?
 
-        if expresser.settings.general.debug
-            rawLength = lodash.size @rawData
-            expresser.logger.info "BaseImporter", "fetchCallback", "Raw data length: #{rawLength}"
-
         # Transform the data.
-        @transform @transformCallback
+        if @transform?
+            @transform @transformCallback
+        else
+            @transformCallback null, @rawData
 
     # Callback for the `transform` method.
     transformCallback: (err, data) =>
-        if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "transformCallback"
-
-        return @error err if err?
-
-        # If import mode is full, wipe contents before proceeding.
-        @wipe() if @options.mode is "full"
+        if err?
+            @error "transformCallback", err
+            if not @options.continueOnError
+                @onFinish() if @onFinish?
+                return false
+        else if expresser.settings.general.debug
+            @log "transformCallback", "OK. Processed data length: #{lodash.size(data)}"
 
         # If data was passed, set it as the `processedData`.
         @processedData = data if data?
 
-        # Make sure the `processedData` is an array.
-        if lodash.isString @processedData
-            @processedData = expresser.utils.minifyJson @processedData
-            @processedData = JSON.parse @processedData
+        # If processed data is empty, stop straight away.
+        if not @processedData? or @processedData is ""
+            @processCallback "Property 'processedData' has no value. Abort!"
+
+        # Make sure the `processedData` is JSON.
+        if not lodash.isObject @processedData
+            try
+                @processedData = expresser.utils.minifyJson @processedData
+                @processedData = JSON.parse @processedData
+            catch ex
+                @error "transformCallback", ex
+                if not @options.continueOnError
+                    @onFinish() if @onFinish?
+                    return false
 
         # Make sure result is an array.
         if not lodash.isArray @processedData
@@ -186,50 +366,56 @@ class BaseImporter
 
     # Callback for the `proccess` method.
     processCallback: (err, data) =>
-        if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "processCallback"
+        @endTime = moment()
 
-        return @error err if err?
+        if err?
+            @error "processCallback", err
+            if not @options.continueOnError
+                @onFinish() if @onFinish?
+                return false
+        else if expresser.settings.general.debug
+            @log "processCallback", "OK. End time: #{@endTime.format("HH:mm:ss")}"
 
-        @postRun() if @postRun?
+        # Push document count to results.
+        documentCount = lodash.size @processedData
+        @results.push documentCount
+
+        # Finished: call `postRun` or proceed to `onFinish`.
+        if @postRun?
+            @postRun @onFinish
+        else if @onFinish?
+            @onFinish()
 
 
     # HELPERS
     # ----------------------------------------------------------------------
 
+    # Main log helper.
+    log: (method, arg) =>
+        return
+
+        if arg isnt undefined
+            expresser.logger.info "Importer", method, @entity, @options.id, arg
+        else
+            expresser.logger.info "Importer", method, @entity, @options.id
+
     # On error log to the console and check for custom error actions.
-    error: (err) =>
-        expresser.logger.error "Importer", @options.type, @entity, err
+    error: (method, err, doNotStop) =>
+        if doNotStop
+            expresser.logger.error "Importer", @entity, @options.id, "doNotStop", err
+        else
+            expresser.logger.error "Importer", @entity, @options.id, err
+
+        @endTime = moment()
+
+        @errors.push err
         @onError err if @onError?
 
     # Wipe the entity data from the Solr database.
     wipe: =>
         if expresser.settings.general.debug
-            expresser.logger.info "BaseImporter", "wipe"
-
-        query = solrClient.createQuery().q("*:*").start(0).rows 9999999
-
-        solrClient.deleteByQuery "*:*", (err, result) ->
-            if expresser.settings.general.debug
-                if err?
-                    expresser.logger.error "BaseImporter", "wipe", @entity, err
-                else
-                    expresser.logger.info "BaseImporter", "wipe", @entity, "OK"
-            return @error err if err?
-
-
-    # INTERNAL IMPLEMENTATION
-    # ----------------------------------------------------------------------
-
-    # Set search field on Solr.
-    setSearchField = (item) ->
-        sf = []
-        lodash.each item, (value, key) ->
-            return unless value
-            value = value.join(" ") if typeof value is typeof []
-            value = value.split("-").join(" ") if key is "id"
-            sf.push value if value
-        item["search-s"] = sf.join " "
+            @log "wipe"
+        @solrManager.purge()
 
 
 # EXPORTS

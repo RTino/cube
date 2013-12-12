@@ -246,7 +246,7 @@ class ItemController
                 if ExtBackend
                     extBackend = new ExtBackend item if ExtBackend
                     extBackend.delete (err, i) ->
-                        throw err if err
+                        console.log err
 
                 solrManager.client.deleteByID id, (err, result) ->
                     throw err if err
@@ -354,7 +354,7 @@ class ItemController
 
                 if item[prop] instanceof Array
                     index = item[prop].indexOf value
-                    item[prop] = item[prop].splice index, 1
+                    item[prop].splice index, 1
                     delete item[prop] if item[prop].length is 1
                 else
                     delete item[prop]

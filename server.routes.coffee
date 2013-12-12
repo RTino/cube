@@ -52,49 +52,51 @@ module.exports = (app, express, passport, flash) ->
     # Serves any request about an item, like querying by ID.
     ItemController      = require "./server/itemController.coffee"
 
-    # Servers any request about extension administration, like creating one.
-    ExtensionController = require "./server/extensionController.coffee"
-
     # Servers any request about the print view, like showing items for print.
     PrintController     = require "./server/printController.coffee"
 
     # Solr utility methods
     SolrManager         = require './server/solrManager.coffee'
 
+    # Import Manager object.
+    ImportManager       = require './server/importManager.coffee'
+
     # Create instances from controllers
     new EntityController    app, auth, entities
     new ItemController      app, auth
-    new ExtensionController app, auth
     new PrintController     app, auth
 
 
     #### Routes
 
-    app.get "/imports", (req, res) ->
-        impman = require("./server/importManager.coffee")
-        impman.start()
-        res.json impman.jobs
-
     # Root route
-    app.get '/',            toLogin,    (a...) -> root          a...
+    app.get '/',            toLogin,    (a...) -> root              a...
 
     # List of available entities with settings
-    app.get '/entities',    auth,       (a...) -> listEntities  a...
+    app.get '/entities',    auth,       (a...) -> listEntities      a...
 
     # Alive Response ({status:ok})
-    app.get '/status',                  (a...) -> status        a...
+    app.get '/status',                  (a...) -> status            a...
+
+    # Force run one or all importer jobs.
+    app.get '/importers/run/:entity',   (a...) -> runImporter       a...
+
+    # Dump the importer statuses.
+    app.get '/importers/status',        (a...) -> importerStatus    a...
 
     # Render login page
-    app.get '/login',                   (a...) -> login         a...
+    app.get '/login',                   (a...) -> login             a...
 
     # Receive user credentials and authenticate
-    app.post '/login',      check,      (a...) -> logged        a...
+    app.post '/login',      check,      (a...) -> logged            a...
 
     # Logs Out a user and redirects to login page
-    app.get '/logout',      auth,       (a...) -> logout        a...
+    app.get '/logout',      auth,       (a...) -> logout            a...
 
     # Render the cube app for a specific entity
-    app.get '/:entity',     toLogin,    (a...) => toEntity      a...
+    app.get '/:entity',     toLogin,    (a...) => toEntity          a...
+
+
 
 
     #### Functionality
@@ -134,17 +136,22 @@ module.exports = (app, express, passport, flash) ->
     listEntities = (req, res) ->
         res.send getEntities()
 
-
     # Status alive response returns a JSON { "status": "ok" } object.
     status = (req, res) ->
-
         res.send status: 'ok'
-
 
     # Render login page
     login = (req, res) ->
-
         res.render 'login', flash: req.flash()
+
+    # Show importer statuses.
+    importerStatus = (req, res) ->
+        res.render "importerStatus", {jobs: ImportManager.jobs}
+
+    # Force run the specified importer, or all if none was specified.
+    runImporter = (req, res) ->
+        ImportManager.run req.params.entity
+        res.send "Force run #{req.params.entity} importers!"
 
 
     # Redirect authenticated user to a specifc address from the querystring

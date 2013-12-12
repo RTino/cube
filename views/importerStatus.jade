@@ -1,0 +1,47 @@
+!!! 5
+html
+    head
+        title Cube - Import Status
+        != css('app')
+    body.importStatus
+        h1 Cube - Import Status
+        span Now: #{moment()}
+        each job in jobs
+            div
+                h3 #{job.importer.options.id}
+                if job.problem
+                    div.problem
+                        label Problem
+                        span #{job.problem}
+                div
+                    label Entity
+                    span #{job.importer.entity}
+                div
+                    label Type
+                    span #{job.importer.constructor.name} #{job.importer.options.mode}
+                div
+                    label URI
+                    span #{job.importer.options.uri}
+                div
+                    label Schedule
+                    span #{job.importer.options.schedule}
+                div
+                    label Start time
+                    span #{job.importer.startTime.format("MMM DD hh:mm:ss.SSS")}
+                div
+                    label End time
+                    span #{job.importer.endTime.format("MMM DD hh:mm:ss.SSS")}
+                if job.nextRun
+                    div
+                        label Next run
+                        span #{job.nextRun.fromNow()}
+                    div
+                        label Results
+                        each r in job.importer.results
+                            span #{r}
+                    div
+                        label Errors
+                        span #{job.importer.errors.length}
+                        div
+                            each err in job.importer.errors
+                                div.error #{err}

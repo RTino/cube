@@ -68,6 +68,8 @@ $ ->
 
                 f = window.settings.Schema.getFieldById id.split('_')[0]
 
+                return unless f
+
                 return unless !f.type or f.type is "text" or
                     f.type is "email" or f.type is "multiline" or
                     f.type is "skype" or f.type is "link" or
@@ -95,6 +97,8 @@ $ ->
                 id = $i.attr 'id'
 
                 f = window.settings.Schema.getFieldById id.split('_')[0]
+
+                return unless f
 
                 return unless f.type is "integer" or
                     f.type is "float"
