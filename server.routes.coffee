@@ -105,8 +105,10 @@ module.exports = (app, express, passport, flash) ->
     # is coming from an old/deprectaed URL.
     root =  (req, res) ->
 
+        isAuthEnabled = settings.Authentication.strategy isnt 'none'
+
         # Req is fine, get available entities and render index page.
-        res.render 'index', entities: getEntities(), user: req.user or {}
+        res.render 'index', entities: getEntities(), user: req.user or null, auth: isAuthEnabled
 
 
     # Serves an entity rendering the app with the appropriate collection. It
@@ -175,10 +177,12 @@ module.exports = (app, express, passport, flash) ->
 
         name = req.params.entity
 
-        user = {}
-        user = mail: req.user?.mail
+        user = null
+        user = mail: req.user.mail if req.user?.mail?
 
-        params =  entity: name, entities: [], themes: themes, user: user
+        isAuthEnabled = settings.Authentication.strategy isnt 'none'
+
+        params =  entity: name, entities: [], themes: themes, user: user, auth: isAuthEnabled
 
         # Read all configuration files from filesystem
         async.parallel [

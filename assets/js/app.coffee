@@ -190,6 +190,8 @@ $ =>
             else
                 $('#controls a#profile').hide()
 
+            return unless window.user
+
             username = window.user.mail
             if window.user.name and window.user.lastname
                 username = "#{window.user.name} #{window.user.lastname}"
@@ -1210,10 +1212,13 @@ $ =>
             @itemSelection = new window.Collection
             @navigate()
 
-        # Check if admin key is present in QS
         isAdmin: () =>
 
             return yes if window.settings.unrestricted
+
+            return yes unless window.auth
+
+            return no unless window.user
 
             uid = window.user.email or window.user.mail
 

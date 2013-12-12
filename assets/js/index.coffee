@@ -8,6 +8,10 @@ isAdmin = (settings) =>
 
     return yes if settings.unrestricted
 
+    return yes unless window.auth
+
+    return no unless window.user
+
     uid = window.user.email or window.user.mail
 
     return yes unless uid
