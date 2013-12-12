@@ -85,7 +85,7 @@ class ItemController
         item        = id: @generateId()
         updateOp    = if req.body.id then yes else no
 
-        return @dennyAccess res unless @isAllowed(req) or updateOp
+        return @denyAccess res unless @isAllowed(req) or updateOp
 
         getItem = (cb) =>
             return cb() unless updateOp
@@ -211,7 +211,7 @@ class ItemController
                 res.send response
 
 
-    dennyAccess: (res) =>
+    denyAccess: (res) =>
         res.statusCode = 403
         res.send 'Unauthorized'
 
@@ -287,17 +287,13 @@ class ItemController
         Verify  = require("../entities/#{entity}/code.coffee").Verify
 
         # Check if its allowed to make this change
-        unless Verify
-            res.statusCode = 403
-            return res.send "Not allowed"
+        return @denyAccess res unless Verify
 
         verify = new Verify req
 
         verify.isAllowed (allowed) =>
 
-            unless allowed
-                res.statusCode = 403
-                return res.send "Not allowed"
+            return @denyAccess res unless allowed
 
             solrManager = new SolrManager entity
 
@@ -329,18 +325,14 @@ class ItemController
 
         Verify  = require("../entities/#{entity}/code.coffee").Verify
 
-        unless Verify
-            res.statusCode = 403
-            return res.send "Not allowed"
+        return @denyAccess res unless Verify
 
         # Check if its allowed to make this change
         verify = new Verify req
 
         verify.isAllowed (allowed) =>
 
-            if not allowed
-                res.statusCode = 403
-                return res.send "Not allowed"
+            return @denyAccess res unless allowed
 
             solrManager = new SolrManager entity
 
@@ -355,7 +347,7 @@ class ItemController
                 if item[prop] instanceof Array
                     index = item[prop].indexOf value
                     item[prop].splice index, 1
-                    delete item[prop] if item[prop].length is 1
+                    delete item[prop] if item[prop].length <= 1
                 else
                     delete item[prop]
 

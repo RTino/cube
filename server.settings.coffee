@@ -10,7 +10,7 @@ ServerSettings = ->
 
         development:
 
-            port: 3030
+            port: 3000
 
         production:
 
