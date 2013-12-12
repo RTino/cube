@@ -1240,6 +1240,8 @@ $ =>
             return no unless @isEditable()
             return yes if @isAdmin()
             return no unless window.settings.Schema.getAdditionals().length
+            return yes unless window.auth
+            return no unless window.user
             return yes if window.user.email is window.profileView.model.get('email')
             no
 
