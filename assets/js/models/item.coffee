@@ -30,9 +30,6 @@ class @Item extends Backbone.Model
 
         sep = window.settings.separator
 
-        _.each model, (value, field) =>
-            model[field] = _.escape value if typeof value is typeof "string"
-
         fields = window.settings.Schema.getMultivalues()
 
         _.each fields, (field) =>
