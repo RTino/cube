@@ -125,6 +125,8 @@ class ItemController
 
                 return _cb() unless v
 
+                v = v.toLowerCase()
+
                 solrManager.getItemsByProp fid, v, (err, items) =>
                     docs = []
                     _.each items, (item, __cb) =>
