@@ -274,26 +274,27 @@ script(type="text/template")#details-template.
                 _.each(schema.get(), function(a) {
                     if (a['type'] === "img") { return; };
                     if (a['additional'] || a['hidden']) { return; };
-                    renderField(a, model); });
-                    if (schema.getAdditionals().length) { %>
-                        <li class="additional">
-                        <span id="arrow" class="<%
-                            if (window.profileState.additionalOpen) { %>active<%}; %>">
-                        </span>
-                        <label for="additional-parameters" class="additional">
-                            Additional Information
-                        </label>
-                        <ul class="<%
-                            if (window.profileState.additionalOpen) {%>open <% } %>"><%
-                            _.each(schema.getAdditionals(), function(a) {
-                                if (a['hidden']) { return; }
-                                renderField(a, model);
-                            }); %>
-                        </ul>
-                    </li><%
-                }; %>
+                    renderField(a, model);
+                }); %>
             </ul>
-            <div id="extensions"></div>
+            <div id="extensions"></div><%
+            if (schema.getAdditionals().length) { %>
+                <ul><li class="additional">
+                    <span id="arrow" class="<%
+                        if (window.profileState.additionalOpen) { %>active<%}; %>">
+                    </span>
+                    <label for="additional-parameters" class="additional">
+                        Additional Information
+                    </label>
+                    <ul class="<%
+                        if (window.profileState.additionalOpen) {%>open <% } %>"><%
+                        _.each(schema.getAdditionals(), function(a) {
+                            if (a['hidden']) { return; }
+                            renderField(a, model);
+                        }); %>
+                    </ul>
+                </li></ul><%
+            }; %>
         </div><%
         var mailCls = model.subscription ? '' : 'hidden';
         if ($('#app > #extensions > #actions-template').length
