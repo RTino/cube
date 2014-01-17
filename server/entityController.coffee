@@ -103,13 +103,13 @@ class EntityController
 
     # Picture uploader. Save picture on tmp location, convert, manipulate and
     # move to storage location. Respond with an array of properties from the
-    # uploaded image. Useful for backbone.
+    # uploaded image.
     picture: (req, res) =>
         entity = req.params.entity
         return res.send 404 if entities.indexOf(entity) is -1
 
         upload_id = req.files.picture.path
-        target_filename = upload_id + '.jpg'
+        target_filename = upload_id.split('.')[0] + '.jpg'
         target_path= "public/images/#{entity}/archive/"
         target_file = target_path + target_filename
         tmp_file = 'public/images/tmp/' + target_filename
