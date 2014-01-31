@@ -518,7 +518,6 @@ class SolrManager
         fields = @schema.getFieldsByType 'facet'
         _.each fields, (field) =>
             return unless item[field.id]
-            return if item[field.id] instanceof Array
             return item[field.id] = [ item[field.id].toLowerCase() ] if field.token
             item[field.id] = @tokenizeField item[field.id]
         item
