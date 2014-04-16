@@ -518,8 +518,9 @@ class SolrManager
         fields = @schema.getFieldsByType 'facet'
         _.each fields, (field) =>
             return unless item[field.id]
-            return item[field.id] = [ item[field.id].toLowerCase() ] if field.token
-            item[field.id] = @tokenizeField item[field.id]
+            return item[field.id] = [ item[field.id].toString().toLowerCase() ] if field.token
+            tokenizedField = @tokenizeField item[field.id]
+            item[field.id] = tokenizedField if tokenizedField
         item
 
 
@@ -528,6 +529,7 @@ class SolrManager
         value = value.toString()
         _.each value.split(','), (v, i) =>
             v = v.trim()
+            return unless v
             _.each @getUniqueTokens(v), (t) =>
                 tokens.push(t) unless tokens.indexOf(t) isnt -1
         tokens

@@ -628,12 +628,14 @@ span.miniEtq
           top           19px
           background-repeat no-repeat
       &.headerSortUp .th-inner,
-      &.headerSortDown .th-inner,
-        background          tableHeaderActive
+      &.headerSortDown .th-inner
+            background          tableHeaderActive
       &.headerSortUp .th-inner #sortArrow
         background-image    url('/assets/desc.gif')
+        background-repeat   no-repeat
       &.headerSortDown .th-inner #sortArrow
         background-image    url('/assets/asc.gif')
+        background-repeat   no-repeat
       &.header .th-inner .ganttHeaderContainer
           position        relative
           .ganttHeaderContent
@@ -1370,3 +1372,17 @@ input
    -webkit-user-select  none
    -ms-user-select      none
    user-select          none
+
+.importStatus
+    padding 10px
+    h3
+        background rgb(245, 249, 255)
+    label
+        display inline-block
+        width 90px
+    .error
+        color rgb(140, 40, 40)
+        font-style italic
+    .problem
+        color rgb(140, 40, 40)
+        font-weight bold
