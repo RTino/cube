@@ -33,161 +33,161 @@ script(type="text/html")#item-template.
          <div class="label"><%= App.getThumbnailLabel(model, schema) %></div>
      </div>
 
-script(type="text/html")#item-table-template
-  | <%
-  |   var pic = settings.Schema.getImgKey();
-  |   var etiquettes = App.getItemEtiquettes(m);
-  |   var model = m.parseSubfields();
-  |   var avatar = '/assets/default-avatar.png';
-  |   if (settings.avatar === 'person') {
-  |       avatar = '/assets/default-person-avatar.png'
-  |   };
-  |   avatar = model[pic] ? model[pic] : avatar;
-  |   function fieldImg(field, model) { %>
-  |       <img src="<%= avatar %>" class="hoverpic"/>
-  |       <div id="hoverpicEtiquettes" class="etiquettes"><%
-  |           addEtiquettes(); %>
-  |       </div>
-  |       <div class="cont miniPicContainer"><%
-  |           addMiniEtiquette(etiquettes, 'marked', false, model); %>
-  |           <object class="miniPic" data="<%= model[field.id] %>">
-  |               <img class="miniPic" src="<%= avatar %>"/>
-  |           </object>
-  |       </div><%
-  |   };
-  |   function fieldText(field, model) { %>
-  |       <%- model[field.id] %><%
-  |   };
-  |   function fieldFacet(field, model) { %>
-  |       <%= model[field.id] %><%
-  |   };
-  |   function fieldDate(field, model) { %>
-  |       <%- App.formatDate(model[field.id]) %><%
-  |   };
-  |   function fieldDateTime(field, model) { %>
-  |       <%- App.formatDateTime(model[field.id]) %><%
-  |   };
-  |   function fieldNumber(field, model) { %>
-  |       <%- App.formatNumber(model[field.id]) %><%
-  |   };
-  |   function fieldTuple(field, model) {
-  |       addRowEtiquettes(etiquettes);
-  |   };
-  |   function fieldGantt(field, model) {
-  |       if (typeof model[field.start] === 'undefined' ||
-  |           typeof model[field.end] === 'undefined') { return; }
-  |       var date = new Date();
-  |       var start = Date.prototype.week(model[field.start]);
-  |       var end = Date.prototype.week(model[field.end]);
-  |       var current = Date.prototype.week(date); %>
-  |       <div class="ganttWrapper">
-  |           <div class="ganttInfoL"></div>
-  |           <div class="ganttInfoC"></div>
-  |           <div class="ganttItem"
-  |               style="margin-left: <%- ((start - current) * 40) + 120 %>px;"
-  |               data-start="<%- start %>" data-end="<%- end %>"
-  |               data-current="<%- current %>"><%
-  |               _.range(start, end + 1).forEach(function(w){
-  |                   if(w < 1){ w = 52 + w;} else if(w > 52){ w = w - 52;}
-  |                       var week = Date.prototype.getStartAndEndDateOfWeek(w, null, field.dateFormat); %>
-  |                       <div class="ganttCell <% if(current === w) {%>ganttCurrent<% } %>"
-  |                           data-notification="<%- week.start + ' - ' + week.end %>"><%- w %></div><%
-  |               }); %>
-  |           </div>
-  |           <div class="ganttInfoR"></div>
-  |       </div><%
-  |   };
-  |   function fieldClink(field, model) {
-  |       if (!model[field.id]) { return; }
-  |       var csettings     = App.getEntitySettings(field.entity);
-  |       var cdenom        = csettings.itemType;
-  |       var cschema       = new Schema(csettings.schema);
-  |       var cpic          = cschema.getImgKey();
-  |       var nitems        = model[field.id].length
-  |       cdenom = model[field.id].length === 1 ? cdenom[0] : cdenom[1]; %>
-  |       <div><%
-  |           _.each(model[field.id], function(item, i) {
-  |               if (i > 2) { return; };
-  |               var label = App.getThumbnailLabel(item, csettings.schema);
-  |               miniPic(item[cpic], label);
-  |               nitems--;
-  |           });
-  |           if (nitems) { %><span> +<%- nitems %><% } %>
-  |       </div><%
-  |   };
-  |   function miniPic(src, label) {
-  |       var avatar = '/assets/default-pane-avatar.png';
-  |       if (settings.avatar === 'person') {
-  |           avatar = '/assets/default-person-avatar.png'
-  |       };
-  |       avatar = src ? src : avatar; %>
-  |       <img class="miniPic" src="<%= avatar %>" title="<%- label %>"/><%
-  |   }
-  |   function renderField(field, model) {
-  |       rf = fieldText;
-  |       if (field['type'] === 'facet')   { rf = fieldFacet;  };
-  |       if (field['type'] === 'date')    { rf = fieldDate;   };
-  |       if (field['type'] === 'datetime'){ rf = fieldDateTime;};
-  |       if (field['type'] === 'integer') { rf = fieldNumber; };
-  |       if (field['type'] === 'float')   { rf = fieldNumber; };
-  |       if (field['type'] === 'img')     { rf = fieldImg;    };
-  |       if (field['type'] === 'tuple')   { rf = fieldTuple;  };
-  |       if (field['type'] === 'gantt')   { rf = fieldGantt;  };
-  |       if (field['type'] === 'clink')   { rf = fieldClink;  };
-  |       rf(field, model);
-  |   };
-  |   function addEtiquettes() {
-  |       _.each(etiquettes, function(e) {
-  |           if (!e) { return; };
-  |           var etq = App.getEtiquetteById(e);
-  |           var css, bg, font;
-  |           var label = e;
-  |           if (etq) {
-  |               css = "background-image:url('"+etq.image+"')";
-  |               var bgimg = etq.image.split('.')[0] + '-bar.png';
-  |               bg = "background-image:url('"+bgimg+"');";
-  |               bg += "color:"+etq.font;
-  |               label = etq.label;
-  |           }; %>
-  |           <div class="bigEtiquette hc" title="<%= label %>">
-  |               <span class="etiquetteFold" style="<%= css %>"></span>
-  |               <label class="hc" style="<%= bg %>"><%= label %></label>
-  |               <span class="etiquetteTip" style="<%= css %>"></span>
-  |           </div><%
-  |       });
-  |   };
-  |   function addRowEtiquettes(etiquettes) {
-  |       _.each(etiquettes, function(e) {
-  |           if (!e) { return; };
-  |           var etq = App.getEtiquetteById(e);
-  |           var label = etq ? etq.label : e;
-  |           var bg, font = '';
-  |           if (etq) {
-  |               bg = "background:"+etq.color;
-  |               font = "color:"+etq.font;
-  |           }; %>
-  |           <span class="rowEtiquette" style="<%= bg %>">
-  |               <label style="<%= font %>"><%= label %></label>
-  |           </span><%
-  |       });
-  |   };
-  |   function addMiniEtiquette(etiquettes, cls, color, model) {
-  |       if (!etiquettes || !etiquettes.length) { return; };
-  |       var etq = App.getMiniEtiquette(etiquettes);
-  |       if (!etq) { return; };
-  |       var imgname = etq.image.split('.')
-  |       var mini = imgname[0] + '-mini.' + imgname[1];
-  |       var css = "background-image:url('" + mini + "')"; %>
-  |       <span class="miniEtq" <%
-  |           if (mini) { %>style="<%= css %>"<% } %>>
-  |       </span><%
-  |   };
-  |   _.each(schema, function(f) {
-  |         var title = model[f.id];
-  |         if (title instanceof Array) { title = ''; }; %>
-  |       <td class="<%- f.id %><% if (f.index) { %> visible<% }; if(f.type === 'gantt'){ %> ganttChart<% } %> "
-  |           title="<%- title %>" data-type="<%- f.type %>" >
-  |       <% renderField(f, model); %>
-  |       </td><%
-  |   });
-  | %>
+script(type="text/html")#item-table-template.
+    <%
+      var pic = settings.Schema.getImgKey();
+      var etiquettes = App.getItemEtiquettes(m);
+      var model = m.parseSubfields();
+      var avatar = '/assets/default-avatar.png';
+      if (settings.avatar === 'person') {
+          avatar = '/assets/default-person-avatar.png'
+      };
+      avatar = model[pic] ? model[pic] : avatar;
+      function fieldImg(field, model) { %>
+          <img src="<%= avatar %>" class="hoverpic"/>
+          <div id="hoverpicEtiquettes" class="etiquettes"><%
+              addEtiquettes(); %>
+          </div>
+          <div class="cont miniPicContainer"><%
+              addMiniEtiquette(etiquettes, 'marked', false, model); %>
+              <object class="miniPic" data="<%= model[field.id] %>">
+                  <img class="miniPic" src="<%= avatar %>"/>
+              </object>
+          </div><%
+      };
+      function fieldText(field, model) { %>
+          <%- model[field.id] %><%
+      };
+      function fieldFacet(field, model) { %>
+          <%= model[field.id] %><%
+      };
+      function fieldDate(field, model) { %>
+          <%- App.formatDate(model[field.id]) %><%
+      };
+      function fieldDateTime(field, model) { %>
+          <%- App.formatDateTime(model[field.id]) %><%
+      };
+      function fieldNumber(field, model) { %>
+          <%- App.formatNumber(model[field.id]) %><%
+      };
+      function fieldTuple(field, model) {
+          addRowEtiquettes(etiquettes);
+      };
+      function fieldGantt(field, model) {
+          if (typeof model[field.start] === 'undefined' ||
+              typeof model[field.end] === 'undefined') { return; }
+          var date = new Date();
+          var start = Date.prototype.week(model[field.start]);
+          var end = Date.prototype.week(model[field.end]);
+          var current = Date.prototype.week(date); %>
+          <div class="ganttWrapper">
+              <div class="ganttInfoL"></div>
+              <div class="ganttInfoC"></div>
+              <div class="ganttItem"
+                  style="margin-left: <%- ((start - current) * 40) + 120 %>px;"
+                  data-start="<%- start %>" data-end="<%- end %>"
+                  data-current="<%- current %>"><%
+                  _.range(start, end + 1).forEach(function(w){
+                      if(w < 1){ w = 52 + w;} else if(w > 52){ w = w - 52;}
+                          var week = Date.prototype.getStartAndEndDateOfWeek(w, null, field.dateFormat); %>
+                          <div class="ganttCell <% if(current === w) {%>ganttCurrent<% } %>"
+                              data-notification="<%- week.start + ' - ' + week.end %>"><%- w %></div><%
+                  }); %>
+              </div>
+              <div class="ganttInfoR"></div>
+          </div><%
+      };
+      function fieldClink(field, model) {
+          if (!model[field.id]) { return; }
+          var csettings     = App.getEntitySettings(field.entity);
+          var cdenom        = csettings.itemType;
+          var cschema       = new Schema(csettings.schema);
+          var cpic          = cschema.getImgKey();
+          var nitems        = model[field.id].length
+          cdenom = model[field.id].length === 1 ? cdenom[0] : cdenom[1]; %>
+          <div><%
+              _.each(model[field.id], function(item, i) {
+                  if (i > 2) { return; };
+                  var label = App.getThumbnailLabel(item, csettings.schema);
+                  miniPic(item[cpic], label);
+                  nitems--;
+              });
+              if (nitems) { %><span> +<%- nitems %><% } %>
+          </div><%
+      };
+      function miniPic(src, label) {
+          var avatar = '/assets/default-pane-avatar.png';
+          if (settings.avatar === 'person') {
+              avatar = '/assets/default-person-avatar.png'
+          };
+          avatar = src ? src : avatar; %>
+          <img class="miniPic" src="<%= avatar %>" title="<%- label %>"/><%
+      }
+      function renderField(field, model) {
+          rf = fieldText;
+          if (field['type'] === 'facet')   { rf = fieldFacet;  };
+          if (field['type'] === 'date')    { rf = fieldDate;   };
+          if (field['type'] === 'datetime'){ rf = fieldDateTime;};
+          if (field['type'] === 'integer') { rf = fieldNumber; };
+          if (field['type'] === 'float')   { rf = fieldNumber; };
+          if (field['type'] === 'img')     { rf = fieldImg;    };
+          if (field['type'] === 'tuple')   { rf = fieldTuple;  };
+          if (field['type'] === 'gantt')   { rf = fieldGantt;  };
+          if (field['type'] === 'clink')   { rf = fieldClink;  };
+          rf(field, model);
+      };
+      function addEtiquettes() {
+          _.each(etiquettes, function(e) {
+              if (!e) { return; };
+              var etq = App.getEtiquetteById(e);
+              var css, bg, font;
+              var label = e;
+              if (etq) {
+                  css = "background-image:url('"+etq.image+"')";
+                  var bgimg = etq.image.split('.')[0] + '-bar.png';
+                  bg = "background-image:url('"+bgimg+"');";
+                  bg += "color:"+etq.font;
+                  label = etq.label;
+              }; %>
+              <div class="bigEtiquette hc" title="<%= label %>">
+                  <span class="etiquetteFold" style="<%= css %>"></span>
+                  <label class="hc" style="<%= bg %>"><%= label %></label>
+                  <span class="etiquetteTip" style="<%= css %>"></span>
+              </div><%
+          });
+      };
+      function addRowEtiquettes(etiquettes) {
+          _.each(etiquettes, function(e) {
+              if (!e) { return; };
+              var etq = App.getEtiquetteById(e);
+              var label = etq ? etq.label : e;
+              var bg, font = '';
+              if (etq) {
+                  bg = "background:"+etq.color;
+                  font = "color:"+etq.font;
+              }; %>
+              <span class="rowEtiquette" style="<%= bg %>">
+                  <label style="<%= font %>"><%= label %></label>
+              </span><%
+          });
+      };
+      function addMiniEtiquette(etiquettes, cls, color, model) {
+          if (!etiquettes || !etiquettes.length) { return; };
+          var etq = App.getMiniEtiquette(etiquettes);
+          if (!etq) { return; };
+          var imgname = etq.image.split('.')
+          var mini = imgname[0] + '-mini.' + imgname[1];
+          var css = "background-image:url('" + mini + "')"; %>
+          <span class="miniEtq" <%
+              if (mini) { %>style="<%= css %>"<% } %>>
+          </span><%
+      };
+      _.each(schema, function(f) {
+            var title = model[f.id];
+            if (title instanceof Array) { title = ''; }; %>
+          <td class="<%- f.id %><% if (f.index) { %> visible<% }; if(f.type === 'gantt'){ %> ganttChart<% } %> "
+              title="<%- title %>" data-type="<%- f.type %>" >
+          <% renderField(f, model); %>
+          </td><%
+      });
+    %>

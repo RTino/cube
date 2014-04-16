@@ -44,7 +44,7 @@ script(type="text/template")#details-template.
                   <div class="text-container" id="<%- field.id %>"><%
                       if (field.multivalue) {
                           addMultivalue(model[field.id], field.id, 'filter');
-                      } else { %><%= model[field.id] %><% } %>
+                      } else { %><%- model[field.id] %><% } %>
                   </div>
               </div>
               <input type="text" id="<%- field.id %>" class="hidden"
@@ -72,7 +72,7 @@ script(type="text/template")#details-template.
                   field.label %>
               </label>
               <div class="multilineWrapp">
-                  <p><%= model[field.id] %></p>
+                  <p><%- model[field.id] %></p>
                   <textarea id="<%- field.id %>" wrap="virtual"><%=
                       model[field.id]
                   %></textarea>
@@ -102,7 +102,7 @@ script(type="text/template")#details-template.
               <div class="mask">
                   <div class="text-container" id="<%- field.id %>">
                       <a class="link" id="email" href="mailto:<%- model[field.id] %>">
-                          <%= model[field.id] %>
+                          <%- model[field.id] %>
                       </a>
                   </div>
               </div>
@@ -113,7 +113,7 @@ script(type="text/template")#details-template.
       function fieldDate(field, model) { %>
           <li>
               <label for="<%- field.id %>" ><%= field.label %></label>
-              <div class="mask"><%= model[field.id] %></div>
+              <div class="mask"><%- model[field.id] %></div>
               <input type="text" id="<%- field.id %>" class="hidden"
                   value="<%= model[field.id] %>" data-type="date" readonly="readonly"/>
           </li><%
@@ -121,7 +121,7 @@ script(type="text/template")#details-template.
       function fieldDateTime(field, model) { %>
           <li>
               <label for="<%- field.id %>" ><%= field.label %></label>
-              <div class="mask"><%= model[field.id] %></div>
+              <div class="mask"><%- model[field.id] %></div>
               <input type="text" id="<%- field.id %>" class="hidden"
                   value="<%= model[field.id] %>" data-type="datetime" readonly="readonly"/>
           </li><%
@@ -133,7 +133,7 @@ script(type="text/template")#details-template.
                   <div class="text-container" id="<%- field.id %>">
                       <a class="link" id="email"
                           href="skype:<%= model[field.id] %>?chat">
-                          <%= model[field.id] %>
+                          <%- model[field.id] %>
                       </a>
                   </div>
               </div>
@@ -168,7 +168,7 @@ script(type="text/template")#details-template.
               <label for="<%- field.id %>" ><%= field.label %></label>
               <div class="mask">
                   <a id="<%- field.id%>" class="clinkLink link">
-                      <%= model[field.id].length %> <%= cdenom %>
+                      <%- model[field.id].length %> <%= cdenom %>
                   </a>
               </div>
           </li><%
